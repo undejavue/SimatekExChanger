@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ServiceModel.Discovery;
 using System.ComponentModel;
+using System.Timers;
 
 
 namespace ClassLibOPC
@@ -25,6 +26,8 @@ namespace ClassLibOPC
 
         public mServerItem SelectedServer;
 
+        private Timer reconnectTimer;
+
 
         public exOPCserver ()
         {
@@ -32,6 +35,8 @@ namespace ClassLibOPC
             IsConnected = false;
             MonitoredTags = new ObservableCollection<mTag>();
             opcSubscription = null;
+
+            configureWatchDog();
         }
 
 
@@ -91,29 +96,37 @@ namespace ClassLibOPC
             IsConnected = false;
 
             this.url = new Opc.URL(urlString);
-            IsConnected = false;
+            
 
-            try
-            {
+            if (server == null)
+            {               
                 server = new Opc.Da.Server(new OpcCom.Factory(), url);
-                server.Connect();
-
-                server.ServerShutdown += server_ServerShutdown;
-
-                RefreshServerStatus();
-
-                if (IsConnected = server.IsConnected)
-                {
-                    OnReportMessage("Server is connected");
-                }
-                else
-                {
-                    OnReportMessage("Server is not connected, unknown error");
-                }
+                
             }
-            catch (Exception ex)
+
+            if (!server.IsConnected)
             {
-                OnReportMessage(ex.Message.ToString());
+                try
+                {
+
+                    server.Connect();
+                    RefreshServerStatus();
+
+                    if (IsConnected = server.IsConnected)
+                    {
+                        OnReportMessage("Server is connected");
+                        server.ServerShutdown -= server_ServerShutdown;
+                        server.ServerShutdown += server_ServerShutdown;
+                    }
+                    else
+                    {
+                        OnReportMessage("Server is not connected, unknown error");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    OnReportMessage(ex.Message.ToString());
+                }
             }
 
             return IsConnected;
@@ -122,9 +135,35 @@ namespace ClassLibOPC
         private void server_ServerShutdown(string reason)
         {
             //OnReportMessage("Server shutdown, reason: " + reason);
-            RefreshServerStatus();
+            //RefreshServerStatus();
+            reconnectTimer.Enabled = true;
+
         }
 
+
+        private void configureWatchDog()
+        {
+            reconnectTimer = new System.Timers.Timer();
+            reconnectTimer.Elapsed += reconnectTimer_Elapsed;
+            reconnectTimer.Interval = 5000;
+            reconnectTimer.AutoReset = false;
+
+
+        }
+
+        private void startStopWatchDog(bool startstop)
+        {
+            reconnectTimer.Enabled = startstop;
+        }
+
+        private void reconnectTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            //OnReportMessage("Server down, trying to reconnect..");
+            e.SignalTime.ToString();
+            ConnectServer(server.Url.ToString());
+            
+
+        }
 
         /// <summary>
         /// Disconnect server and clear all data
@@ -144,6 +183,9 @@ namespace ClassLibOPC
                     SelectedServer.IsConnected = server.IsConnected;
 
                     OnReportMessage("Server is disconnected");
+
+                    server.ServerShutdown -= server_ServerShutdown;
+                    server.Dispose();
                 }
                 else
                 {
