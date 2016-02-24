@@ -15,54 +15,68 @@ namespace ClassLibOPC
     {
         private Opc.URL url;
         private Opc.Da.Server server;
+        private OpcCom.Factory factory;
         private Opc.Da.Subscription opcSubscription;
         private Opc.Da.ServerStatus serverStatus;
-              
-        
-        public ObservableCollection<mServerItem> servers_list;
-        public string hostname;
-        public bool IsConnected;
-        public ObservableCollection<mTag> MonitoredTags;
-
-        public mServerItem SelectedServer;
-
         private Timer reconnectTimer;
+        
+        public ObservableCollection<mServerItem> listServers;
+        public string hostname;
+        public bool isConnected;
+        public ObservableCollection<mTag> monitoredTags;
+        public List<mTag> restoredTagList;
+        public mServerItem selectedServer;
+
+        public List<string> messageLog;
 
 
         public exOPCserver ()
         {
-            servers_list = new ObservableCollection<mServerItem>();
-            IsConnected = false;
-            MonitoredTags = new ObservableCollection<mTag>();
+            listServers = new ObservableCollection<mServerItem>();
+            monitoredTags = new ObservableCollection<mTag>();
+            restoredTagList = new List<mTag>();
+            messageLog = new List<string>();
+            logMessage("Message log started");
+
+            isConnected = false;
             opcSubscription = null;
 
             configureWatchDog();
+
         }
 
+
+        private void logMessage(string m)
+        {
+            messageLog.Add(DateTime.Now.ToString("hh:mm:ss") + ": " + m);
+        }
 
         public ObservableCollection<mServerItem> GetServers(string hostname)
         {
             OpcCom.ServerEnumerator discovery = new OpcCom.ServerEnumerator();
-            
-            //Get all local OPC DA servers of version 2.0
-            Opc.Server[] localservers = discovery.GetAvailableServers(Opc.Specification.COM_DA_20, hostname, null);
 
+            if (hostname == "") hostname = "localhost";
+
+            //Get all local OPC DA servers of version 3.0
+            Opc.Server[] localservers = discovery.GetAvailableServers(Opc.Specification.COM_DA_30, hostname, null);
+
+            listServers.Clear();
 
             foreach ( Opc.Server srv in localservers)
             {
-                mServerItem si = new mServerItem();
+                mServerItem si = new mServerItem(true);
 
                 si.Name = srv.Name;
                 si.Description = srv.Locale;
                 si.UrlString = srv.Url.ToString();
 
-                servers_list.Add(si);
+                listServers.Add(si);
             }
 
             //Get all OPC DA servers of version 2.0 of machine "MyMachine"
             //Opc.Server[] hostservers = discovery.GetAvailableServers(Opc.Specification.COM_DA_20, "MNS1-179N", null);
  
-            return servers_list;
+            return listServers;
         }
 
 
@@ -71,19 +85,25 @@ namespace ClassLibOPC
         /// </summary>
         private void RefreshServerStatus()
         {
-            //if (SelectedServer==null)
-            //{
-            //    SelectedServer = new mServerItem();
-            //}
+            selectedServer = selectedServer ?? new mServerItem(true);
 
-            SelectedServer = SelectedServer ?? new mServerItem();
-
-            serverStatus = server.GetStatus();
-            SelectedServer.IsConnected = server.IsConnected;
-            SelectedServer.StatusInfo = serverStatus.StatusInfo;
-            SelectedServer.ServerState = serverStatus.ServerState.ToString();
-            SelectedServer.ProductVersion = serverStatus.ProductVersion;
-            SelectedServer.VendorInfo = serverStatus.VendorInfo;
+            if (server != null)
+            {
+                try
+                {
+                    serverStatus = server.GetStatus();
+                    selectedServer.isConnected = server.IsConnected;
+                    selectedServer.Name = server.Name;
+                    selectedServer.StatusInfo = serverStatus.StatusInfo;
+                    selectedServer.ServerState = serverStatus.ServerState.ToString();
+                    selectedServer.ProductVersion = serverStatus.ProductVersion;
+                    selectedServer.VendorInfo = serverStatus.VendorInfo;
+                }
+                catch (Exception ex)
+                {
+                    OnReportMessage("Fail to get server status, " + ex.Message.ToString());
+                }
+            }
         }
 
         /// <summary>
@@ -93,51 +113,48 @@ namespace ClassLibOPC
         /// <returns>IsConnected</returns>
         public bool ConnectServer(string urlString)
         {
-            IsConnected = false;
+            isConnected = false;
 
             this.url = new Opc.URL(urlString);
-            
+            factory = new OpcCom.Factory();
+            server = new Opc.Da.Server(factory, url);
 
-            if (server == null)
-            {               
-                server = new Opc.Da.Server(new OpcCom.Factory(), url);
+            try
+            {
+                server.Connect();
+                if (isConnected = server.IsConnected)
+                {
+                    OnReportMessage("Server is connected");
+                    server.ServerShutdown -= server_ServerShutdown;
+                    server.ServerShutdown += server_ServerShutdown;
+
+                    RefreshServerStatus();
+                }
+                else
+                {
+                    OnReportMessage("Server is not connected, unknown error");
+                }
+            }
+            catch (Exception ex)
+            {
+                OnReportMessage(ex.Message.ToString());
                 
             }
-
-            if (!server.IsConnected)
-            {
-                try
-                {
-
-                    server.Connect();
-                    RefreshServerStatus();
-
-                    if (IsConnected = server.IsConnected)
-                    {
-                        OnReportMessage("Server is connected");
-                        server.ServerShutdown -= server_ServerShutdown;
-                        server.ServerShutdown += server_ServerShutdown;
-                    }
-                    else
-                    {
-                        OnReportMessage("Server is not connected, unknown error");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    OnReportMessage(ex.Message.ToString());
-                }
-            }
-
-            return IsConnected;
+            
+            return isConnected;
         }
+
+
 
         private void server_ServerShutdown(string reason)
         {
-            //OnReportMessage("Server shutdown, reason: " + reason);
-            //RefreshServerStatus();
-            reconnectTimer.Enabled = true;
+            OnReportMessage("Server shutdown, reason: " + reason);
+            RefreshServerStatus();
 
+            restoredTagList = new List<mTag>(monitoredTags.ToList());
+
+            DisconnectServer();
+            reconnectTimer.Enabled = true;
         }
 
 
@@ -156,14 +173,24 @@ namespace ClassLibOPC
             reconnectTimer.Enabled = startstop;
         }
 
-        private void reconnectTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private void reconnectTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)      
         {
-            //OnReportMessage("Server down, trying to reconnect..");
-            e.SignalTime.ToString();
-            ConnectServer(server.Url.ToString());
-            
+            OnReportError(999,"Server is down, trying to reconnect.."); 
+        
+            if ( ConnectServer(url.ToString()) )
+            {
+                startStopWatchDog(false);
+
+                if (restoredTagList.Count() > 0)
+                    SubscribeTags(restoredTagList);
+            }
+            else
+            {
+                startStopWatchDog(true);
+            }
 
         }
+
 
         /// <summary>
         /// Disconnect server and clear all data
@@ -178,13 +205,15 @@ namespace ClassLibOPC
                     if (opcSubscription != null)
                         UnSubcribe();
 
-                    server.Disconnect();
-                    IsConnected = server.IsConnected;
-                    SelectedServer.IsConnected = server.IsConnected;
-
-                    OnReportMessage("Server is disconnected");
+                    monitoredTags.Clear();
 
                     server.ServerShutdown -= server_ServerShutdown;
+
+                    server.Disconnect();
+                    isConnected = server.IsConnected;
+                    selectedServer.isConnected = isConnected;
+
+                    OnReportMessage("Server is disconnected");
                     server.Dispose();
                 }
                 else
@@ -192,9 +221,8 @@ namespace ClassLibOPC
                     OnReportMessage("Server is already disconnected");
                 }
 
-                OnReportMessage("No connected server available");
             }
-            return IsConnected;
+            return isConnected;
         }
 
 
@@ -220,7 +248,7 @@ namespace ClassLibOPC
         {
             ObservableCollection<mTreeNode> tree = new ObservableCollection<mTreeNode>();
 
-            if (IsConnected)
+            if (isConnected)
             {
                 Opc.Da.BrowsePosition position;
                 Opc.Da.BrowseFilters filters = new Opc.Da.BrowseFilters() { BrowseFilter = Opc.Da.browseFilter.branch };
@@ -296,7 +324,7 @@ namespace ClassLibOPC
 
                 foreach (mTag tag in Tags)
                 {
-                    var contain = MonitoredTags.Any(t => t.Name == tag.Name);
+                    var contain = monitoredTags.Any(t => t.Name == tag.Name);
 
                     if (!contain)
                     {
@@ -309,7 +337,7 @@ namespace ClassLibOPC
                         item.ActiveSpecified = true;
                         opcItems.Add(item);
 
-                        MonitoredTags.Add(tag);
+                        monitoredTags.Add(tag);
                         needToAddItems = true;
                     }
                 }
@@ -355,8 +383,8 @@ namespace ClassLibOPC
             foreach (Opc.Da.ItemValueResult item in values)
             {
                 
-                MonitoredTags.Last(t => t.Name.Equals(item.ItemName)).Value = item.Value.ToString();
-                MonitoredTags.Last(t => t.Name.Equals(item.ItemName)).Quality = item.Quality.ToString();
+                monitoredTags.Last(t => t.Name.Equals(item.ItemName)).Value = item.Value.ToString();
+                monitoredTags.Last(t => t.Name.Equals(item.ItemName)).Quality = item.Quality.ToString();
                 
                 
             }
@@ -367,14 +395,14 @@ namespace ClassLibOPC
 
         public void UnSubcribe()
         {
-            opcSubscription.DataChanged -= opcSubscription_DataChanged;
+               
             try
             {
+                opcSubscription.DataChanged -= opcSubscription_DataChanged;
                 server.CancelSubscription(opcSubscription);
                 opcSubscription.Dispose();
 
-                MonitoredTags.Clear();
-
+                monitoredTags.Clear();
                 OnReportMessage("OPC Subscription cleared");
             }
             catch (Exception ex)
@@ -385,16 +413,36 @@ namespace ClassLibOPC
             RefreshServerStatus();
         }
 
-        //--- Message handler
+
+        /// <summary>
+        /// Message handles
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
         public delegate void OPCserverEventHandler(object sender, exEventArgs args);
 
         public event OPCserverEventHandler ReportMessage;
 
         protected virtual void OnReportMessage(string message)
         {
-            if (ReportMessage != null)
+            OPCserverEventHandler ReportMessageCopy = ReportMessage;
+
+            if (ReportMessageCopy != null)
             {
-                ReportMessage(this, new exEventArgs(message));
+                ReportMessageCopy(this, new exEventArgs(message));
+                logMessage(message);
+            }
+        }
+
+        protected virtual void OnReportError(int error, string message)
+        {
+            OPCserverEventHandler ReportMessageCopy = ReportMessage;
+
+            if (ReportMessageCopy != null)
+            {
+                ReportMessageCopy(this, new exEventArgs(error, message));
+                logMessage(message);
+                logMessage("Error code = " + error.ToString());
             }
         }
 

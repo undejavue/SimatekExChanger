@@ -128,9 +128,10 @@ namespace ClassLibOracle
 
         protected virtual void OnReportMessage(string message)
         {
-            if (ReportMessage != null)
+            oraEventHandler ReportMessageCopy = ReportMessage;
+            if (ReportMessageCopy != null)
             {
-                ReportMessage(this, new oraEventArgs(message));
+                ReportMessageCopy(this, new oraEventArgs(message));
             }
         }
 

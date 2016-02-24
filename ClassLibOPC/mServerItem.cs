@@ -12,7 +12,7 @@ namespace ClassLibOPC
     {
 
         private bool _isConnected;
-        public bool IsConnected
+        public bool isConnected
         {
             get { return _isConnected; }
             set
@@ -32,7 +32,6 @@ namespace ClassLibOPC
                 OnPropertyChanged(new PropertyChangedEventArgs("Description"));
             }
         }
-
 
         private string _Name;
         public string Name
@@ -107,6 +106,24 @@ namespace ClassLibOPC
         }
 
 
+        /// <summary>
+        /// Server item: name, url, status, state, produc, vendor, isconnected
+        /// </summary>
+        /// <param name="init">if true, set all fields to default values</param>
+        public mServerItem(bool init)
+        {
+            if (init)
+            {
+                isConnected = false;
+                Description = "unknown";
+                Name = "unknown";
+                UrlString = "";
+                ServerState = "unknown";
+                StatusInfo = "unknown";
+                ProductVersion = "unknown";
+                VendorInfo = "unknown";
+            }
+        }
 
     }
 }

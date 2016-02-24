@@ -3,7 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:ClassLibOPC;assembly=ClassLibOPC"
         Title="Simatek OPC to DB connector" Height="500" Width="800">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
+
+        
+    </Window.Resources>
+    
+    
     <Grid Name="grid_main">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -24,7 +31,7 @@
             </StackPanel>
 
             <ListBox  Name="lst_Servers" ItemsSource="{Binding}" HorizontalAlignment="Left" 
-                     Height="160" Margin="0,0,0,0" VerticalAlignment="Top" Width="240" MouseDoubleClick="lst_Servers_MouseDoubleClick" Grid.RowSpan="2" >
+                     Height="160" Margin="0,0,0,0" VerticalAlignment="Top" Width="240" MouseDoubleClick="lst_Servers_MouseDoubleClick" Grid.RowSpan="2" SelectionChanged="lst_Servers_SelectionChanged" >
                 <ListBox.ItemTemplate >
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
@@ -37,7 +44,7 @@
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <Grid x:Name="grid_ServerStatus" Margin="0,10" Grid.RowSpan="2">
+            <Grid x:Name="grid_ServerStatus" Margin="0,10" Grid.RowSpan="2" Background="#FFEEEBE2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -55,11 +62,15 @@
                 <Label Grid.Row="2" Grid.Column="0" Content="Status" HorizontalAlignment="Right" FontSize="10"/>
                 <Label Grid.Row="3" Grid.Column="0" Content="Is Connected" HorizontalAlignment="Right" FontSize="10" />
                 <Label Grid.Row="4" Grid.Column="0" Content="Vendor" HorizontalAlignment="Right" FontSize="10"/>
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Name}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" />
+                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Name}" Foreground="Green" FontWeight="Bold"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" />
                 <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ServerState}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" />
                 <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding StatusInfo}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" />
-                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding IsConnected}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" />
+                <TextBlock Grid.Row="3" Grid.Column="1" Text="DISCONNECTED" Background="DarkRed" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="12" Width="110"  />
+                <TextBlock Grid.Row="3" Grid.Column="1" Text=" CONNECTED " Background="LightGreen" Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="12" Width="110" Visibility="{Binding Path=isConnected, Converter={StaticResource BoolToVis}}" />
+                
                 <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding VendorInfo}" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" />
+                
+                <!--<TextBlock Grid.Row="5" Grid.Column="0" Text="{Binding Path}" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" />-->
             </Grid>
         </StackPanel>
 
@@ -76,12 +87,10 @@
 
 
             <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="10" >
-                <Button Content="Connect" x:Name="btn_Connect" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="64" Height="22" Click="btn_Connect_Click"/>
-                <Button Content="Disconnect" x:Name="btn_Disconnect" HorizontalAlignment="Left" Margin="20,0,0,0" VerticalAlignment="Top" Width="64" Height="22" Click="btn_Disconnect_Click" />
-                <Button Content="Browse" x:Name="btn_GetTree" HorizontalAlignment="Left" Margin="20,0,0,0" VerticalAlignment="Top" Width="64" Height="22" Click="btn_GetTree_Click" />
-                <Button Content="Get Tags" x:Name="btn_GetTags" HorizontalAlignment="Left" Margin="20,0,0,0" VerticalAlignment="Top" Width="64" Height="22" Click="btn_GetTags_Click"/>
+                <Button Content="Disconnect" x:Name="btn_Disconnect" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="64" Height="22" Click="btn_Disconnect_Click" />
 
-                <Button Content="insert" x:Name="btn_insertToDatabase" HorizontalAlignment="Left" Margin="20,0,0,0" VerticalAlignment="Top" Width="64" Height="22" Click="btn_insertToDatabase_Click"/>
+                <Button Content="Sync on" x:Name="btn_oraStartSync" HorizontalAlignment="Left" Margin="20,0,0,0" VerticalAlignment="Top" Width="64" Height="22" Click="btn_oraStartSync_Click"/>
+                <Button Content="Sync off" x:Name="btn_oraStopSync" HorizontalAlignment="Left" Margin="20,0,0,0" VerticalAlignment="Top" Width="64" Height="22" Click="btn_oraStopSync_Click"/>
             </StackPanel>
 
             <TreeView Grid.Row="1" Grid.Column="0"  x:Name="treeControl" ItemsSource="{Binding}" Margin="10,0,10,0"  
@@ -112,6 +121,7 @@
                         <DataGridTextColumn Header="Quality" Width="Auto" Binding="{Binding Quality}" />
                     </DataGrid.Columns>
                 </DataGrid>
+                <Button Content="Clear" x:Name="btn_ClearSubscription" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="84" Height="22" Click="btn_ClearSubscription_Click" />
             </StackPanel>
 
             <StackPanel Grid.Column="1" Grid.Row="2"  Orientation="Vertical" Height="160" VerticalAlignment="Top">
@@ -125,10 +135,12 @@
         </Grid>
 
 
+        <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Vertical">
 
-        <TextBox  Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"  x:Name="txt_result"  HorizontalAlignment="Left" Margin="10,10" 
+            <TextBox Name="txt_path" Text="{Binding UrlString}" Width="700" Height="24" HorizontalAlignment="Left" Margin="10,0" IsReadOnly="True"/>
+            <TextBox    x:Name="txt_result"  HorizontalAlignment="Left" Margin="10,10" 
                     TextWrapping="Wrap" Width="700" Height="60" VerticalAlignment="Bottom" 
         	        IsReadOnly="True" VerticalScrollBarVisibility="Visible" Text="Инициализация..."  />
-
+        </StackPanel>
     </Grid>
 </Window>

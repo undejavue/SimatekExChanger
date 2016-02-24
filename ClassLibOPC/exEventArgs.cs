@@ -14,9 +14,22 @@ namespace ClassLibOPC
             get { return this._message; }
         }
 
-        public exEventArgs(string text)
+        private readonly int _error;
+        public int error
         {
-            this._message = text;
+            get { return this._error; }
+        }
+
+        public exEventArgs(string messageText)
+        {
+            this._message = messageText;
+            this._error = 0;
+        }
+
+        public exEventArgs(int errorCode, string messageText)
+        {
+            this._message = messageText;
+            this._error = errorCode;
         }
 
 
