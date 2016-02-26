@@ -27,12 +27,9 @@ namespace WPFinterface
     /// </summary>
     public partial class MainWindow : Window
     {
+        private ViewModel Model;
+        
         private exOPCserver opcServer;
-        private ObservableCollection<mServerItem> opcListServers;
-        private ObservableCollection<mTreeNode> opcTreeNodes;
-        private ObservableCollection<mItem> opcListTagsInBranch;
-        public ObservableCollection<mTag> opcMonitoredTags;
-
 
         private dbServerItem configuredServer;
         private mServerItem serverStatusUI;
@@ -40,10 +37,6 @@ namespace WPFinterface
         private bool oraConnectionMonitor;
         private Timer oraTransmitFreq;
         private OraExchanger oraEx;
-
-        public ObservableCollection<mTag> subscribedTags;
-
-        public mItem host;
 
 
         /// <summary>
@@ -59,25 +52,13 @@ namespace WPFinterface
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            opcListServers = new ObservableCollection<mServerItem>();
-            lst_Servers.ItemsSource = opcListServers;
+            Model = new ViewModel();
+            Model.Initialize();
 
-            opcTreeNodes = new ObservableCollection<mTreeNode>();
+            this.DataContext = Model;
 
             opcServer = new exOPCserver();
             opcServer.ReportMessage += opcServer_ReportMessage;
-
-            subscribedTags = new ObservableCollection<mTag>();          
-            dgrid_Values.ItemsSource = subscribedTags;
-
-            host = new mItem("LOCALHOST", "localhost");
-            txt_hostname.DataContext = host;
-
-            serverStatusUI = new mServerItem(true);
-            grid_ServerStatus.DataContext = serverStatusUI;
-
-            configuredServer = new dbServerItem();
-
 
             configureOraTransmitRate();
         }
@@ -86,12 +67,20 @@ namespace WPFinterface
         /// Print log
         /// </summary>
         /// <param name="s">Log string</param>
-        public void print2result(string s)
+        private void print2result(string s)
         {
             txt_result.AppendText("\r\n" + DateTime.Now.ToString("hh:mm:ss") + ": " + s);
             txt_result.ScrollToEnd();
         }
 
+
+        private void LogMessage(string message)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                print2result(message);
+            }));
+        }
 
         /// <summary>
         /// Event handle for OPC server class
@@ -100,17 +89,7 @@ namespace WPFinterface
         /// <param name="args"></param>
         private void opcServer_ReportMessage(object sender, exEventArgs args)
         {
-
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                //if (args.error.Equals(999))
-                //{
-                //    print2result("ERROR CODE 999");
-                //}
-
-                print2result(args.message);
-
-            }));
+            LogMessage(args.message);
         }
 
         
@@ -119,12 +98,10 @@ namespace WPFinterface
 
         private void SearchServers(string hostName)
         {
-            ObservableCollection<mServerItem> srvs = opcServer.GetServers(hostName);
-            opcListServers.Clear();
-            foreach (mServerItem si in srvs)
-            {
-                opcListServers.Add(si);
-            }
+
+            Model.opcListServers.Clear();
+            Model.opcListServers = opcServer.GetServers(hostName);
+
         }
 
         private void Connect()
@@ -132,11 +109,11 @@ namespace WPFinterface
             mServerItem selected_Server = (mServerItem)lst_Servers.SelectedItem;
             if (selected_Server != null)
             {
-                opcServer.ConnectServer(selected_Server.UrlString);
-                grid_ServerStatus.DataContext = opcServer.selectedServer;
-                serverStatusUI = opcServer.selectedServer;
-
-                lst_Servers.IsEnabled = false;
+                if ( opcServer.ConnectServer(selected_Server.UrlString) )
+                {
+                    Model.list_Servers_isEnable = false;
+                }
+                Model.selectedOPCserver = opcServer.selectedServer;
 
             }
         }
@@ -144,42 +121,28 @@ namespace WPFinterface
         private void Disconnect()
         {
             opcServer.DisconnectServer();
-
-            if (opcTreeNodes != null)
-                opcTreeNodes.Clear();
-            if (opcListTagsInBranch != null)
-                opcListTagsInBranch.Clear();
-            if (subscribedTags != null)
-                subscribedTags.Clear();
-
-            grid_ServerStatus.DataContext = new mServerItem(true);
-            lst_Servers.IsEnabled = true;
-
+            Model.changeState(ModelState.opcDisconneted);
             SubscriptionClear();
 
-            treeControl.IsEnabled = true;
-            dgrid_Tags.IsEnabled = true;
-            btn_ClearSubscription.IsEnabled = true;
         }
+
         private void BrowseServer()
         {
             if (opcServer.isConnected)
             {
-                opcTreeNodes = opcServer.GetTree();
+                Model.opcTreeNodes = opcServer.GetTree();
             }
             else
-                opcTreeNodes.Clear();
-
-            treeControl.ItemsSource = opcTreeNodes;
+                Model.opcTreeNodes.Clear();
         }
+
 
         private void BrowseTags()
         {
             mTreeNode node = (mTreeNode)treeControl.SelectedItem;
             if (node != null)
             {
-                opcListTagsInBranch = new ObservableCollection<mItem>(opcServer.GetTags(node.Path, node.Name));
-                dgrid_Tags.ItemsSource = opcListTagsInBranch;
+                Model.opcListTagsInBranch =  opcServer.GetTags(node.Path, node.Name);
             }
         }
 
@@ -188,20 +151,15 @@ namespace WPFinterface
         {
             mItem selectedTag = (mItem)dgrid_Tags.SelectedItem;
             mTag tag = new mTag(selectedTag.Name, selectedTag.Path);
-
-            subscribedTags.Add(tag);
+            Model.opcSubscribedTags.Add(tag);
         }
+
 
         private void Subscribe()
         {
-            opcServer.SubscribeTags(subscribedTags.ToList());
-            opcMonitoredTags = new ObservableCollection<mTag>(opcServer.monitoredTags);
-            dgrid_Values.ItemsSource = opcMonitoredTags;
-
-            treeControl.IsEnabled = false;
-            dgrid_Tags.IsEnabled = false;
-            btn_ClearSubscription.IsEnabled = false;
-          
+            opcServer.SubscribeTags(Model.opcSubscribedTags.ToList());
+            Model.opcMonitoredTags = opcServer.monitoredTags;
+      
         }
 
 
@@ -209,23 +167,21 @@ namespace WPFinterface
         private void UnSubscribe()
         {
             opcServer.UnSubcribe();
-            dgrid_Values.ItemsSource = subscribedTags;
 
-            foreach (mTag t in subscribedTags)
+            ;
+
+            foreach (mTag t in Model.opcSubscribedTags)
             {
                 t.Value = "x";
                 t.Quality = "unsubsribed";
             }
 
-            treeControl.IsEnabled = true;
-            dgrid_Tags.IsEnabled = true;
-            btn_ClearSubscription.IsEnabled = true;
         }
 
 
         private void SubscriptionClear()
         {
-            subscribedTags.Clear();
+            Model.opcSubscribedTags.Clear();
         }
 
 
@@ -233,30 +189,31 @@ namespace WPFinterface
 
         private void SaveConfiguration()
         {
-            configuredServer = new dbServerItem();
-            if (opcServer != null)
-            {
-                configuredServer.Name = opcServer.hostname;
-                configuredServer.urlString = opcServer.selectedServer.UrlString;
-            }
+            //configuredServer = new dbServerItem();
 
-            if (subscribedTags != null)
-            {
-                foreach (mTag tag in subscribedTags)
-                {
-                    dbTagItem t = new dbTagItem(tag.Name, tag.Path);
-                    configuredServer.monitoredTags.Add(t);
-                }
-            }
+            //if (opcServer != null)
+            //{
+            //    configuredServer.Name = opcServer.hostname;
+            //    configuredServer.urlString = opcServer.selectedServer.UrlString;
+            //}
+
+            //if (subscribedTags != null)
+            //{
+            //    foreach (mTag tag in subscribedTags)
+            //    {
+            //        dbTagItem t = new dbTagItem(tag.Name, tag.Path);
+            //        configuredServer.monitoredTags.Add(t);
+            //    }
+            //}
             
-            dbConfig config = new dbConfig();
-            FileWorks fw = new FileWorks();
+            //dbConfig config = new dbConfig();
+            //FileWorks fw = new FileWorks();
 
-            string path = fw.GetSaveFilePath();
-            if (path != "")
-            {
-                config.Save(configuredServer, path);
-            }       
+            //string path = fw.GetSaveFilePath();
+            //if (path != "")
+            //{
+            //    config.Save(configuredServer, path);
+            //}       
         }
 
 
@@ -287,23 +244,36 @@ namespace WPFinterface
 
             oraTransmitFreq = new System.Timers.Timer();
             
-            oraTransmitFreq.Interval = 5000;
+            oraTransmitFreq.Interval = 8000;
             oraTransmitFreq.AutoReset = false;
 
             oraTransmitFreq.Elapsed += oraTransmitFreq_Elapsed;
-
 
         }
 
         private void oraTransmitFreq_Elapsed(object sender, ElapsedEventArgs e)
         {
-            bool isDone = TransmitToOracle(opcMonitoredTags);
-            OracleSyncStartStop(true);
 
-            if (!isDone)
+
+            if (Model.opcMonitoredTags != null)
             {
-                print2result("Oracle connection fail, try again...");
+                if (TransmitToOracle(Model.opcMonitoredTags))
+                {
+                    
+                }
+                else
+                {
+                    LogMessage("Transmit to database fail, try again...");
+                }
+
+                OracleSyncStartStop(true);
             }
+            else
+            {
+                LogMessage("Nothing to transmit");
+            }
+
+
         }
 
 
@@ -345,10 +315,7 @@ namespace WPFinterface
 
         void oraEx_ReportMessage(object sender, oraEventArgs args)
         {
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                print2result(args.message);
-            }));
+            LogMessage(args.message);
         }
 
 
@@ -356,7 +323,7 @@ namespace WPFinterface
         //--------- Buttons
         private void btn_GetServers_Click(object sender, RoutedEventArgs e)
         {          
-            SearchServers(host.Name);
+            SearchServers("LOCALHOST");
         }
 
 

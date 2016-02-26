@@ -5,9 +5,6 @@
         Title="Simatek OPC to DB connector" Height="500" Width="800">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-
-
-        
     </Window.Resources>
     
     

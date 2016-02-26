@@ -85,7 +85,7 @@ namespace ClassLibOPC
         /// </summary>
         private void RefreshServerStatus()
         {
-            selectedServer = selectedServer ?? new mServerItem(true);
+            
 
             if (server != null)
             {
@@ -121,6 +121,7 @@ namespace ClassLibOPC
 
             try
             {
+                selectedServer = selectedServer ?? new mServerItem(true);
                 server.Connect();
                 if (isConnected = server.IsConnected)
                 {
