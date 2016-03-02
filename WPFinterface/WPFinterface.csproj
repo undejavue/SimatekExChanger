@@ -69,6 +69,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Extenders.cs" />
     <Compile Include="ViewModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -78,7 +79,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Converter.cs" />
+    <Compile Include="Converters.cs" />
     <Compile Include="FileWorks.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -125,6 +126,10 @@
     <ProjectReference Include="..\EFconfigDB\EFconfigDB.csproj">
       <Project>{68f3f4e4-7f1d-462d-b8a2-12f113fd9fc1}</Project>
       <Name>EFconfigDB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Global\ClassLibGlobal.csproj">
+      <Project>{ff2664cd-ab52-4dd9-b9e7-9de81eea383b}</Project>
+      <Name>ClassLibGlobal</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

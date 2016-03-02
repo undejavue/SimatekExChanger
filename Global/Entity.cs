@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace Global
+namespace ClassLibGlobal
 {
     public abstract class Entity : INotifyPropertyChanged
     {

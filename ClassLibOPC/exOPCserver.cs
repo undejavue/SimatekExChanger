@@ -41,6 +41,9 @@ namespace ClassLibOPC
             isConnected = false;
             opcSubscription = null;
 
+            selectedServer = new mServerItem(true);
+            selectedServer.ReconnectInterval = 5000;
+
             configureWatchDog();
 
         }
@@ -56,6 +59,8 @@ namespace ClassLibOPC
             OpcCom.ServerEnumerator discovery = new OpcCom.ServerEnumerator();
 
             if (hostname == "") hostname = "localhost";
+
+            selectedServer.Host = hostname;
 
             //Get all local OPC DA servers of version 3.0
             Opc.Server[] localservers = discovery.GetAvailableServers(Opc.Specification.COM_DA_30, hostname, null);
@@ -85,23 +90,32 @@ namespace ClassLibOPC
         /// </summary>
         private void RefreshServerStatus()
         {
-            
 
             if (server != null)
             {
                 try
                 {
-                    serverStatus = server.GetStatus();
+
                     selectedServer.isConnected = server.IsConnected;
                     selectedServer.Name = server.Name;
+                    selectedServer.UrlString = server.Url.ToString();
+
+                    serverStatus = server.GetStatus();
                     selectedServer.StatusInfo = serverStatus.StatusInfo;
                     selectedServer.ServerState = serverStatus.ServerState.ToString();
                     selectedServer.ProductVersion = serverStatus.ProductVersion;
                     selectedServer.VendorInfo = serverStatus.VendorInfo;
+
                 }
                 catch (Exception ex)
                 {
                     OnReportMessage("Fail to get server status, " + ex.Message.ToString());
+
+                    selectedServer.StatusInfo = "unknown";
+                    selectedServer.ServerState = "unknown";
+                    selectedServer.ProductVersion = "unknown";
+                    selectedServer.VendorInfo = "unknown";
+
                 }
             }
         }
@@ -110,7 +124,7 @@ namespace ClassLibOPC
         /// Server connection procedure
         /// </summary>
         /// <param name="urlString">OPC server URL in string format</param>
-        /// <returns>IsConnected</returns>
+        /// <returns>isConnected</returns>
         public bool ConnectServer(string urlString)
         {
             isConnected = false;
@@ -133,13 +147,12 @@ namespace ClassLibOPC
                 }
                 else
                 {
-                    OnReportMessage("Server is not connected, unknown error");
+                    OnReportMessage("Server connection fail, unknown error");
                 }
             }
             catch (Exception ex)
             {
-                OnReportMessage(ex.Message.ToString());
-                
+                OnReportMessage(ex.Message.ToString());               
             }
             
             return isConnected;
@@ -163,20 +176,20 @@ namespace ClassLibOPC
         {
             reconnectTimer = new System.Timers.Timer();
             reconnectTimer.Elapsed += reconnectTimer_Elapsed;
-            reconnectTimer.Interval = 5000;
+            reconnectTimer.Interval = selectedServer.ReconnectInterval;
             reconnectTimer.AutoReset = false;
-
 
         }
 
         private void startStopWatchDog(bool startstop)
         {
+            reconnectTimer.Interval = selectedServer.ReconnectInterval;
             reconnectTimer.Enabled = startstop;
         }
 
         private void reconnectTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)      
         {
-            OnReportError(999,"Server is down, trying to reconnect.."); 
+            OnReportMessage("Server is down, trying to reconnect.."); 
         
             if ( ConnectServer(url.ToString()) )
             {
@@ -207,12 +220,12 @@ namespace ClassLibOPC
                         UnSubcribe();
 
                     monitoredTags.Clear();
-
                     server.ServerShutdown -= server_ServerShutdown;
 
                     server.Disconnect();
                     isConnected = server.IsConnected;
-                    selectedServer.isConnected = isConnected;
+
+                    RefreshServerStatus();
 
                     OnReportMessage("Server is disconnected");
                     server.Dispose();

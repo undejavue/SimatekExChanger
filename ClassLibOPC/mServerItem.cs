@@ -106,6 +106,31 @@ namespace ClassLibOPC
         }
 
 
+        private string _host;
+        public string Host
+        {
+            get { return _host; }
+            set
+            {
+                _host = value;
+
+                OnPropertyChanged(new PropertyChangedEventArgs("Host"));
+            }
+        }
+
+
+        private double _reconnectInterval;
+        public double ReconnectInterval
+        {
+            get { return _reconnectInterval; }
+            set
+            {
+                _reconnectInterval = value;
+
+                OnPropertyChanged(new PropertyChangedEventArgs("ReconnectInterval"));
+            }
+        }
+
         /// <summary>
         /// Server item: name, url, status, state, produc, vendor, isconnected
         /// </summary>
@@ -122,6 +147,8 @@ namespace ClassLibOPC
                 StatusInfo = "unknown";
                 ProductVersion = "unknown";
                 VendorInfo = "unknown";
+                ReconnectInterval = 10000; // milisec
+                Host = "localhost";
             }
         }
 

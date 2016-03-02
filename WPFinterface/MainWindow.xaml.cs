@@ -18,6 +18,7 @@ using System.Timers;
 using ClassLibOPC;
 using EFconfigDB;
 using ClassLibOracle;
+using System.Globalization;
 
 
 namespace WPFinterface
@@ -27,34 +28,21 @@ namespace WPFinterface
     /// </summary>
     public partial class MainWindow : Window
     {
-        private ViewModel Model;
-        
+        private ViewModel Model;       
         private exOPCserver opcServer;
-
-        private dbServerItem configuredServer;
-        private mServerItem serverStatusUI;
-
-        private bool oraConnectionMonitor;
-        private Timer oraTransmitFreq;
         private OraExchanger oraEx;
+        private Timer oraTransmitFreq;
 
 
-        /// <summary>
-        /// Main window
-        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
             Loaded += MainWindow_Loaded;
         }
 
-
-
-        void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             Model = new ViewModel();
-            Model.Initialize();
-
             this.DataContext = Model;
 
             opcServer = new exOPCserver();
@@ -63,24 +51,9 @@ namespace WPFinterface
             configureOraTransmitRate();
         }
 
-        /// <summary>
-        /// Print log
-        /// </summary>
-        /// <param name="s">Log string</param>
-        private void print2result(string s)
-        {
-            txt_result.AppendText("\r\n" + DateTime.Now.ToString("hh:mm:ss") + ": " + s);
-            txt_result.ScrollToEnd();
-        }
 
 
-        private void LogMessage(string message)
-        {
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                print2result(message);
-            }));
-        }
+        #region Message Handlers
 
         /// <summary>
         /// Event handle for OPC server class
@@ -89,19 +62,31 @@ namespace WPFinterface
         /// <param name="args"></param>
         private void opcServer_ReportMessage(object sender, exEventArgs args)
         {
-            LogMessage(args.message);
+            
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                Model.addLogRecord(args.message);
+            }));
         }
 
-        
+        private void oraEx_ReportMessage(object sender, oraEventArgs args)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                Model.addLogRecord(args.message);
+            }));
+        }
 
-        //---- Main options --------------------------------------------
+        #endregion
+
+
+        #region OPC Server operations
 
         private void SearchServers(string hostName)
         {
-
             Model.opcListServers.Clear();
-            Model.opcListServers = opcServer.GetServers(hostName);
-
+            foreach (mServerItem i in opcServer.GetServers(hostName)) { Model.opcListServers.Add(i); }
+            Model.addLogRecord("Server search complited...");         
         }
 
         private void Connect()
@@ -111,10 +96,9 @@ namespace WPFinterface
             {
                 if ( opcServer.ConnectServer(selected_Server.UrlString) )
                 {
-                    Model.list_Servers_isEnable = false;
+                    Model.changeState(ModelState.opcConneted);
                 }
                 Model.selectedOPCserver = opcServer.selectedServer;
-
             }
         }
 
@@ -130,7 +114,8 @@ namespace WPFinterface
         {
             if (opcServer.isConnected)
             {
-                Model.opcTreeNodes = opcServer.GetTree();
+                Model.opcTreeNodes.Clear();
+                foreach (mTreeNode node in opcServer.GetTree()) { Model.opcTreeNodes.Add(node); }
             }
             else
                 Model.opcTreeNodes.Clear();
@@ -142,7 +127,11 @@ namespace WPFinterface
             mTreeNode node = (mTreeNode)treeControl.SelectedItem;
             if (node != null)
             {
-                Model.opcListTagsInBranch =  opcServer.GetTags(node.Path, node.Name);
+                Model.opcListTagsInBranch.Clear();
+                foreach (mItem tag in opcServer.GetTags(node.Path, node.Name))
+                {
+                    Model.opcListTagsInBranch.Add(tag);
+                }
             }
         }
 
@@ -151,14 +140,24 @@ namespace WPFinterface
         {
             mItem selectedTag = (mItem)dgrid_Tags.SelectedItem;
             mTag tag = new mTag(selectedTag.Name, selectedTag.Path);
-            Model.opcSubscribedTags.Add(tag);
+
+            var contain = Model.opcSubscribedTags.Any(t => t.Name == tag.Name);
+
+            if (!contain) Model.opcSubscribedTags.Add(tag);
+
+            //сделать подсветку в таблице тех, которые выбраны
         }
 
 
         private void Subscribe()
         {
             opcServer.SubscribeTags(Model.opcSubscribedTags.ToList());
-            Model.opcMonitoredTags = opcServer.monitoredTags;
+            Model.opcMonitoredTags.Clear();
+
+            Model.changeState(ModelState.opcSubscribed);
+
+            foreach (mTag tag in opcServer.monitoredTags)
+            { Model.opcMonitoredTags.Add(tag); }
       
         }
 
@@ -167,14 +166,13 @@ namespace WPFinterface
         private void UnSubscribe()
         {
             opcServer.UnSubcribe();
+            Model.changeState(ModelState.opcUnsubscribed);
 
-            ;
-
-            foreach (mTag t in Model.opcSubscribedTags)
-            {
-                t.Value = "x";
-                t.Quality = "unsubsribed";
-            }
+            //foreach (mTag t in Model.opcSubscribedTags)
+            //{
+            //    t.Value = "x";
+            //    t.Quality = "unsubsribed";
+            //}
 
         }
 
@@ -185,8 +183,10 @@ namespace WPFinterface
         }
 
 
+        #endregion
 
 
+        #region Configuration Save-Load operations
         private void SaveConfiguration()
         {
             //configuredServer = new dbServerItem();
@@ -219,20 +219,24 @@ namespace WPFinterface
 
         private void LoadConfiguration()
         {
-            FileWorks fw = new FileWorks();
-            string path = fw.GetLoadFilePath();
+            //FileWorks fw = new FileWorks();
+            //string path = fw.GetLoadFilePath();
 
-            if (path != "")
-            {
-                configuredServer = new dbServerItem();
-                dbConfig config = new dbConfig();
-                configuredServer = config.Load(path);
-                //config.Save(serverConfig, path);
-            }
-
-
+            //if (path != "")
+            //{
+            //    configuredServer = new dbServerItem();
+            //    dbConfig config = new dbConfig();
+            //    configuredServer = config.Load(path);
+            //    //config.Save(serverConfig, path);
+            //}
 
         }
+
+        #endregion
+
+
+        #region Database operations
+
         private void OracleSyncStartStop(bool startStop)
         {
             oraTransmitFreq.Enabled = startStop;
@@ -263,14 +267,14 @@ namespace WPFinterface
                 }
                 else
                 {
-                    LogMessage("Transmit to database fail, try again...");
+                    Model.addLogRecord("Transmit to database fail, try again...");
                 }
 
                 OracleSyncStartStop(true);
             }
             else
             {
-                LogMessage("Nothing to transmit");
+                Model.addLogRecord("Nothing to transmit");
             }
 
 
@@ -312,13 +316,10 @@ namespace WPFinterface
                 return false;
 
         }
-
-        void oraEx_ReportMessage(object sender, oraEventArgs args)
-        {
-            LogMessage(args.message);
-        }
+        #endregion
 
 
+        #region Interface
 
         //--------- Buttons
         private void btn_GetServers_Click(object sender, RoutedEventArgs e)
@@ -374,8 +375,8 @@ namespace WPFinterface
         private void lst_Servers_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             mServerItem selectedServer = (mServerItem)lst_Servers.SelectedItem;
-            txt_path.DataContext = selectedServer;
-            configuredServer.urlString = selectedServer.UrlString;
+            Model.selectedOPCserver.UrlString = selectedServer.UrlString;
+            
         }
 
         private void btn_ClearSubscription_Click(object sender, RoutedEventArgs e)
@@ -393,9 +394,12 @@ namespace WPFinterface
             OracleSyncStartStop(false);
         }
 
-        //---------------------------------------------------------------------
+        #endregion
 
+        private void btn_oraTestConnection_Click(object sender, RoutedEventArgs e)
+        {
 
+        }
 
     }
 }
