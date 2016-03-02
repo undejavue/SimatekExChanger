@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.ServiceModel.Discovery;
 using System.ComponentModel;
 using System.Timers;
+using ClassLibGlobal;
 
 
 namespace ClassLibOPC
@@ -21,13 +22,16 @@ namespace ClassLibOPC
         private Timer reconnectTimer;
         
         public ObservableCollection<mServerItem> listServers;
-        public string hostname;
-        public bool isConnected;
+        public string hostname { get; set; }
+        public bool isConnected { get; set; }
+
         public ObservableCollection<mTag> monitoredTags;
         public List<mTag> restoredTagList;
         public mServerItem selectedServer;
 
         public List<string> messageLog;
+        public gErrorEntity error { get; set; }
+        
 
 
         public exOPCserver ()
@@ -37,6 +41,7 @@ namespace ClassLibOPC
             restoredTagList = new List<mTag>();
             messageLog = new List<string>();
             logMessage("Message log started");
+            error = new gErrorEntity(false, "E000", "Initialized");
 
             isConnected = false;
             opcSubscription = null;
@@ -140,6 +145,7 @@ namespace ClassLibOPC
                 if (isConnected = server.IsConnected)
                 {
                     OnReportMessage("Server is connected");
+
                     server.ServerShutdown -= server_ServerShutdown;
                     server.ServerShutdown += server_ServerShutdown;
 
@@ -169,6 +175,8 @@ namespace ClassLibOPC
 
             DisconnectServer();
             reconnectTimer.Enabled = true;
+
+            error.newError(true, "E999", "OPC Server shut down");
         }
 
 
@@ -183,7 +191,6 @@ namespace ClassLibOPC
 
         private void startStopWatchDog(bool startstop)
         {
-            reconnectTimer.Interval = selectedServer.ReconnectInterval;
             reconnectTimer.Enabled = startstop;
         }
 
@@ -194,9 +201,12 @@ namespace ClassLibOPC
             if ( ConnectServer(url.ToString()) )
             {
                 startStopWatchDog(false);
+                
 
                 if (restoredTagList.Count() > 0)
                     SubscribeTags(restoredTagList);
+
+                error.newError(false, "E000", "OPC Server restored");
             }
             else
             {

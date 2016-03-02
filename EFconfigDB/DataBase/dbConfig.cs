@@ -40,7 +40,7 @@ namespace EFconfigDB
 
             using (context = new dbContext(dbFilePath))
             {
-                context.dbServerConfig.Include(s => s.monitoredTags).Load();
+                context.dbServerConfig.Include(s => s.opcMonitoredTags).Load();
 
                 config = context.dbServerConfig.Local;
             }

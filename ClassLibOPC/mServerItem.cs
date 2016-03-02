@@ -118,6 +118,16 @@ namespace ClassLibOPC
             }
         }
 
+        private bool _isReconnect;
+        public bool isReconnect
+        {
+            get { return _isReconnect; }
+            set
+            {
+                _isReconnect = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("isReconnect"));
+            }
+        }
 
         private double _reconnectInterval;
         public double ReconnectInterval

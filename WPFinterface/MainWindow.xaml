@@ -34,28 +34,35 @@
                         Click="btn_GetServers_Click" IsEnabled="{Binding btn_Search_isEnable}" />
             </StackPanel>
         </StackPanel>
-       
+
+        <StackPanel Name="panelInfo" Grid.Row="0" Grid.Column="1" Orientation="Vertical" Margin="10,0" VerticalAlignment="Center" HorizontalAlignment="Stretch" >
+            <TextBlock Text="{Binding ModelStateString}" FontSize="14" FontWeight="Medium" Foreground="#FF487DA2"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" />
+        </StackPanel>
+
         <StackPanel Name="btns_Config" Grid.Row="0" Grid.Column="2" Orientation="Horizontal">
-            <Button Content="Save config" x:Name="btn_SaveConfig" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="84" Height="22" 
-                        Click="btn_SaveConfig_Click"  IsEnabled="{Binding btn_LoadConfig_isEnable}"/>
-            <Button Content="Load config" x:Name="btn_LoadConfig" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="84" Height="22" 
+            <Button Content="Save config" x:Name="btn_SaveConfig" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="68" Height="22" 
+                        Click="btn_SaveConfig_Click"  IsEnabled="{Binding btn_SaveConfig_isEnable}"/>
+            <Button Content="Load config" x:Name="btn_LoadConfig" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="68" Height="22" 
                         Click="btn_LoadConfig_Click"  IsEnabled="{Binding btn_LoadConfig_isEnable}"/>
+            <Button Content="Try connect" x:Name="btn_ConfigConnect" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="68" Height="22" 
+                        Click="btn_ConfigConnect_Click" IsEnabled="{Binding btn_TryConfig_isEnable}"  />
         </StackPanel>
 
         <ListBox Name="lst_Servers" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding opcListServers}"  IsEnabled="{Binding list_Servers_isEnable}"
                      Height="Auto" Margin="10" Width="Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                      MouseDoubleClick="lst_Servers_MouseDoubleClick"  SelectionChanged="lst_Servers_SelectionChanged" >
-                <ListBox.ItemTemplate >
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Name}"/>
+            <ListBox.ItemTemplate >
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Name}"/>
 
-                            <!--<TextBlock Text="{Binding UrlString}" Margin="10,0,0,0" FontSize="10"/>-->
-                        </StackPanel>
+                        <!--<TextBlock Text="{Binding UrlString}" Margin="10,0,0,0" FontSize="10"/>-->
+                    </StackPanel>
 
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
 
         <TreeView Name="treeControl" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding opcTreeNodes}" IsEnabled="{Binding list_Branches_isEnable}"  
                   ScrollViewer.VerticalScrollBarVisibility="Auto" FontSize="12"
@@ -88,7 +95,7 @@
                     <TextBox Text="{Binding selectedOPCserver.ReconnectInterval}" VerticalContentAlignment="Center" VerticalAlignment="Center"/>
                 </StackPanel>
             </Border>
-            
+
             <Border Background="#FFEEEBE2" Margin="10,10" BorderBrush="Gray" BorderThickness="1" HorizontalAlignment="Stretch" >
                 <Grid x:Name="grid_ServerStatus" Margin="10"  DataContext="{Binding selectedOPCserver}">
                     <Grid.RowDefinitions>
@@ -114,7 +121,7 @@
                     <TextBlock Grid.Row="3" Grid.Column="1" Text="DISCONNECTED" Background="DarkRed" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="12" Width="110"  />
                     <TextBlock Grid.Row="3" Grid.Column="1" Text=" CONNECTED " Background="LightGreen" Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="12" Width="110" Visibility="{Binding Path=isConnected, Converter={StaticResource BoolToVis}}" />
                     <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding VendorInfo}" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" />
-                    <!--<TextBlock Grid.Row="4" Grid.ColumnSpan="2" Grid.RowSpan="2" Text="{Binding UrlString}" TextWrapping="WrapWithOverflow" Width="Auto" Height="24" HorizontalAlignment="Left" Margin="10,0" FontSize="11" />-->               
+                    <!--<TextBlock Grid.Row="4" Grid.ColumnSpan="2" Grid.RowSpan="2" Text="{Binding UrlString}" TextWrapping="WrapWithOverflow" Width="Auto" Height="24" HorizontalAlignment="Left" Margin="10,0" FontSize="11" />-->
                 </Grid>
             </Border>
         </StackPanel>
@@ -128,7 +135,7 @@
                 <Button Content="Clear" x:Name="btn_ClearSubscription" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="84" Height="22" 
                         Click="btn_ClearSubscription_Click" IsEnabled="{Binding btn_ClearTags_isEnable}" />
             </StackPanel>
-            
+
             <DataGrid Name="dgrid_Subscribed"   ItemsSource="{Binding opcSubscribedTags}" IsEnabled="{Binding list_SubscribedTags_isEnable}"
                       Height="Auto" Margin="10,16" Width="Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                       Visibility="{Binding dgrid_Subscribed_isVisible, Converter={StaticResource BoolToVis} }"
@@ -153,53 +160,57 @@
         </StackPanel>
 
         <StackPanel Grid.Row="2" Grid.Column="2" Name="panel_Database"  Orientation="Vertical" HorizontalAlignment="Stretch">
-        <Border Background="#FFEEEBE2" Margin="10,10" BorderBrush="Gray" BorderThickness="1" HorizontalAlignment="Stretch" >
-            <StackPanel Grid.Row="2" Grid.Column="2"  Orientation="Horizontal" Margin="2" HorizontalAlignment="Center">
-                <Button Content="Sync on" x:Name="btn_oraStartSync" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="64" Height="22" 
+            <Border Background="#FFEEEBE2" Margin="10,10" BorderBrush="Gray" BorderThickness="1" HorizontalAlignment="Stretch" >
+                <StackPanel Grid.Row="2" Grid.Column="2"  Orientation="Horizontal" Margin="2" HorizontalAlignment="Center">
+                    <Button Content="Sync on" x:Name="btn_oraStartSync" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="64" Height="22" 
                         Click="btn_oraStartSync_Click" IsEnabled="{Binding btn_SyncOn_isEnable}"/>
-                <Button Content="Sync off" x:Name="btn_oraStopSync" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Width="64" Height="22" 
+                    <Button Content="Sync off" x:Name="btn_oraStopSync" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Width="64" Height="22" 
                         Click="btn_oraStopSync_Click" IsEnabled="{Binding btn_SyncOff_isEnable}" />
-                <Button Content="Test" x:Name="btn_oraTestConnection" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Width="64" Height="22" 
+                    <Button Content="Test" x:Name="btn_oraTestConnection" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Width="64" Height="22" 
                         Click="btn_oraTestConnection_Click"  IsEnabled="{Binding btn_SyncOn_isEnable}" />
-            </StackPanel>
-        </Border>
+                </StackPanel>
+            </Border>
 
-        <Border Background="#FFEEEBE2" Margin="10,0" BorderBrush="Gray" BorderThickness="1" >
-            <StackPanel Orientation="Vertical" >
-            <Grid x:Name="grid_Database" Margin="0"  DataContext="{Binding }">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="30*" />
-                    <ColumnDefinition Width="30*" />
-                </Grid.ColumnDefinitions>
-                <Label Grid.Row="0" Grid.Column="0" Content="Server Name" HorizontalAlignment="Right" FontSize="10"  />
-                <Label Grid.Row="1" Grid.Column="0" Content="Reconnect interval, ms" HorizontalAlignment="Right" FontSize="10" Height="23" VerticalAlignment="Bottom"/>
-                <Label Grid.Row="2" Grid.Column="0" Content="Insert interval, ms" HorizontalAlignment="Right" FontSize="10"/>
-                <Label Grid.Row="3" Grid.Column="0" Content="Is Connected" HorizontalAlignment="Right" FontSize="10" />
-                
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Name}" Foreground="Green" FontWeight="Bold"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" />
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ServerState}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" />
-                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding StatusInfo}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" />
-                <TextBlock Grid.Row="3" Grid.Column="1" Text="DISCONNECTED" Background="DarkRed" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="12" Width="110"  />
-                <TextBlock Grid.Row="3" Grid.Column="1" Text=" CONNECTED " Background="LightGreen" Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="12" Width="110" Visibility="{Binding Path=isConnected, Converter={StaticResource BoolToVis}}" />
-                
-                <!--<TextBlock Grid.Row="4" Grid.ColumnSpan="2" Grid.RowSpan="2" Text="{Binding UrlString}" TextWrapping="WrapWithOverflow" Width="Auto" Height="24" HorizontalAlignment="Left" Margin="10,0" FontSize="11" />-->
-            </Grid>
-            </StackPanel>
-        </Border>
+            <Border Background="#FFEEEBE2" Margin="10,0" BorderBrush="Gray" BorderThickness="1" >
+                <StackPanel Orientation="Vertical" >
+                    <Grid x:Name="grid_Database" Margin="0"  DataContext="{Binding }">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="30*" />
+                            <ColumnDefinition Width="30*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0" Content="Server Name" HorizontalAlignment="Right" FontSize="10"  />
+                        <Label Grid.Row="1" Grid.Column="0" Content="Reconnect interval, ms" HorizontalAlignment="Right" FontSize="10" Height="23" VerticalAlignment="Bottom"/>
+                        <Label Grid.Row="2" Grid.Column="0" Content="Insert interval, ms" HorizontalAlignment="Right" FontSize="10"/>
+                        <Label Grid.Row="3" Grid.Column="0" Content="Is Connected" HorizontalAlignment="Right" FontSize="10" />
+
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Name}" Foreground="Green" FontWeight="Bold"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ServerState}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding StatusInfo}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="10" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="DISCONNECTED" Background="DarkRed" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="12" Width="110"  />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text=" CONNECTED " Background="LightGreen" Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="12" Width="110" Visibility="{Binding Path=isConnected, Converter={StaticResource BoolToVis}}" />
+
+                        <!--<TextBlock Grid.Row="4" Grid.ColumnSpan="2" Grid.RowSpan="2" Text="{Binding UrlString}" TextWrapping="WrapWithOverflow" Width="Auto" Height="24" HorizontalAlignment="Left" Margin="10,0" FontSize="11" />-->
+                    </Grid>
+                </StackPanel>
+            </Border>
         </StackPanel>
 
-        <StackPanel Name="log_panel" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical" Height="Auto" Margin="0">
+        <StackPanel Name="log_panel" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Vertical" Height="Auto" Margin="0" Background="{Binding infoLineColor}">
             <Border BorderThickness="1" BorderBrush="Gray" Width="Auto" Height="22" MinWidth="700" Margin="10,4,10,4">
-            <TextBlock Text="{Binding selectedOPCserver.UrlString}"  FontSize="11"
-                       HorizontalAlignment="Stretch"  Background="#FFF9F7F6" VerticalAlignment="Stretch"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding opcError.code}" Margin="0" Width="Auto"/>
+                    <TextBlock Text="{Binding opcError.message}" Margin="10,0" Width="Auto"/>
+                    <TextBlock Text="{Binding selectedOPCserver.UrlString}"  FontSize="12" TextAlignment="Center" Margin="10,0"
+                                HorizontalAlignment="Stretch"  VerticalAlignment="Stretch"/>
+                </StackPanel>
             </Border>
             <ListBox    x:Name="list_Log"  HorizontalAlignment="Stretch" Margin="10,0,10,0"
                      MinWidth="700" Height="70" VerticalAlignment="Stretch" ItemsSource="{Binding messageLog, Mode=OneWay}" local:ListBoxExtenders.AutoScrollToEnd="True"  >
@@ -210,7 +221,7 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </StackPanel>
-        
+
     </Grid>
-    
+
 </Window>

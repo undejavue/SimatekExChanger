@@ -46,6 +46,7 @@ namespace WPFinterface
             this.DataContext = Model;
 
             opcServer = new exOPCserver();
+            
             opcServer.ReportMessage += opcServer_ReportMessage;
 
             configureOraTransmitRate();
@@ -97,6 +98,7 @@ namespace WPFinterface
                 if ( opcServer.ConnectServer(selected_Server.UrlString) )
                 {
                     Model.changeState(ModelState.opcConneted);
+                    Model.opcError = opcServer.error;
                 }
                 Model.selectedOPCserver = opcServer.selectedServer;
             }
@@ -107,7 +109,6 @@ namespace WPFinterface
             opcServer.DisconnectServer();
             Model.changeState(ModelState.opcDisconneted);
             SubscriptionClear();
-
         }
 
         private void BrowseServer()
@@ -142,10 +143,7 @@ namespace WPFinterface
             mTag tag = new mTag(selectedTag.Name, selectedTag.Path);
 
             var contain = Model.opcSubscribedTags.Any(t => t.Name == tag.Name);
-
             if (!contain) Model.opcSubscribedTags.Add(tag);
-
-            //сделать подсветку в таблице тех, которые выбраны
         }
 
 
@@ -189,47 +187,45 @@ namespace WPFinterface
         #region Configuration Save-Load operations
         private void SaveConfiguration()
         {
-            //configuredServer = new dbServerItem();
+            if (Model.selectedOPCserver != null)
+            {
+                Model.SaveServer();
+            }
 
-            //if (opcServer != null)
-            //{
-            //    configuredServer.Name = opcServer.hostname;
-            //    configuredServer.urlString = opcServer.selectedServer.UrlString;
-            //}
+            dbConfig config = new dbConfig();
+            FileWorks fw = new FileWorks();
 
-            //if (subscribedTags != null)
-            //{
-            //    foreach (mTag tag in subscribedTags)
-            //    {
-            //        dbTagItem t = new dbTagItem(tag.Name, tag.Path);
-            //        configuredServer.monitoredTags.Add(t);
-            //    }
-            //}
-            
-            //dbConfig config = new dbConfig();
-            //FileWorks fw = new FileWorks();
-
-            //string path = fw.GetSaveFilePath();
-            //if (path != "")
-            //{
-            //    config.Save(configuredServer, path);
-            //}       
+            string path = fw.GetSaveFilePath();
+            if (path != "")
+            {
+                config.Save(Model.configuredServer, path);
+            }       
         }
 
 
         private void LoadConfiguration()
         {
-            //FileWorks fw = new FileWorks();
-            //string path = fw.GetLoadFilePath();
+            FileWorks fw = new FileWorks();
+            string path = fw.GetLoadFilePath();
 
-            //if (path != "")
-            //{
-            //    configuredServer = new dbServerItem();
-            //    dbConfig config = new dbConfig();
-            //    configuredServer = config.Load(path);
-            //    //config.Save(serverConfig, path);
-            //}
+            if (path != "")
+            {
+                dbConfig config = new dbConfig();
+                if (Model.LoadServer(config.Load(path)))
+                {
+                    Model.changeState(ModelState.configLoaded);
+                }
+            }
+        }
 
+        private void ConnectFromConfig()
+        {
+            if (opcServer.ConnectServer(Model.selectedOPCserver.UrlString))
+            {
+                Model.changeState(ModelState.opcConneted);
+                Model.selectedOPCserver = opcServer.selectedServer;
+                Subscribe();
+            }           
         }
 
         #endregion
@@ -374,8 +370,11 @@ namespace WPFinterface
 
         private void lst_Servers_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            mServerItem selectedServer = (mServerItem)lst_Servers.SelectedItem;
-            Model.selectedOPCserver.UrlString = selectedServer.UrlString;
+            if (lst_Servers.SelectedItem != null)
+            {
+                mServerItem selectedServer = (mServerItem)lst_Servers.SelectedItem;
+                Model.selectedOPCserver.UrlString = selectedServer.UrlString;
+            }
             
         }
 
@@ -399,6 +398,12 @@ namespace WPFinterface
         private void btn_oraTestConnection_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void btn_ConfigConnect_Click(object sender, RoutedEventArgs e)
+        {
+            ConnectFromConfig();
+            
         }
 
     }

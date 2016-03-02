@@ -21,25 +21,73 @@ namespace EFconfigDB
             }
         }
 
-        private string _urlString;
-        public string urlString
+        private string _opcHost;
+        public string opcHost
         {
-            get { return _urlString; }
+            get { return _opcHost; }
             set
             {
-                _urlString = value;
+                _opcHost = value;
 
-                OnPropertyChanged(new PropertyChangedEventArgs("urlString"));
+                OnPropertyChanged(new PropertyChangedEventArgs("Host"));
+            }
+        }
+
+        private string _opcURL;
+        public string opcURL
+        {
+            get { return _opcURL; }
+            set
+            {
+                _opcURL = value;
+
+                OnPropertyChanged(new PropertyChangedEventArgs("opcURL"));
+            }
+        }
+
+        private bool _opcRecconect;
+        public bool opcRecconect
+        {
+            get { return _opcRecconect; }
+            set
+            {
+                _opcRecconect = value;
+
+                OnPropertyChanged(new PropertyChangedEventArgs("opcRecconect"));
             }
         }
 
 
-        public virtual List<dbTagItem> monitoredTags {get; set;}
+        private string _dbConnString;
+        public string dbConnString
+        {
+            get { return _dbConnString; }
+            set
+            {
+                _dbConnString = value;
+
+                OnPropertyChanged(new PropertyChangedEventArgs("dbConnString"));
+            }
+        }
+
+        private bool _dbRecconect;
+        public bool dbRecconect
+        {
+            get { return _dbRecconect; }
+            set
+            {
+                _dbRecconect = value;
+
+                OnPropertyChanged(new PropertyChangedEventArgs("dbRecconect"));
+            }
+        }
+
+        public virtual List<dbTagItem> opcMonitoredTags {get; set;}
 
 
         public dbServerItem() 
         {
-            monitoredTags = new List<dbTagItem>();
+            opcMonitoredTags = new List<dbTagItem>();
         }
 
     }

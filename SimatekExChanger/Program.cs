@@ -28,7 +28,7 @@ namespace SimatekExChanger
             for (int i = 1; i < 10; i++)
             {
                 dbTagItem tag = new dbTagItem("name " + i.ToString(), "path " + i.ToString());
-                server.monitoredTags.Add(tag);
+                server.opcMonitoredTags.Add(tag);
             }
 
 
@@ -39,7 +39,7 @@ namespace SimatekExChanger
 
             dbServerItem s = config.Load(dbFile);
 
-            foreach (dbTagItem tag in s.monitoredTags)
+            foreach (dbTagItem tag in s.opcMonitoredTags)
             {
                 System.Console.WriteLine("Server name = {0}", tag.Name);
             }

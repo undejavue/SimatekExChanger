@@ -61,6 +61,12 @@
     <Compile Include="mTreeNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Global\ClassLibGlobal.csproj">
+      <Project>{ff2664cd-ab52-4dd9-b9e7-9de81eea383b}</Project>
+      <Name>ClassLibGlobal</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

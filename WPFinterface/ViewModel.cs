@@ -7,6 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ClassLibOPC;
 using ClassLibGlobal;
+using System.Windows.Threading;
+using EFconfigDB;
+using System.Windows.Media;
 
 namespace WPFinterface
 {
@@ -17,16 +20,18 @@ namespace WPFinterface
         opcConneted,
         opcDisconneted,
         opcSubscribed,
-        opcUnsubscribed
+        opcUnsubscribed,
+        configLoaded
     }
 
     public class ViewModel : INotifyPropertyChanged
     {
+        #region Public Properties
 
         /// <summary>
         /// Log of messages, buffer of strings
         /// </summary>
-        public ObservableCollection<LogItem> messageLog { get; set; }
+        public ObservableCollection<gLogEntity> messageLog { get; set; }
         /// <summary>
         /// List of OPC servers
         /// </summary>
@@ -60,17 +65,20 @@ namespace WPFinterface
                 OnPropertyChanged(new PropertyChangedEventArgs("selectedOPCserver"));
             }
         }
+
+        public gErrorEntity opcError { get; set; }
+
         /// <summary>
         /// Configured OPC server
         /// </summary>
-        private mServerItem _configuredOPCserver;
-        public mServerItem configuredOPCserver
+        private dbServerItem _configuredServer;
+        public dbServerItem configuredServer
         {
-            get { return _configuredOPCserver; }
+            get { return _configuredServer; }
             set
             {
-                _configuredOPCserver = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("configuredOPCserver"));
+                _configuredServer = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("configuredServer"));
             }
         }
 
@@ -82,46 +90,33 @@ namespace WPFinterface
             {
                 _state = value;
                 OnPropertyChanged(new PropertyChangedEventArgs("state"));
+                OnPropertyChanged(new PropertyChangedEventArgs("ModelStateString"));
+
             }
         }
-
-
-
-        #region Interface buttons and views
-
-
-        private bool _btn_Search_isEnable;
-        public bool btn_Search_isEnable
+        public string ModelStateString
         {
-            get { return _btn_Search_isEnable; }
+            get { return state.ToString(); }
+        }
+
+        private Brush _infoLineColor;
+        public Brush infoLineColor
+        {
+            get
+            {
+                return _infoLineColor;
+            }
             set
             {
-                _btn_Search_isEnable = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("btn_Search_isEnable"));
+                _infoLineColor = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("infoLineColor"));
             }
         }
 
-        private bool _dgrid_Subscribed_isVisible;
-        public bool dgrid_Subscribed_isVisible
-        {
-            get { return _dgrid_Subscribed_isVisible; }
-            set
-            {
-                _dgrid_Subscribed_isVisible = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("dgrid_Subscribed_isVisible"));
-            }
-        }
+        #endregion
 
-        private bool _dgrid_Monitored_isVisible;
-        public bool dgrid_Monitored_isVisible
-        {
-            get { return _dgrid_Monitored_isVisible; }
-            set
-            {
-                _dgrid_Monitored_isVisible = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("dgrid_Monitored_isVisible"));
-            }
-        }
+
+        #region Interface Buttons
 
 
         private bool _btn_Connect_isEnable;
@@ -135,6 +130,31 @@ namespace WPFinterface
             }
         }
 
+
+        private bool _btn_Search_isEnable;
+        public bool btn_Search_isEnable
+        {
+            get { return _btn_Search_isEnable; }
+            set
+            {
+                _btn_Search_isEnable = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("btn_Search_isEnable"));
+            }
+        }
+
+
+        private bool _btn_TryConfig_isEnable;
+        public bool btn_TryConfig_isEnable
+        {
+            get { return _btn_TryConfig_isEnable; }
+            set
+            {
+                _btn_TryConfig_isEnable = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("btn_TryConfig_isEnable"));
+            }
+        }
+
+
         private bool _btn_Subscribe_isEnable;
         public bool btn_Subscribe_isEnable
         {
@@ -146,6 +166,7 @@ namespace WPFinterface
             }
         }
 
+
         private bool _btn_Unsubscribe_isEnable;
         public bool btn_Unsubscribe_isEnable
         {
@@ -156,6 +177,7 @@ namespace WPFinterface
                 OnPropertyChanged(new PropertyChangedEventArgs("btn_Unsubscribe_isEnable"));
             }
         }
+
 
         private bool _btn_SyncOn_isEnable;
         public bool btn_SyncOn_isEnable
@@ -203,6 +225,46 @@ namespace WPFinterface
                 OnPropertyChanged(new PropertyChangedEventArgs("btn_LoadConfig_isEnable"));
             }
         }
+
+
+        private bool _btn_SaveConfig_isEnable;
+        public bool btn_SaveConfig_isEnable
+        {
+            get { return _btn_SaveConfig_isEnable; }
+            set
+            {
+                _btn_SaveConfig_isEnable = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("btn_SaveConfig_isEnable"));
+            }
+        }
+
+        #endregion
+
+
+        #region Interface views
+
+        private bool _dgrid_Subscribed_isVisible;
+        public bool dgrid_Subscribed_isVisible
+        {
+            get { return _dgrid_Subscribed_isVisible; }
+            set
+            {
+                _dgrid_Subscribed_isVisible = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("dgrid_Subscribed_isVisible"));
+            }
+        }
+
+        private bool _dgrid_Monitored_isVisible;
+        public bool dgrid_Monitored_isVisible
+        {
+            get { return _dgrid_Monitored_isVisible; }
+            set
+            {
+                _dgrid_Monitored_isVisible = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("dgrid_Monitored_isVisible"));
+            }
+        }
+
 
         private bool _list_Servers_isEnable;
         public bool list_Servers_isEnable
@@ -255,12 +317,12 @@ namespace WPFinterface
         public ViewModel()
         {
             changeState(ModelState.initialized);
-            
+
         }
 
         public void addLogRecord(string record)
         {
-            messageLog.Add(new LogItem(record));
+            messageLog.Add(new gLogEntity(record));
         }
 
         public List<string> unloadMessageLog()
@@ -288,6 +350,8 @@ namespace WPFinterface
                     btn_ClearTags_isEnable = false;
                     btn_Connect_isEnable = false;
                     btn_LoadConfig_isEnable = false;
+                    btn_SaveConfig_isEnable = true;
+                    btn_TryConfig_isEnable = false;
                     btn_Subscribe_isEnable = true;
                     btn_Unsubscribe_isEnable = false;
                     btn_Search_isEnable = false;
@@ -299,6 +363,9 @@ namespace WPFinterface
                     list_Branches_isEnable = true;
                     list_Tags_isEnable = true;
                     list_SubscribedTags_isEnable = true;
+
+                    infoLineColor = new SolidColorBrush(Colors.Goldenrod);
+
                     break;
 
                 case ModelState.opcDisconneted:
@@ -306,6 +373,7 @@ namespace WPFinterface
                     btn_ClearTags_isEnable = false;
                     btn_Connect_isEnable = true;
                     btn_LoadConfig_isEnable = true;
+                    btn_SaveConfig_isEnable = false;
                     btn_Subscribe_isEnable = false;
                     btn_Unsubscribe_isEnable = false;
                     btn_Search_isEnable = true;
@@ -320,6 +388,9 @@ namespace WPFinterface
 
                     dgrid_Monitored_isVisible = false;
                     dgrid_Subscribed_isVisible = true;
+
+                    Clear();
+
                     break;
 
                 case ModelState.opcSubscribed:
@@ -328,11 +399,15 @@ namespace WPFinterface
                     btn_Unsubscribe_isEnable = true;
                     btn_ClearTags_isEnable = false;
                     btn_Search_isEnable = false;
+                    btn_TryConfig_isEnable = false;
+
+                    list_Branches_isEnable = false;
+                    list_Tags_isEnable = false;
 
                     dgrid_Monitored_isVisible = true;
                     dgrid_Subscribed_isVisible = false;
 
-                  break;
+                    break;
 
                 case ModelState.opcUnsubscribed:
 
@@ -340,10 +415,22 @@ namespace WPFinterface
                     btn_Unsubscribe_isEnable = false;
                     btn_ClearTags_isEnable = true;
 
+                    list_Branches_isEnable = true;
+                    list_Tags_isEnable = true;
+
                     dgrid_Monitored_isVisible = false;
                     dgrid_Subscribed_isVisible = true;
 
-                  break;
+                    break;
+                case ModelState.configLoaded:
+
+                    btn_TryConfig_isEnable = true;
+
+                    list_Branches_isEnable = false;
+                    list_Tags_isEnable = false;
+                    infoLineColor = new SolidColorBrush(Colors.LightGreen);
+
+                    break;
 
             }
         }
@@ -356,16 +443,16 @@ namespace WPFinterface
             opcListTagsInBranch = new ObservableCollection<mItem>();
             opcMonitoredTags = new ObservableCollection<mTag>();
             opcSubscribedTags = new ObservableCollection<mTag>();
-
             selectedOPCserver = new mServerItem(true);
-            configuredOPCserver = new mServerItem(true);
 
-            messageLog = new ObservableCollection<LogItem>();
-            messageLog.Add(new LogItem("Start log"));
+            messageLog = new ObservableCollection<gLogEntity>();
+            messageLog.Add(new gLogEntity("Start log"));
 
             btn_ClearTags_isEnable = false;
             btn_Connect_isEnable = true;
             btn_LoadConfig_isEnable = true;
+            btn_SaveConfig_isEnable = false;
+            btn_TryConfig_isEnable = false;
             btn_Subscribe_isEnable = false;
             btn_SyncOff_isEnable = true;
             btn_SyncOn_isEnable = true;
@@ -380,8 +467,69 @@ namespace WPFinterface
             dgrid_Monitored_isVisible = false;
             dgrid_Subscribed_isVisible = true;
 
-            //state = ModelState.initialized;
+            infoLineColor = new SolidColorBrush(Colors.White);
 
+            opcError = new gErrorEntity();
+
+        }
+
+        public void Clear()
+        {
+            opcListServers.Clear();
+            opcTreeNodes.Clear();
+            opcListTagsInBranch.Clear();
+            opcMonitoredTags.Clear();
+            opcSubscribedTags.Clear();
+
+            infoLineColor = new SolidColorBrush(Colors.WhiteSmoke);
+
+            addLogRecord("ViewModel is cleared");
+        }
+
+        public void SaveServer()
+        {
+            configuredServer = new dbServerItem();
+
+            configuredServer.opcHost = selectedOPCserver.Host;
+            configuredServer.opcURL = selectedOPCserver.UrlString;
+            configuredServer.opcRecconect = selectedOPCserver.isReconnect;
+
+            foreach (mTag tag in opcMonitoredTags)
+            {
+                dbTagItem t = new dbTagItem(tag.Name, tag.Path);
+                configuredServer.opcMonitoredTags.Add(t);
+            }
+            addLogRecord("Server configuration copied");
+        }
+
+
+        public bool LoadServer(dbServerItem srv)
+        {
+            try
+            {
+                configuredServer = new dbServerItem();
+                configuredServer = srv;
+
+                selectedOPCserver.Host = srv.opcHost;
+                selectedOPCserver.UrlString = srv.opcURL;
+                selectedOPCserver.isReconnect = srv.opcRecconect;
+
+                foreach (dbTagItem tag in srv.opcMonitoredTags)
+                {
+                    mTag t = new mTag(tag.Name, tag.Path);
+                    opcSubscribedTags.Add(t);
+                }
+                addLogRecord("Server configuration loaded successfully");
+                addLogRecord("Server url is: " + selectedOPCserver.UrlString);
+                addLogRecord("Tags count for subscribtion: " + opcSubscribedTags.Count.ToString());
+                return true;
+            }
+            catch (Exception ex)
+            {
+                addLogRecord("Fail to load server configuration...");
+                addLogRecord(ex.Message);
+                return false;
+            }
         }
 
 

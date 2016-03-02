@@ -37,7 +37,7 @@ namespace EFconfigDB
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             
-            modelBuilder.Entity<dbServerItem>().HasMany<dbTagItem>(k => k.monitoredTags).WithRequired(k => k.srvID);
+            modelBuilder.Entity<dbServerItem>().HasMany<dbTagItem>(k => k.opcMonitoredTags).WithRequired(k => k.srvID);
             //modelBuilder.Entity<dbServerItem>().HasMany<dbTagItem>(k => k.monitoredTags).WithRequired(k => k.srvID).HasForeignKey();
 
         }

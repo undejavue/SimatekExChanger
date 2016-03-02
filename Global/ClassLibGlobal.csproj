@@ -40,7 +40,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entity.cs" />
-    <Compile Include="LogEntry.cs" />
+    <Compile Include="gErrorEntity.cs" />
+    <Compile Include="gLogEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
