@@ -1,24 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Timers;
-
 using ClassLibOPC;
 using EFconfigDB;
 using ClassLibOracle;
-using System.Globalization;
 
 
 namespace WPFinterface
@@ -48,6 +37,7 @@ namespace WPFinterface
             opcServer = new exOPCserver();
             
             opcServer.ReportMessage += opcServer_ReportMessage;
+            
 
             configureOraTransmitRate();
         }
@@ -67,6 +57,8 @@ namespace WPFinterface
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 Model.addLogRecord(args.message);
+
+                
             }));
         }
 
@@ -98,7 +90,6 @@ namespace WPFinterface
                 if ( opcServer.ConnectServer(selected_Server.UrlString) )
                 {
                     Model.changeState(ModelState.opcConneted);
-                    Model.opcError = opcServer.error;
                 }
                 Model.selectedOPCserver = opcServer.selectedServer;
             }

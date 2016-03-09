@@ -22,7 +22,6 @@ namespace ClassLibOPC
         private Timer reconnectTimer;
         
         public ObservableCollection<mServerItem> listServers;
-        public string hostname { get; set; }
         public bool isConnected { get; set; }
 
         public ObservableCollection<mTag> monitoredTags;
@@ -30,7 +29,7 @@ namespace ClassLibOPC
         public mServerItem selectedServer;
 
         public List<string> messageLog;
-        public gErrorEntity error { get; set; }
+
         
 
 
@@ -41,7 +40,6 @@ namespace ClassLibOPC
             restoredTagList = new List<mTag>();
             messageLog = new List<string>();
             logMessage("Message log started");
-            error = new gErrorEntity(false, "E000", "Initialized");
 
             isConnected = false;
             opcSubscription = null;
@@ -148,7 +146,6 @@ namespace ClassLibOPC
 
                     server.ServerShutdown -= server_ServerShutdown;
                     server.ServerShutdown += server_ServerShutdown;
-
                     RefreshServerStatus();
                 }
                 else
@@ -176,7 +173,6 @@ namespace ClassLibOPC
             DisconnectServer();
             reconnectTimer.Enabled = true;
 
-            error.newError(true, "E999", "OPC Server shut down");
         }
 
 
@@ -206,7 +202,6 @@ namespace ClassLibOPC
                 if (restoredTagList.Count() > 0)
                     SubscribeTags(restoredTagList);
 
-                error.newError(false, "E000", "OPC Server restored");
             }
             else
             {
@@ -246,6 +241,7 @@ namespace ClassLibOPC
                 }
 
             }
+
             return isConnected;
         }
 
@@ -446,6 +442,7 @@ namespace ClassLibOPC
         public delegate void OPCserverEventHandler(object sender, exEventArgs args);
 
         public event OPCserverEventHandler ReportMessage;
+        public event OPCserverEventHandler ReportError;
 
         protected virtual void OnReportMessage(string message)
         {
@@ -457,6 +454,8 @@ namespace ClassLibOPC
                 logMessage(message);
             }
         }
+
+
 
         protected virtual void OnReportError(int error, string message)
         {

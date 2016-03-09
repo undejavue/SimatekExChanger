@@ -66,7 +66,16 @@ namespace WPFinterface
             }
         }
 
-        public gErrorEntity opcError { get; set; }
+        private vmError _opcError;
+        public vmError opcError
+        {
+            get { return _opcError; }
+            set
+            {
+                _opcError = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("opcError"));
+            }
+        }
 
         /// <summary>
         /// Configured OPC server
@@ -364,7 +373,7 @@ namespace WPFinterface
                     list_Tags_isEnable = true;
                     list_SubscribedTags_isEnable = true;
 
-                    infoLineColor = new SolidColorBrush(Colors.Goldenrod);
+                    infoLineColor = new SolidColorBrush(Colors.LightGreen);
 
                     break;
 
@@ -428,7 +437,7 @@ namespace WPFinterface
 
                     list_Branches_isEnable = false;
                     list_Tags_isEnable = false;
-                    infoLineColor = new SolidColorBrush(Colors.LightGreen);
+                    infoLineColor = new SolidColorBrush(Colors.DarkSlateBlue);
 
                     break;
 
@@ -469,7 +478,7 @@ namespace WPFinterface
 
             infoLineColor = new SolidColorBrush(Colors.White);
 
-            opcError = new gErrorEntity();
+            opcError = new vmError();
 
         }
 

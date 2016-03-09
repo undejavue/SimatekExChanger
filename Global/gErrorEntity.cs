@@ -17,7 +17,7 @@ namespace ClassLibGlobal
                 return _isError;
             }
             set
-            {
+           {
                 _isError = value;
                 OnPropertyChanged(new PropertyChangedEventArgs("isError"));
             }
@@ -37,8 +37,8 @@ namespace ClassLibGlobal
             }
         }
 
-        private string _code;
-        public string code
+        private int _code;
+        public int code
         {
             get
             {
@@ -47,18 +47,20 @@ namespace ClassLibGlobal
             set
             {
                 _code = value;
+                SetError();
                 OnPropertyChanged(new PropertyChangedEventArgs("code"));
             }
         }
+
 
         public gErrorEntity()
         {
 
         }
 
-        public gErrorEntity(bool isError, string ErrorCode, string ErrorMessage)
+        public gErrorEntity(int ErrorCode, string ErrorMessage)
         {
-            newError(isError, ErrorCode, ErrorMessage);
+            newError(ErrorCode, ErrorMessage);
         }
 
 
@@ -68,11 +70,18 @@ namespace ClassLibGlobal
         /// <param name="isError">True if error need to be indicated</param>
         /// <param name="ErrorCode">Error code</param>
         /// <param name="ErrorMessage">Error message</param>
-        public void newError(bool isError, string ErrorCode, string ErrorMessage)
+        public void newError(int ErrorCode, string ErrorMessage)
         {
-            this.isError = isError;
             code = ErrorCode;
             message = ErrorMessage;
+        }
+
+        private void SetError()
+        {
+            if (code == 0)
+                isError = false;
+            else
+                isError = true;
         }
 
 
