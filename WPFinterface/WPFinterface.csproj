@@ -70,8 +70,15 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Extenders.cs" />
+    <Compile Include="ucDBtblRemote.xaml.cs">
+      <DependentUpon>ucDBtblRemote.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ViewModel\ViewModel.cs" />
+    <Compile Include="ViewModel\vmColors.cs" />
     <Compile Include="ViewModel\vmError.cs" />
+    <Compile Include="wndDBbrowser.xaml.cs">
+      <DependentUpon>wndDBbrowser.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -86,6 +93,14 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="ucDBtblRemote.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="wndDBbrowser.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

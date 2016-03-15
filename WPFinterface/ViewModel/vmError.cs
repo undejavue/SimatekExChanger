@@ -7,60 +7,90 @@ namespace WPFinterface
     public class vmError : gErrorEntity
     {
 
-        public new int code
+
+        private Brush _backColor;
+        public Brush backColor
         {
-            get
-            {
-                return base.code;
-            }
+            get { return _backColor; }
             set
             {
-                base.code = value;
-                SetColor();
-                OnPropertyChanged(new PropertyChangedEventArgs("code"));
+                _backColor = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("backColor"));
             }
         }
 
-
-
-        private Brush _errColor;
-        public Brush errColor
+        private Color _foreColor;
+        public Color foreColor
         {
-            get
-            {
-                return _errColor;
-            }
+            get { return _foreColor; }
             set
             {
-                _errColor = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("errColor"));
+                _foreColor = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("foreColor"));
             }
         }
 
-
-        private static Color errorColor = Colors.Red;
-        private static Color normColor = Colors.Gray;
-
-
-
-        public vmError()
+        
+        public vmError(gErrorEntity errEnt)
         {
+            setFields(errEnt);
+            errEnt.PropertyChanged += ErrEnt_PropertyChanged;  
+        }
 
+        private void ErrEnt_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            setFields((gErrorEntity)sender as gErrorEntity);        
+            if (e.PropertyName.Equals("isError")) { SetBackColor(); }
+            if (e.PropertyName.Equals("code")) { SetForeColor(); }
+        }
+
+        private void setFields(gErrorEntity errEnt)
+        {
+            this.isError = errEnt.isError;
+            this.code = errEnt.code;
+            this.message = errEnt.message;
         }
 
 
-        private void SetColor()
+        private void SetDefaultColors()
         {
-            if (base.isError)
+            backColor = new SolidColorBrush(vmColors.backDefault);
+            foreColor = vmColors.foreDefault;
+        }
+
+        private void SetBackColor()
+        {
+            if (isError)
             {
-                errColor = new SolidColorBrush(errorColor);
+                backColor = new SolidColorBrush(vmColors.backAlarm);            
             }
             else
             {
-                errColor = new SolidColorBrush(normColor);
+                backColor = new SolidColorBrush(vmColors.backDefault);
             }
         }
 
-
+        private void SetForeColor()
+        {
+            switch (code)
+            {
+                case 0:
+                    foreColor = vmColors.foreDefault;
+                    backColor = new SolidColorBrush(vmColors.backDefault);
+                    break;
+                case 500:
+                    foreColor = vmColors.foreWarning;
+                    backColor = new SolidColorBrush(vmColors.backWarning);
+                    break;
+                case 999:
+                    foreColor = vmColors.foreAlarm;
+                    backColor = new SolidColorBrush(vmColors.backAlarm);
+                    break;
+                default:
+                    foreColor = vmColors.foreDefault;
+                    backColor = new SolidColorBrush(vmColors.backDefault);
+                    break;
+            }
+        }
     }
 }

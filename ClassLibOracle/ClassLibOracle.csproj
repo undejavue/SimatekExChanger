@@ -56,6 +56,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="oraEntity.cs" />
     <Compile Include="oraEventArgs.cs" />
     <Compile Include="OraExchanger.cs" />
     <Compile Include="FIX_STAN789_T.cs">

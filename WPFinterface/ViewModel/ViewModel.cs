@@ -77,6 +77,17 @@ namespace WPFinterface
             }
         }
 
+        private gErrorEntity _gError;
+        public gErrorEntity gError
+        {
+            get { return _gError; }
+            set
+            {
+                _gError = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("gError"));
+            }
+        }
+
         /// <summary>
         /// Configured OPC server
         /// </summary>
@@ -119,6 +130,36 @@ namespace WPFinterface
             {
                 _infoLineColor = value;
                 OnPropertyChanged(new PropertyChangedEventArgs("infoLineColor"));
+            }
+        }
+
+
+        private bool _isDbServerConnected;
+        public bool isDbServerConnected
+        {
+            get
+            {
+                return _isDbServerConnected;
+            }
+            set
+            {
+                _isDbServerConnected = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("isDbServerConnected"));
+            }
+        }
+
+
+        private long _progressBar;
+        public long progressBar
+        {
+            get
+            {
+                return _progressBar;
+            }
+            set
+            {
+                _progressBar = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("progressBar"));
             }
         }
 
@@ -251,6 +292,17 @@ namespace WPFinterface
 
 
         #region Interface views
+
+        private bool _lbl_InitConnection_isVisible;
+        public bool lbl_InitConnection_isVisible
+        {
+            get { return _lbl_InitConnection_isVisible; }
+            set
+            {
+                _lbl_InitConnection_isVisible = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("lbl_InitConnection_isVisible"));
+            }
+        }
 
         private bool _dgrid_Subscribed_isVisible;
         public bool dgrid_Subscribed_isVisible
@@ -476,10 +528,13 @@ namespace WPFinterface
             dgrid_Monitored_isVisible = false;
             dgrid_Subscribed_isVisible = true;
 
+            lbl_InitConnection_isVisible = true;
+
             infoLineColor = new SolidColorBrush(Colors.White);
 
-            opcError = new vmError();
-
+            
+            gError = new gErrorEntity(1, "Created in model");
+            opcError = new vmError(gError);
         }
 
         public void Clear()
@@ -505,7 +560,7 @@ namespace WPFinterface
 
             foreach (mTag tag in opcMonitoredTags)
             {
-                dbTagItem t = new dbTagItem(tag.Name, tag.Path);
+                dbTagItem t = new dbTagItem(tag.Name, tag.Path, tag.Description);
                 configuredServer.opcMonitoredTags.Add(t);
             }
             addLogRecord("Server configuration copied");

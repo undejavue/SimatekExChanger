@@ -8,7 +8,9 @@ using System.Timers;
 using ClassLibOPC;
 using EFconfigDB;
 using ClassLibOracle;
-
+using ClassLibGlobal;
+using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace WPFinterface
 {
@@ -17,10 +19,15 @@ namespace WPFinterface
     /// </summary>
     public partial class MainWindow : Window
     {
-        private ViewModel Model;       
+        private ViewModel Model;
         private exOPCserver opcServer;
         private OraExchanger oraEx;
         private Timer oraTransmitFreq;
+
+        private Timer progressTimer;
+
+        private BackgroundWorker bgWorker;
+        
 
 
         public MainWindow()
@@ -34,12 +41,58 @@ namespace WPFinterface
             Model = new ViewModel();
             this.DataContext = Model;
 
-            opcServer = new exOPCserver();
-            
-            opcServer.ReportMessage += opcServer_ReportMessage;
+            bgWorker = new BackgroundWorker();
+            bgWorker.DoWork += BgWorker_DoWork;
+            bgWorker.RunWorkerCompleted += BgWorker_RunWorkerCompleted;
+            bgWorker.ProgressChanged += BgWorker_ProgressChanged;
             
 
+            opcServer = new exOPCserver();
+            Model.opcError = new vmError(opcServer.error);
+            //Model.gError = opcServer.error;
+
+            opcServer.ReportMessage += opcServer_ReportMessage;
+
+            opcServer.DataChanged += OpcServer_DataChanged;
+
+
             configureOraTransmitRate();
+
+            SearchServers("localhost");
+
+            bgWorker.RunWorkerAsync();
+
+            
+        }
+
+        private void BgWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            Model.progressBar = e.ProgressPercentage;
+        }
+
+        private void BgWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            OraTableInit();
+            Model.addLogRecord("Finish test oracle connection");
+            Model.isDbServerConnected = oraEx.isConnectionOK;
+            Model.lbl_InitConnection_isVisible = false;
+        }
+
+        private void BgWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            Model.lbl_InitConnection_isVisible = true;
+
+            progressTimer.Interval = 30000;
+            progressTimer.Enabled = true;
+
+            oraEx = new OraExchanger();
+            oraEx.ReportMessage += oraEx_ReportMessage;
+        }
+
+
+        private void OpcServer_DataChanged(object sender)
+        {
+            OraInsert();
         }
 
 
@@ -53,12 +106,17 @@ namespace WPFinterface
         /// <param name="args"></param>
         private void opcServer_ReportMessage(object sender, exEventArgs args)
         {
-            
+
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 Model.addLogRecord(args.message);
 
-                
+                if (args.error != 0)
+                {
+                    //Model.opcError.code = args.error;
+                    // Model.opcError.message = args.message;
+                }
+
             }));
         }
 
@@ -79,7 +137,7 @@ namespace WPFinterface
         {
             Model.opcListServers.Clear();
             foreach (mServerItem i in opcServer.GetServers(hostName)) { Model.opcListServers.Add(i); }
-            Model.addLogRecord("Server search complited...");         
+            Model.addLogRecord("Server search complited...");
         }
 
         private void Connect()
@@ -87,7 +145,7 @@ namespace WPFinterface
             mServerItem selected_Server = (mServerItem)lst_Servers.SelectedItem;
             if (selected_Server != null)
             {
-                if ( opcServer.ConnectServer(selected_Server.UrlString) )
+                if (opcServer.ConnectServer(selected_Server.UrlString))
                 {
                     Model.changeState(ModelState.opcConneted);
                 }
@@ -134,20 +192,27 @@ namespace WPFinterface
             mTag tag = new mTag(selectedTag.Name, selectedTag.Path);
 
             var contain = Model.opcSubscribedTags.Any(t => t.Name == tag.Name);
-            if (!contain) Model.opcSubscribedTags.Add(tag);
+            if (!contain)
+            {
+                mTag newTag = (mTag)dgrid_Subscribed.SelectedItem as mTag;
+
+                var mt = Model.opcSubscribedTags.FirstOrDefault(t => t.Description == newTag.Description);
+                mt.Name = tag.Name;
+                mt.Path = tag.Path;
+            }
         }
 
 
         private void Subscribe()
         {
-            opcServer.SubscribeTags(Model.opcSubscribedTags.ToList());
+            opcServer.SubscribeTags(Model.opcSubscribedTags.Where(t => t.Name != null).ToList());
             Model.opcMonitoredTags.Clear();
 
             Model.changeState(ModelState.opcSubscribed);
 
             foreach (mTag tag in opcServer.monitoredTags)
             { Model.opcMonitoredTags.Add(tag); }
-      
+
         }
 
 
@@ -190,7 +255,7 @@ namespace WPFinterface
             if (path != "")
             {
                 config.Save(Model.configuredServer, path);
-            }       
+            }
         }
 
 
@@ -216,13 +281,41 @@ namespace WPFinterface
                 Model.changeState(ModelState.opcConneted);
                 Model.selectedOPCserver = opcServer.selectedServer;
                 Subscribe();
-            }           
+            }
         }
 
         #endregion
 
 
         #region Database operations
+
+
+        private void OraTableInit()
+        {
+            Model.opcSubscribedTags.Clear();
+
+            
+
+            foreach (string s in oraEx.GetFields())
+            {
+                mTag tag = new mTag();
+                tag.Description = s;
+                Model.opcSubscribedTags.Add(tag);
+            }
+        }
+
+        private void OraShowTable()
+        {
+
+            ucDBtblRemote ucOraTable = new ucDBtblRemote(oraEx.bindContext());
+            wndDBbrowser dbWindow = new wndDBbrowser();
+
+            dbWindow.Content = ucOraTable;
+            dbWindow.Show();
+            
+            
+        }
+
 
         private void OracleSyncStartStop(bool startStop)
         {
@@ -234,7 +327,7 @@ namespace WPFinterface
         {
 
             oraTransmitFreq = new System.Timers.Timer();
-            
+
             oraTransmitFreq.Interval = 8000;
             oraTransmitFreq.AutoReset = false;
 
@@ -244,65 +337,49 @@ namespace WPFinterface
 
         private void oraTransmitFreq_Elapsed(object sender, ElapsedEventArgs e)
         {
+            //if (Model.opcMonitoredTags != null)
+            //{
+            //    if (OraInsert(Model.opcMonitoredTags))
+            //    {
 
+            //    }
+            //    else
+            //    {
+            //        Model.addLogRecord("Transmit to database fail, try again...");
+            //    }
 
-            if (Model.opcMonitoredTags != null)
-            {
-                if (TransmitToOracle(Model.opcMonitoredTags))
-                {
-                    
-                }
-                else
-                {
-                    Model.addLogRecord("Transmit to database fail, try again...");
-                }
-
-                OracleSyncStartStop(true);
-            }
-            else
-            {
-                Model.addLogRecord("Nothing to transmit");
-            }
-
-
+            //    OracleSyncStartStop(true);
+            //}
+            //else
+            //{
+            //    Model.addLogRecord("Nothing to transmit");
+            //}
         }
 
 
-        private bool TransmitToOracle(ObservableCollection<mTag> tags)
+
+
+
+        private void OraInsert()
         {
-            if (tags.Count() > 1)
+            oraEx = oraEx ?? new OraExchanger();
+
+            List<oraEntity> list = new List<oraEntity>();
+
+            foreach (mTag t in Model.opcMonitoredTags)
             {
-                
-                oraEx = new OraExchanger();
-                oraEx.ReportMessage += oraEx_ReportMessage;
-
-                if (oraEx.isConnectionOK)
-                {
-
-                    FIX_STAN789_T ent = new FIX_STAN789_T();
-
-                    try
-                    {
-                        ent.N_STAN = Decimal.Parse(tags[0].Value);
-                        ent.COUNTER = Int32.Parse(tags[1].Value);
-                    }
-                    catch
-                    {
-                        ent.N_STAN = 1;
-                        ent.COUNTER = 999;
-                    }
-
-                    ent.INCOMIN_DATE = DateTime.Now;
-                    ent.WHEN = DateTime.Now;
-
-                    return oraEx.insertData(ent);
-                }
-                else return false;
+                oraEntity ora = new oraEntity(t.Description, t.Value);
+                list.Add(ora);
             }
-            else
-                return false;
+
+            oraEx.items = new ObservableCollection<oraEntity>(list);
+            oraEx.bindData();
 
         }
+
+
+
+        
         #endregion
 
 
@@ -388,7 +465,8 @@ namespace WPFinterface
 
         private void btn_oraTestConnection_Click(object sender, RoutedEventArgs e)
         {
-
+            //OraInsert(Model.opcMonitoredTags);
+            OraInsert();
         }
 
         private void btn_ConfigConnect_Click(object sender, RoutedEventArgs e)
@@ -397,5 +475,24 @@ namespace WPFinterface
             
         }
 
+        private void btn_OraTableInit_Click(object sender, RoutedEventArgs e)
+        {
+            OraTableInit();
+        }
+
+        private void btn_OraShowTable_Click(object sender, RoutedEventArgs e)
+        {
+            OraShowTable();
+        }
+
+        private void dgrid_Subscribed_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            mTag tag = (mTag)dgrid_Subscribed.SelectedItem;
+
+            if (tag != null)
+            {
+                tag.onChange = !tag.onChange;
+            }
+        }
     }
 }

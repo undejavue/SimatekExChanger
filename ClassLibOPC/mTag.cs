@@ -70,6 +70,18 @@ namespace ClassLibOPC
             }
         }
 
+        private bool _onChange;
+        public bool onChange
+        {
+            get { return _onChange; }
+            set
+            {
+                _onChange = value;
+
+                OnPropertyChanged(new PropertyChangedEventArgs("onChange"));
+            }
+        }
+
         public mTag() { }
 
         public mTag(string tagName, string tagPath)

@@ -46,6 +46,18 @@ namespace EFconfigDB
             }
         }
 
+        private string _description;
+        public string Description
+        {
+            get { return _description; }
+            set
+            {
+                _description = value;
+
+                OnPropertyChanged(new PropertyChangedEventArgs("Description"));
+            }
+        }
+
         public virtual dbServerItem srvID {get; set; }
 
         public dbTagItem ()
@@ -57,6 +69,13 @@ namespace EFconfigDB
         {
             this.Name = name;
             this.Path = path;
+        }
+
+        public dbTagItem(string name, string path, string desc)
+        {
+            this.Name = name;
+            this.Path = path;
+            this.Description = desc;
         }
     }
 }

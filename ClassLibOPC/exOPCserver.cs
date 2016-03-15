@@ -30,7 +30,7 @@ namespace ClassLibOPC
 
         public List<string> messageLog;
 
-        
+        public gErrorEntity error { get; set; }
 
 
         public exOPCserver ()
@@ -48,6 +48,8 @@ namespace ClassLibOPC
             selectedServer.ReconnectInterval = 5000;
 
             configureWatchDog();
+
+            error = new gErrorEntity(0, "Initialized");
 
         }
 
@@ -142,7 +144,7 @@ namespace ClassLibOPC
                 server.Connect();
                 if (isConnected = server.IsConnected)
                 {
-                    OnReportMessage("Server is connected");
+                    OnReportMessage(0,"Server is connected");
 
                     server.ServerShutdown -= server_ServerShutdown;
                     server.ServerShutdown += server_ServerShutdown;
@@ -165,14 +167,14 @@ namespace ClassLibOPC
 
         private void server_ServerShutdown(string reason)
         {
-            OnReportMessage("Server shutdown, reason: " + reason);
-            RefreshServerStatus();
+            OnReportMessage(999,"Server shutdown");
+            OnReportMessage("reason: " + reason);
 
+            RefreshServerStatus();
             restoredTagList = new List<mTag>(monitoredTags.ToList());
 
             DisconnectServer();
             reconnectTimer.Enabled = true;
-
         }
 
 
@@ -192,8 +194,8 @@ namespace ClassLibOPC
 
         private void reconnectTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)      
         {
-            OnReportMessage("Server is down, trying to reconnect.."); 
-        
+            OnReportMessage(777, "Trying to reconnect..");       
+
             if ( ConnectServer(url.ToString()) )
             {
                 startStopWatchDog(false);
@@ -232,7 +234,7 @@ namespace ClassLibOPC
 
                     RefreshServerStatus();
 
-                    OnReportMessage("Server is disconnected");
+                    OnReportMessage(500,"Server disconnected");
                     server.Dispose();
                 }
                 else
@@ -409,6 +411,8 @@ namespace ClassLibOPC
                 
             }
 
+            OnDataChanged();
+
             RefreshServerStatus();
         }
 
@@ -440,9 +444,11 @@ namespace ClassLibOPC
         /// <param name="sender"></param>
         /// <param name="args"></param>
         public delegate void OPCserverEventHandler(object sender, exEventArgs args);
+        public delegate void OPCserverDataEventHandler(object sender);
 
         public event OPCserverEventHandler ReportMessage;
-        public event OPCserverEventHandler ReportError;
+
+        public event OPCserverDataEventHandler DataChanged;
 
         protected virtual void OnReportMessage(string message)
         {
@@ -456,16 +462,34 @@ namespace ClassLibOPC
         }
 
 
+        protected virtual void OnDataChanged()
+        {
+            OPCserverDataEventHandler DataChangedCopy = DataChanged;
 
-        protected virtual void OnReportError(int error, string message)
+            if (DataChangedCopy != null)
+            {
+                DataChangedCopy(this);
+
+            }
+        }
+
+
+        protected virtual void OnReportMessage(int error, string message)
         {
             OPCserverEventHandler ReportMessageCopy = ReportMessage;
 
             if (ReportMessageCopy != null)
             {
                 ReportMessageCopy(this, new exEventArgs(error, message));
-                logMessage(message);
+
+                this.error.code = error;
+                if (error == 0)
+                    this.error.message = "No errors";
+                else
+                    this.error.message = message;
+                
                 logMessage("Error code = " + error.ToString());
+                logMessage(message);
             }
         }
 
