@@ -42,6 +42,7 @@
     <Compile Include="Entity.cs" />
     <Compile Include="G.cs" />
     <Compile Include="gErrorEntity.cs" />
+    <Compile Include="gEventArgs.cs" />
     <Compile Include="gLogEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

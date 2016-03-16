@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EFconfigDB;
+using EFlocalDB;
 
 namespace SimatekExChanger
 {
@@ -20,7 +20,7 @@ namespace SimatekExChanger
             string dbFile = @"D:\OneDB\sconfig.mdf";
 
 
-            dbConfig config = new dbConfig();
+            dbConfManager config = new dbConfManager();
 
             dbServerItem server = new dbServerItem();
 

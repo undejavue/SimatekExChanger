@@ -1,5 +1,5 @@
 ﻿using System;
-using EFconfigDB;
+using EFlocalDB;
 using System.ComponentModel;
 using Microsoft.Win32;
 

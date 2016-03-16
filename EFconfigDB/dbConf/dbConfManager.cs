@@ -12,13 +12,13 @@ using System.Collections.ObjectModel;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
 
-namespace EFconfigDB
+namespace EFlocalDB
 {
-    public class dbConfig
+    public class dbConfManager
     {
-        dbContext context;
+        dbConfContext context;
 
-        public dbConfig()
+        public dbConfManager()
         {
 
  
@@ -27,7 +27,7 @@ namespace EFconfigDB
 
         public void Save(dbServerItem server, string dbFilePath)
         {
-            using (context = new dbContext(dbFilePath))
+            using (context = new dbConfContext(dbFilePath))
             {             
                 context.dbServerConfig.Add(server);
                 context.SaveChanges();
@@ -38,7 +38,7 @@ namespace EFconfigDB
         {
             ObservableCollection<dbServerItem> config = new ObservableCollection<dbServerItem>();
 
-            using (context = new dbContext(dbFilePath))
+            using (context = new dbConfContext(dbFilePath))
             {
                 context.dbServerConfig.Include(s => s.opcMonitoredTags).Load();
 

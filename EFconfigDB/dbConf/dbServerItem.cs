@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
 
-namespace EFconfigDB
+namespace EFlocalDB
 {
     public class dbServerItem : Entity
     {

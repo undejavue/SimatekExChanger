@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows.Controls;
 using ClassLibOracle;
+using EFlocalDB;
 
 namespace WPFinterface
 {
@@ -8,14 +9,23 @@ namespace WPFinterface
     /// Interaction logic for ucDBtblRemote.xaml
     /// </summary>
     public partial class ucDBtblRemote : UserControl
-    { 
-        
+    {
+        private ObservableCollection<dbLocalRecord> observableCollection;
 
-        public ucDBtblRemote(ObservableCollection<FIX_STAN789_T> Oraitems)
+        public ucDBtblRemote(ObservableCollection<dbLocalRecord> collection)
         {
             InitializeComponent();
-            if (Oraitems != null)
-                dgv_DBtable.ItemsSource = Oraitems;
+
+            if (collection != null)
+                dgv_DBtable.ItemsSource = collection;
+        }
+
+        public ucDBtblRemote(ObservableCollection<FIX_STAN789_T> collection)
+        {
+            InitializeComponent();
+
+            if (collection != null)
+                dgv_DBtable.ItemsSource = collection;
         }
 
         public ucDBtblRemote(ObservableCollection<object> collection )

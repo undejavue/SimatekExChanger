@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EFconfigDB
+namespace EFlocalDB
 {
     public abstract class Entity : INotifyPropertyChanged
     {

@@ -250,10 +250,16 @@
                     </Grid>
                 </StackPanel>
             </Border>
-            <StackPanel Orientation="Horizontal" >
-                <Button x:Name="btn_OraTableInit" Content="Init" Width="40" Height="24" Margin="10" Click="btn_OraTableInit_Click"/>
-                <Button x:Name="btn_OraShowTable" Content="Ora table" Width="74" Height="24" Margin="10" Click="btn_OraShowTable_Click"/>
-                <Button x:Name="btn_ShowLocalTable" Content="Local table" Width="74" Height="24" Margin="10,0" Click="btn_ShowLocalTable_Click"/>
+            <StackPanel Orientation="Vertical" >
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="btn_OraTableInit" Content="Init" Width="74" Height="24" Margin="10" Click="btn_OraTableInit_Click"/>
+                    <Button x:Name="btn_OraShowTable" Content="Ora table" Width="74" Height="24" Margin="4" Click="btn_OraShowTable_Click"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="btn_ShowLocalTable" Content="Local table" Width="74" Height="24" Margin="10,0" Click="btn_ShowLocalTable_Click"/>
+                    <Button x:Name="btn_LocalTableInsert" Content="Insert" Width="74" Height="24" Margin="4,0" Click="btn_LocalTableInsert_Click"/>
+                    <Button x:Name="btn_LocalTableView" Content="Insert" Width="74" Height="24" Margin="4,0" Click="btn_LocalTableView_Click"/>
+                </StackPanel>
             </StackPanel>
 
         </StackPanel>

@@ -5,31 +5,31 @@ using System.Text;
 using System.Data.SqlClient;
 using System.Data.Entity;
 
-namespace EFconfigDB
+namespace EFlocalDB
 {
-    public class dbContext : DbContext
+    public class dbConfContext : DbContext
     {
         public DbSet<dbServerItem> dbServerConfig { get; set; }
         public DbSet<dbTagItem> dbTag { get; set; }
 
 
-        public dbContext(bool isNew)
+        public dbConfContext(bool isNew)
             : base(OneConnectionString(""))
         {
 
             if (isNew)
-                Database.SetInitializer<dbContext>(new DropCreateDatabaseAlways<dbContext>());
+                Database.SetInitializer<dbConfContext>(new DropCreateDatabaseAlways<dbConfContext>());
             else
-                Database.SetInitializer<dbContext>(new DropCreateDatabaseIfModelChanges<dbContext>());
+                Database.SetInitializer<dbConfContext>(new DropCreateDatabaseIfModelChanges<dbConfContext>());
 
             this.Configuration.LazyLoadingEnabled = false; 
                
         }
 
 
-        public dbContext(string filename): base(OneConnectionString(filename))
+        public dbConfContext(string filename): base(OneConnectionString(filename))
         {
-            Database.SetInitializer<dbContext>(new DropCreateDatabaseIfModelChanges<dbContext>());
+            Database.SetInitializer<dbConfContext>(new DropCreateDatabaseIfModelChanges<dbConfContext>());
 
             this.Configuration.LazyLoadingEnabled = false;        
         }

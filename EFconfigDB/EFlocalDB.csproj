@@ -7,8 +7,8 @@
     <ProjectGuid>{68F3F4E4-7F1D-462D-B8A2-12F113FD9FC1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EFconfigDB</RootNamespace>
-    <AssemblyName>EFconfigDB</AssemblyName>
+    <RootNamespace>EFlocalDB</RootNamespace>
+    <AssemblyName>EFlocalDB</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -48,17 +48,33 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configurator.cs" />
-    <Compile Include="DataBase\dbConfig.cs" />
-    <Compile Include="DataBase\dbContext.cs" />
-    <Compile Include="DataBase\dbServerItem.cs" />
-    <Compile Include="DataBase\dbTagItem.cs" />
-    <Compile Include="DataBase\Entity.cs" />
+    <Compile Include="dbConf\dbConfManager.cs" />
+    <Compile Include="dbConf\dbConfContext.cs" />
+    <Compile Include="dbConf\dbServerItem.cs" />
+    <Compile Include="dbConf\dbTagItem.cs" />
+    <Compile Include="dbLocal\dbLocalContext.cs" />
+    <Compile Include="dbLocal\dbLocalManager.cs" />
+    <Compile Include="dbLocal\dbLocalRecord.cs" />
+    <Compile Include="Entity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ClassLibOPC\ClassLibOPC.csproj">
+      <Project>{db85b424-be73-4cb3-ba1d-2b9a79f381ce}</Project>
+      <Name>ClassLibOPC</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ClassLibOracle\ClassLibOracle.csproj">
+      <Project>{8fa6ad7a-d71c-4464-9ae8-18106443081e}</Project>
+      <Name>ClassLibOracle</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Global\ClassLibGlobal.csproj">
+      <Project>{ff2664cd-ab52-4dd9-b9e7-9de81eea383b}</Project>
+      <Name>ClassLibGlobal</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xTestConsole", "SimatekExChanger\xTestConsole.csproj", "{92554328-452F-4F9F-BA84-8F8E5417B2D5}"
 EndProject
@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibGlobal", "Global\Cl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibOracle", "ClassLibOracle\ClassLibOracle.csproj", "{8FA6AD7A-D71C-4464-9AE8-18106443081E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFconfigDB", "EFconfigDB\EFconfigDB.csproj", "{68F3F4E4-7F1D-462D-B8A2-12F113FD9FC1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFlocalDB", "EFconfigDB\EFlocalDB.csproj", "{68F3F4E4-7F1D-462D-B8A2-12F113FD9FC1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

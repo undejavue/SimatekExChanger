@@ -448,7 +448,7 @@ namespace ClassLibOPC
 
 
         /// <summary>
-        /// Message handles
+        /// Message handler
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args"></param>

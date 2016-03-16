@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Timers;
 using ClassLibOPC;
-using EFconfigDB;
+using EFlocalDB;
 using ClassLibOracle;
 using ClassLibGlobal;
 using System.Collections.Generic;
@@ -27,7 +27,10 @@ namespace WPFinterface
         private Timer progressTimer;
 
         private BackgroundWorker bgWorker;
-        
+
+        private dbLocalManager dbManager;
+
+
 
 
         public MainWindow()
@@ -100,6 +103,48 @@ namespace WPFinterface
         {
             OraInsert();
         }
+
+
+
+        #region Local Database operations
+
+        private void LocalDBCreate()
+        {
+
+            FileWorks fw = new FileWorks();
+
+            string path = fw.GetSaveFilePath();
+            if (path != "")
+            {
+                dbManager = new dbLocalManager(path);
+            }
+        }
+
+        private void LocalDBInsert()
+        {
+
+            if (dbManager != null)
+            {
+                dbManager.insert(Model.opcMonitoredTags);
+            }
+        }
+
+
+        private void LocalDBGetRecords()
+        {
+
+            if (dbManager != null)
+            {
+                ucDBtblRemote ucLocalTable = new ucDBtblRemote(dbManager.getRecords());
+                wndDBbrowser dbWindow = new wndDBbrowser();
+
+                dbWindow.Content = ucLocalTable;
+                dbWindow.Show();
+            }
+        }
+
+        #endregion
+
 
 
 
@@ -254,7 +299,7 @@ namespace WPFinterface
                 Model.SaveServer();
             }
 
-            dbConfig config = new dbConfig();
+            dbConfManager config = new dbConfManager();
             FileWorks fw = new FileWorks();
 
             string path = fw.GetSaveFilePath();
@@ -272,7 +317,7 @@ namespace WPFinterface
 
             if (path != "")
             {
-                dbConfig config = new dbConfig();
+                dbConfManager config = new dbConfManager();
                 if (Model.LoadServer(config.Load(path)))
                 {
                     Model.changeState(ModelState.configLoaded);
@@ -503,7 +548,17 @@ namespace WPFinterface
 
         private void btn_ShowLocalTable_Click(object sender, RoutedEventArgs e)
         {
+            LocalDBCreate();
+        }
 
+        private void btn_LocalTableInsert_Click(object sender, RoutedEventArgs e)
+        {
+            LocalDBInsert();
+        }
+
+        private void btn_LocalTableView_Click(object sender, RoutedEventArgs e)
+        {
+            LocalDBGetRecords();
         }
     }
 }

@@ -57,9 +57,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EFconfigDB\EFconfigDB.csproj">
+    <ProjectReference Include="..\EFconfigDB\EFlocalDB.csproj">
       <Project>{68f3f4e4-7f1d-462d-b8a2-12f113fd9fc1}</Project>
-      <Name>EFconfigDB</Name>
+      <Name>EFlocalDB</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using ClassLibOPC;
 using ClassLibGlobal;
 using System.Windows.Threading;
-using EFconfigDB;
+using EFlocalDB;
 using System.Windows.Media;
 
 namespace WPFinterface
