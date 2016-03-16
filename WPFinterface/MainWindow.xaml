@@ -65,10 +65,16 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <TreeView Name="treeControl" Grid.Row="1" Grid.Column="1" IsEnabled="{Binding list_Branches_isEnable}"  
+        <TreeView Name="treeControl" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding opcTreeNodes}" IsEnabled="{Binding list_Branches_isEnable}"  
                   ScrollViewer.VerticalScrollBarVisibility="Auto" FontSize="12"
                   Height="Auto" Margin="10" Width="Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-            	  SelectedItemChanged="treeControl_SelectedItemChanged"/>
+            	  SelectedItemChanged="treeControl_SelectedItemChanged">
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Nodes}" DataType="{x:Type opc:mTreeNode}" >
+                    <TreeViewItem Header="{Binding Description}" />
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
 
         <DataGrid Name="dgrid_Tags" Grid.Row="1" Grid.Column="2" ItemsSource="{Binding opcListTagsInBranch}" MouseDoubleClick="dgrid_Tags_MouseDoubleClick" 
                   IsEnabled="{Binding list_Tags_isEnable}"
@@ -162,7 +168,7 @@
                       Visibility="{Binding dgrid_Subscribed_isVisible, Converter={StaticResource BoolToVis} }" IsReadOnly="True" MaxHeight="200"
                       AutoGenerateColumns="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Place holder" Width="Auto" Binding="{Binding Description}" FontSize="11" />
+                    <DataGridTextColumn Header="Place holder" Width="Auto" Binding="{Binding Description}" FontSize="11" IsReadOnly="True" />
                     <DataGridTextColumn Header="Tag name" Width="Auto" Binding="{Binding Name}" />
                     <DataGridCheckBoxColumn Header="Flag" Width="Auto" Binding="{Binding onChange}" />
                 </DataGrid.Columns>
@@ -170,18 +176,36 @@
 
             <DataGrid Name="dgrid_Monitored"   ItemsSource="{Binding opcMonitoredTags}" IsEnabled="{Binding list_SubscribedTags_isEnable}"
                   Height="Auto" Margin="10" Width="Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                  Visibility="{Binding dgrid_Monitored_isVisible, Converter={StaticResource BoolToVis} }"
+                  Visibility="{Binding dgrid_Monitored_isVisible, Converter={StaticResource BoolToVis} }" IsReadOnly="True"
                   AutoGenerateColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Place holder" Width="Auto" Binding="{Binding Description}" FontSize="11" />
                     <DataGridTextColumn Header="Tag name" Width="Auto" Binding="{Binding Name}" />
                     <DataGridTextColumn Header="Value" Width="Auto" Binding="{Binding Value}" />
                     <DataGridTextColumn Header="Quality" Width="Auto" Binding="{Binding Quality}" />
-                    <DataGridTextColumn Header="Flag" Width="Auto" Binding="{Binding onChange}" />
+                    <DataGridCheckBoxColumn Header="Flag" Width="Auto" Binding="{Binding onChange}" />
                 </DataGrid.Columns>
             </DataGrid>
-            <Label x:Name="lbl_PlsWait" Content="Waiting for Db connection..." Margin="50" Visibility="{Binding Path=lbl_InitConnection_isVisible,  Converter={StaticResource BoolToVis}}"
-                   HorizontalContentAlignment="Center" FontSize="14" BorderBrush="Gray" BorderThickness="1"/>
+            <Border BorderBrush="Gray" BorderThickness="1" Margin="50,20">
+            <StackPanel Orientation="Vertical"  >
+                <Label x:Name="lbl_PlsWait" Content="Waiting for Db connection..."  Visibility="{Binding Path=lbl_InitConnection_isVisible,  Converter={StaticResource BoolToVis}}"
+                   HorizontalContentAlignment="Center" FontSize="14" />
+                <ProgressBar Height="10" Width="Auto" x:Name="progress" Visibility="{Binding lbl_InitConnection_isVisible, Converter={StaticResource BoolToVis}}" Margin="10">
+                    <ProgressBar.Triggers>
+                        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation
+                					Storyboard.TargetName="progress" 
+                					Storyboard.TargetProperty="Value"
+                					From="0" To="100" Duration="0:0:5"  />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </ProgressBar.Triggers>
+                </ProgressBar>
+            </StackPanel>
+            </Border>
         </StackPanel>
 
         <StackPanel Grid.Row="3" Grid.Column="3" Name="panel_Database"  Orientation="Vertical" HorizontalAlignment="Stretch">
@@ -227,8 +251,9 @@
                 </StackPanel>
             </Border>
             <StackPanel Orientation="Horizontal" >
-                <Button x:Name="btn_OraTableInit" Content="Init table" Width="80" Height="24" Margin="10" Click="btn_OraTableInit_Click"/>
-                <Button x:Name="btn_OraShowTable" Content="Ora table" Width="80" Height="24" Margin="10" Click="btn_OraShowTable_Click"/>
+                <Button x:Name="btn_OraTableInit" Content="Init" Width="40" Height="24" Margin="10" Click="btn_OraTableInit_Click"/>
+                <Button x:Name="btn_OraShowTable" Content="Ora table" Width="74" Height="24" Margin="10" Click="btn_OraShowTable_Click"/>
+                <Button x:Name="btn_ShowLocalTable" Content="Local table" Width="74" Height="24" Margin="10,0" Click="btn_ShowLocalTable_Click"/>
             </StackPanel>
 
         </StackPanel>

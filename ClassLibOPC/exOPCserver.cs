@@ -402,16 +402,25 @@ namespace ClassLibOPC
 
         public void opcSubscription_DataChanged(object subscriptionHandle, object requestHandle, Opc.Da.ItemValueResult[] values)
         {
+            bool isMarkedTagsChanged = false;
+
             foreach (Opc.Da.ItemValueResult item in values)
             {
-                
-                monitoredTags.Last(t => t.Name.Equals(item.ItemName)).Value = item.Value.ToString();
-                monitoredTags.Last(t => t.Name.Equals(item.ItemName)).Quality = item.Quality.ToString();
-                
-                
+
+                mTag tag = monitoredTags.Last(t => t.Name.Equals(item.ItemName));
+
+                if (tag != null)
+                {
+
+                    tag.Value = item.Value.ToString();
+                    tag.Quality = item.Quality.ToString();
+
+                    isMarkedTagsChanged = tag.onChange;
+                }
+
             }
 
-            OnDataChanged();
+            if (isMarkedTagsChanged) ReportMarkedTagsChanged();
 
             RefreshServerStatus();
         }
@@ -446,9 +455,15 @@ namespace ClassLibOPC
         public delegate void OPCserverEventHandler(object sender, exEventArgs args);
         public delegate void OPCserverDataEventHandler(object sender);
 
+        /// <summary>
+        /// Messages from OPCserver class
+        /// </summary>
         public event OPCserverEventHandler ReportMessage;
 
-        public event OPCserverDataEventHandler DataChanged;
+        /// <summary>
+        /// Report changes of tags, marked with flag
+        /// </summary>
+        public event OPCserverDataEventHandler MarkedTagsChanged;
 
         protected virtual void OnReportMessage(string message)
         {
@@ -462,14 +477,13 @@ namespace ClassLibOPC
         }
 
 
-        protected virtual void OnDataChanged()
+        protected virtual void ReportMarkedTagsChanged()
         {
-            OPCserverDataEventHandler DataChangedCopy = DataChanged;
+            OPCserverDataEventHandler DataChangedCopy = MarkedTagsChanged;
 
             if (DataChangedCopy != null)
             {
                 DataChangedCopy(this);
-
             }
         }
 

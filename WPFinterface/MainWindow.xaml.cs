@@ -48,30 +48,32 @@ namespace WPFinterface
             
 
             opcServer = new exOPCserver();
+            
             Model.opcError = new vmError(opcServer.error);
             //Model.gError = opcServer.error;
 
             opcServer.ReportMessage += opcServer_ReportMessage;
-
-            opcServer.DataChanged += OpcServer_DataChanged;
+            opcServer.MarkedTagsChanged += OpcServer_MarkedTagsChanged;
 
 
             configureOraTransmitRate();
 
             SearchServers("localhost");
-
             bgWorker.RunWorkerAsync();
-
-            
+          
         }
 
         private void BgWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             Model.progressBar = e.ProgressPercentage;
+            
+            progress.Value = e.ProgressPercentage;
         }
 
         private void BgWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            oraEx.ReportMessage -= oraEx_ReportMessage;
+            oraEx.ReportMessage += oraEx_ReportMessage;
             OraTableInit();
             Model.addLogRecord("Finish test oracle connection");
             Model.isDbServerConnected = oraEx.isConnectionOK;
@@ -80,17 +82,21 @@ namespace WPFinterface
 
         private void BgWorker_DoWork(object sender, DoWorkEventArgs e)
         {
+            
+
+            OraGetFirstConnection();
+        }
+
+        private void OraGetFirstConnection()
+        {
             Model.lbl_InitConnection_isVisible = true;
 
-            progressTimer.Interval = 30000;
-            progressTimer.Enabled = true;
-
             oraEx = new OraExchanger();
-            oraEx.ReportMessage += oraEx_ReportMessage;
+            bgWorker.ReportProgress(100);
         }
 
 
-        private void OpcServer_DataChanged(object sender)
+        private void OpcServer_MarkedTagsChanged(object sender)
         {
             OraInsert();
         }
@@ -294,7 +300,7 @@ namespace WPFinterface
         {
             Model.opcSubscribedTags.Clear();
 
-            
+            if (oraEx != null)
 
             foreach (string s in oraEx.GetFields())
             {
@@ -362,7 +368,7 @@ namespace WPFinterface
 
         private void OraInsert()
         {
-            oraEx = oraEx ?? new OraExchanger();
+            //oraEx = oraEx ?? new OraExchanger();
 
             List<oraEntity> list = new List<oraEntity>();
 
@@ -493,6 +499,11 @@ namespace WPFinterface
             {
                 tag.onChange = !tag.onChange;
             }
+        }
+
+        private void btn_ShowLocalTable_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
