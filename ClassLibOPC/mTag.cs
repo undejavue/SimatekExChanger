@@ -10,14 +10,14 @@ namespace ClassLibOPC
 {
     public class mTag : Entity
     {
-        private string _description;
-        public string Description
+        private string _nameInDb;
+        public string NameInDb
         {
-            get { return _description; }
+            get { return _nameInDb; }
             set
             {
-                _description = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("Description"));
+                _nameInDb = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("NameInDb"));
             }
         }
 

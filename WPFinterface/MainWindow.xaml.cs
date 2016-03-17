@@ -48,6 +48,7 @@ namespace WPFinterface
             bgWorker.DoWork += BgWorker_DoWork;
             bgWorker.RunWorkerCompleted += BgWorker_RunWorkerCompleted;
             bgWorker.ProgressChanged += BgWorker_ProgressChanged;
+            bgWorker.WorkerSupportsCancellation = true;
             
 
             opcServer = new exOPCserver();
@@ -79,30 +80,32 @@ namespace WPFinterface
             oraEx.ReportMessage += oraEx_ReportMessage;
             OraTableInit();
             Model.addLogRecord("Finish test oracle connection");
-            Model.isDbServerConnected = oraEx.isConnectionOK;
+            Model.isRemoteDBConnected = oraEx.isConnectionOK;
             Model.lbl_InitConnection_isVisible = false;
         }
 
         private void BgWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            
+            if (bgWorker.CancellationPending)
+            {
+                e.Cancel = true;
+                return;
+            }
 
-            OraGetFirstConnection();
-        }
-
-        private void OraGetFirstConnection()
-        {
             Model.lbl_InitConnection_isVisible = true;
 
             oraEx = new OraExchanger();
             bgWorker.ReportProgress(100);
+
         }
 
-
-        private void OpcServer_MarkedTagsChanged(object sender)
+        private void OraGetFirstConnection()
         {
-            OraInsert();
+
         }
+
+
+
 
 
 
@@ -113,17 +116,23 @@ namespace WPFinterface
 
             FileWorks fw = new FileWorks();
 
-            string path = fw.GetSaveFilePath();
+            string path = fw.GetLoadFilePath();
             if (path != "")
             {
                 dbManager = new dbLocalManager(path);
+                dbManager.ReportMessage -= DbManager_ReportMessage;
+                dbManager.ReportMessage += DbManager_ReportMessage;
             }
+
+            Model.isLocalDBConnected = true;
         }
+
+
 
         private void LocalDBInsert()
         {
 
-            if (dbManager != null)
+            if ((dbManager != null) & (Model.opcMonitoredTags.Count > 0)) 
             {
                 dbManager.insert(Model.opcMonitoredTags);
             }
@@ -135,12 +144,25 @@ namespace WPFinterface
 
             if (dbManager != null)
             {
-                ucDBtblRemote ucLocalTable = new ucDBtblRemote(dbManager.getRecords());
+                ucDBtblLocal ucLocalTable = new ucDBtblLocal(dbManager.getRecords());
                 wndDBbrowser dbWindow = new wndDBbrowser();
 
                 dbWindow.Content = ucLocalTable;
                 dbWindow.Show();
             }
+
+            //FileWorks fw = new FileWorks();
+
+            //string path = fw.GetLoadFilePath();
+            //if (path != "")
+            //{
+            //    ucDBtblLocal ucLocalTable  = new ucDBtblLocal(path);
+
+            //    wndDBbrowser dbWindow = new wndDBbrowser();
+            //    dbWindow.Content = ucLocalTable;
+            //    dbWindow.Show();
+
+            //}
         }
 
         #endregion
@@ -149,6 +171,27 @@ namespace WPFinterface
 
 
         #region Message Handlers
+
+
+        private void OpcServer_MarkedTagsChanged(object sender)
+        {
+           
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                LocalDBInsert();
+
+            }));
+        }
+
+        private void DbManager_ReportMessage(object sender, gEventArgs args)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                Model.addLogRecord(args.message);
+
+            }));
+
+        }
 
         /// <summary>
         /// Event handle for OPC server class
@@ -247,7 +290,7 @@ namespace WPFinterface
             {
                 mTag newTag = (mTag)dgrid_Subscribed.SelectedItem as mTag;
 
-                var mt = Model.opcSubscribedTags.FirstOrDefault(t => t.Description == newTag.Description);
+                var mt = Model.opcSubscribedTags.FirstOrDefault(t => t.NameInDb == newTag.NameInDb);
                 mt.Name = tag.Name;
                 mt.Path = tag.Path;
             }
@@ -350,7 +393,7 @@ namespace WPFinterface
             foreach (string s in oraEx.GetFields())
             {
                 mTag tag = new mTag();
-                tag.Description = s;
+                tag.NameInDb = s;
                 Model.opcSubscribedTags.Add(tag);
             }
         }
@@ -358,7 +401,7 @@ namespace WPFinterface
         private void OraShowTable()
         {
 
-            ucDBtblRemote ucOraTable = new ucDBtblRemote(oraEx.bindContext());
+            ucDBtblLocal ucOraTable = new ucDBtblLocal(oraEx.bindContext());
             wndDBbrowser dbWindow = new wndDBbrowser();
 
             dbWindow.Content = ucOraTable;
@@ -419,7 +462,7 @@ namespace WPFinterface
 
             foreach (mTag t in Model.opcMonitoredTags)
             {
-                oraEntity ora = new oraEntity(t.Description, t.Value);
+                oraEntity ora = new oraEntity(t.NameInDb, t.Value);
                 list.Add(ora);
             }
 
@@ -559,6 +602,11 @@ namespace WPFinterface
         private void btn_LocalTableView_Click(object sender, RoutedEventArgs e)
         {
             LocalDBGetRecords();
+        }
+
+        private void btn_WaitingCancel_Click(object sender, RoutedEventArgs e)
+        {
+            bgWorker.CancelAsync();
         }
     }
 }

@@ -134,17 +134,31 @@ namespace WPFinterface
         }
 
 
-        private bool _isDbServerConnected;
-        public bool isDbServerConnected
+        private bool _isRemoteDBConnected;
+        public bool isRemoteDBConnected
         {
             get
             {
-                return _isDbServerConnected;
+                return _isRemoteDBConnected;
             }
             set
             {
-                _isDbServerConnected = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("isDbServerConnected"));
+                _isRemoteDBConnected = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("isRemoteDBConnected"));
+            }
+        }
+
+        private bool _isLocalDBConnected;
+        public bool isLocalDBConnected
+        {
+            get
+            {
+                return _isLocalDBConnected;
+            }
+            set
+            {
+                _isLocalDBConnected = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("isLocalDBConnected"));
             }
         }
 
@@ -532,6 +546,8 @@ namespace WPFinterface
 
             infoLineColor = new SolidColorBrush(Colors.White);
 
+            isLocalDBConnected = false;
+            isRemoteDBConnected = false;
             
             gError = new gErrorEntity(1, "Created in model");
             opcError = new vmError(gError);
@@ -560,7 +576,7 @@ namespace WPFinterface
 
             foreach (mTag tag in opcMonitoredTags)
             {
-                dbTagItem t = new dbTagItem(tag.Name, tag.Path, tag.Description);
+                dbTagItem t = new dbTagItem(tag.Name, tag.Path, tag.NameInDb);
                 configuredServer.opcMonitoredTags.Add(t);
             }
             addLogRecord("Server configuration copied");

@@ -70,6 +70,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Extenders.cs" />
+    <Compile Include="ucDBtblLocal.xaml.cs">
+      <DependentUpon>ucDBtblLocal.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ucDBtblRemote.xaml.cs">
       <DependentUpon>ucDBtblRemote.xaml</DependentUpon>
     </Compile>
@@ -93,6 +96,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="ucDBtblLocal.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="ucDBtblRemote.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
