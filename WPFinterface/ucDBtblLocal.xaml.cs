@@ -6,6 +6,8 @@ using ClassLibOracle;
 using EFlocalDB;
 using System.ComponentModel;
 using System.Windows.Data;
+using System.Collections.Specialized;
+using System.Windows.Media;
 
 namespace WPFinterface
 {
@@ -26,12 +28,31 @@ namespace WPFinterface
                 dgv_DBtable.ItemsSource = collection;
 
             dgv_DBtable.DataContextChanged += Dgv_DBtable_DataContextChanged;
+
+            collection.ListChanged += Collection_ListChanged;
+
             
+
+        }
+
+        private void Collection_ListChanged(object sender, ListChangedEventArgs e)
+        {
+            //dgv_DBtable.ScrollIntoView(CollectionView.NewItemPlaceholder);
+
+            if (dgv_DBtable.Items.Count > 0)
+            {
+                var border = VisualTreeHelper.GetChild(dgv_DBtable, 0) as Decorator;
+                if (border != null)
+                {
+                    var scroll = border.Child as ScrollViewer;
+                    if (scroll != null) scroll.ScrollToEnd();
+                }
+            }
         }
 
         private void Dgv_DBtable_DataContextChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
         {
-            dgv_DBtable.ScrollIntoView(CollectionView.NewItemPlaceholder);
+            //dgv_DBtable.ScrollIntoView(CollectionView.NewItemPlaceholder);
         }
 
         public ucDBtblLocal(ObservableCollection<FIX_STAN789_T> collection)

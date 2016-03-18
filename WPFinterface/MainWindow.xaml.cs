@@ -11,6 +11,7 @@ using ClassLibOracle;
 using ClassLibGlobal;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Collections;
 
 namespace WPFinterface
 {
@@ -24,11 +25,13 @@ namespace WPFinterface
         private OraExchanger oraEx;
         private Timer oraTransmitFreq;
 
-        private Timer progressTimer;
-
         private BackgroundWorker bgWorker;
+        private BackgroundWorker bgwOraTestConnection;
+        private BackgroundWorker bgwOraSync;
 
         private dbLocalManager dbManager;
+
+        
 
 
 
@@ -49,7 +52,18 @@ namespace WPFinterface
             bgWorker.RunWorkerCompleted += BgWorker_RunWorkerCompleted;
             bgWorker.ProgressChanged += BgWorker_ProgressChanged;
             bgWorker.WorkerSupportsCancellation = true;
-            
+
+            bgwOraTestConnection = new BackgroundWorker();
+            bgwOraTestConnection.DoWork += BgwOraTestConnection_DoWork;
+            bgwOraTestConnection.RunWorkerCompleted += BgwOraTestConnection_RunWorkerCompleted;
+            bgwOraTestConnection.WorkerSupportsCancellation = true;
+
+            bgwOraSync = new BackgroundWorker();
+            bgwOraSync.DoWork += BgwOraSync_DoWork;
+            bgwOraSync.RunWorkerCompleted += BgwOraSync_RunWorkerCompleted;
+            bgwOraSync.ProgressChanged += BgwOraSync_ProgressChanged;
+            bgwOraSync.WorkerSupportsCancellation = true;
+            bgwOraSync.WorkerReportsProgress = true;
 
             opcServer = new exOPCserver();
             
@@ -67,9 +81,94 @@ namespace WPFinterface
           
         }
 
+        private void BgwOraSync_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            int p = e.ProgressPercentage;
+        }
+
+        private void BgwOraSync_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Cancelled)
+            {
+                Model.addLogRecord("Synchronization cancelled");
+                return;
+            }
+
+            if (e.Result != null)
+            {
+                List<int> ids = (List<int>)e.Result; 
+                Model.addLogRecord(ids.Count().ToString() + " local records pushed to remote db");
+
+
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    dbManager.updateFlags(ids.ToList());
+
+                }));
+                
+
+                Model.isSyncInProgress = false;
+            }
+        }
+
+        private void BgwOraSync_DoWork(object sender, DoWorkEventArgs e)
+        {
+            
+            if ( (dbManager != null) & (oraEx != null) & (oraEx.isConnectionOK) )
+            {
+                Model.isSyncInProgress = true;
+                //Get local records
+                List<dbLocalRecord> records = dbManager.getNotSyncRecords();
+                bgwOraSync.ReportProgress(30);
+
+                //Cancellation check
+                if (bgWorker.CancellationPending) { e.Cancel = true; return;}
+
+                //Save id's of not sync records
+                List<int> ids = records.Select(r => r.pid).ToList();
+                bgwOraSync.ReportProgress(40);
+
+                List<FIX_STAN789_T> oraRecords = new List<FIX_STAN789_T>();
+                float p = 40;
+                float max = records.Count();
+                float step = (70f - p) / max;
+                RecordLocalToRemoteConverter converter = new RecordLocalToRemoteConverter();  
+                foreach (dbLocalRecord r in records)
+                {
+                    oraRecords.Add(converter.return_oraRecord(r));
+                    p = p + step;
+                    bgwOraSync.ReportProgress((int)p);
+                }
+
+                //Cancellation check
+                if (bgWorker.CancellationPending) { e.Cancel = true; return; }
+
+                if (oraEx.insert(oraRecords))
+                {
+                    bgwOraSync.ReportProgress(100);
+                    e.Result = ids;
+                }
+            }
+        }
+
+        private void BgwOraTestConnection_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            bool isOk = (bool)e.Result;
+            Model.isRemoteDBConnected = isOk;
+
+            if ( (!bgwOraSync.IsBusy) & (isOk) )
+                bgwOraSync.RunWorkerAsync();
+        }
+
+        private void BgwOraTestConnection_DoWork(object sender, DoWorkEventArgs e)
+        {
+            
+            e.Result = oraEx.TestConnection();
+        }
+
         private void BgWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            Model.progressBar = e.ProgressPercentage;
+            Model.progressBarOraTestConn = e.ProgressPercentage;
             
             progress.Value = e.ProgressPercentage;
         }
@@ -99,12 +198,6 @@ namespace WPFinterface
 
         }
 
-        private void OraGetFirstConnection()
-        {
-
-        }
-
-
 
 
 
@@ -116,7 +209,7 @@ namespace WPFinterface
 
             FileWorks fw = new FileWorks();
 
-            string path = fw.GetLoadFilePath();
+            string path = fw.GetSaveFilePath();
             if (path != "")
             {
                 dbManager = new dbLocalManager(path);
@@ -129,12 +222,12 @@ namespace WPFinterface
 
 
 
-        private void LocalDBInsert()
+        private void LocalDBInsert(bool flag)
         {
 
             if ((dbManager != null) & (Model.opcMonitoredTags.Count > 0)) 
             {
-                dbManager.insert(Model.opcMonitoredTags);
+                dbManager.insert(Model.opcMonitoredTags, flag);
             }
         }
 
@@ -144,31 +237,38 @@ namespace WPFinterface
 
             if (dbManager != null)
             {
-                ucDBtblLocal ucLocalTable = new ucDBtblLocal(dbManager.getRecords());
+                ucDBtblLocal ucLocalTable = new ucDBtblLocal(dbManager.getAllRecords());
                 wndDBbrowser dbWindow = new wndDBbrowser();
 
                 dbWindow.Content = ucLocalTable;
+                dbWindow.Title = "Local database ";
                 dbWindow.Show();
             }
+        }
 
-            //FileWorks fw = new FileWorks();
+        
+        private void DataInsertProcedure()
+        {
+            bool flag = false;
 
-            //string path = fw.GetLoadFilePath();
-            //if (path != "")
-            //{
-            //    ucDBtblLocal ucLocalTable  = new ucDBtblLocal(path);
+            if (Model.isRemoteDBConnected)
+            {
+                flag = OraInsert();
+                Model.isRemoteDBConnected = flag;
 
-            //    wndDBbrowser dbWindow = new wndDBbrowser();
-            //    dbWindow.Content = ucLocalTable;
-            //    dbWindow.Show();
-
-            //}
+                if ((Model.isSyncInProgress) & (!bgwOraSync.IsBusy))
+                    bgwOraSync.RunWorkerAsync();
+            }
+            else
+            {
+                if (!bgwOraTestConnection.IsBusy)
+                bgwOraTestConnection.RunWorkerAsync();
+            }
+             
+            LocalDBInsert(flag);
         }
 
         #endregion
-
-
-
 
         #region Message Handlers
 
@@ -178,7 +278,7 @@ namespace WPFinterface
            
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                LocalDBInsert();
+                DataInsertProcedure();
 
             }));
         }
@@ -401,10 +501,11 @@ namespace WPFinterface
         private void OraShowTable()
         {
 
-            ucDBtblLocal ucOraTable = new ucDBtblLocal(oraEx.bindContext());
+            ucDBtblRemote ucOraTable = new ucDBtblRemote(oraEx.GetRecords());
             wndDBbrowser dbWindow = new wndDBbrowser();
 
             dbWindow.Content = ucOraTable;
+            dbWindow.Title = "Remote database";
             dbWindow.Show();
             
             
@@ -454,21 +555,15 @@ namespace WPFinterface
 
 
 
-        private void OraInsert()
+        private bool OraInsert()
         {
-            //oraEx = oraEx ?? new OraExchanger();
+            if (oraEx != null)
+                if (oraEx.isConnectionOK)
+                {
+                    return oraEx.insert(Model.opcMonitoredTags.ToList());
+                }
 
-            List<oraEntity> list = new List<oraEntity>();
-
-            foreach (mTag t in Model.opcMonitoredTags)
-            {
-                oraEntity ora = new oraEntity(t.NameInDb, t.Value);
-                list.Add(ora);
-            }
-
-            oraEx.items = new ObservableCollection<oraEntity>(list);
-            oraEx.bindData();
-
+            return false;
         }
 
 
@@ -559,8 +654,7 @@ namespace WPFinterface
 
         private void btn_oraTestConnection_Click(object sender, RoutedEventArgs e)
         {
-            //OraInsert(Model.opcMonitoredTags);
-            OraInsert();
+            
         }
 
         private void btn_ConfigConnect_Click(object sender, RoutedEventArgs e)
@@ -596,7 +690,7 @@ namespace WPFinterface
 
         private void btn_LocalTableInsert_Click(object sender, RoutedEventArgs e)
         {
-            LocalDBInsert();
+            DataInsertProcedure();
         }
 
         private void btn_LocalTableView_Click(object sender, RoutedEventArgs e)

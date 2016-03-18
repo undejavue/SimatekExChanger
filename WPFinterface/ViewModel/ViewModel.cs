@@ -162,18 +162,45 @@ namespace WPFinterface
             }
         }
 
-
-        private long _progressBar;
-        public long progressBar
+        private bool _isSyncInProgress;
+        public bool isSyncInProgress
         {
             get
             {
-                return _progressBar;
+                return _isSyncInProgress;
             }
             set
             {
-                _progressBar = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("progressBar"));
+                _isSyncInProgress = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("isSyncInProgress"));
+            }
+        }
+
+        private long _progressBarSync;
+        public long progressBarSync
+        {
+            get
+            {
+                return _progressBarSync;
+            }
+            set
+            {
+                _progressBarSync = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("progressBarSync"));
+            }
+        }
+
+        private long _progressBarOraTestConn;
+        public long progressBarOraTestConn
+        {
+            get
+            {
+                return _progressBarOraTestConn;
+            }
+            set
+            {
+                _progressBarOraTestConn = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("progressBarOraTestConn"));
             }
         }
 
@@ -548,6 +575,7 @@ namespace WPFinterface
 
             isLocalDBConnected = false;
             isRemoteDBConnected = false;
+            isSyncInProgress = false;
             
             gError = new gErrorEntity(1, "Created in model");
             opcError = new vmError(gError);

@@ -258,6 +258,14 @@
                     <Button x:Name="btn_OraTableInit" Content="Init" Width="74" Height="24" Margin="10" Click="btn_OraTableInit_Click"/>
                     <Button x:Name="btn_LocalTableInsert" Content="Test Insert" Width="74" Height="24" Margin="4,0" Click="btn_LocalTableInsert_Click"/>
                 </StackPanel>
+                <Border Background="#FFECECEC" Margin="10,0" BorderBrush="Gray" BorderThickness="1"
+                        Visibility="{Binding Path=isSyncInProgress,  Converter={StaticResource BoolToVis}}" >
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="Synhronization progress" Margin="0"/>
+                        <ProgressBar Height="10" Width="170" x:Name="progressSync" Margin="10" Value="{Binding progressBarSync}">
+                        </ProgressBar>
+                </StackPanel>
+                </Border>
             </StackPanel>
 
         </StackPanel>

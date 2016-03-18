@@ -5,7 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity;
-
+using System.ComponentModel;
+using ClassLibOPC;
 
 namespace ClassLibOracle
 {
@@ -15,8 +16,8 @@ namespace ClassLibOracle
         private OraContext context;
         public bool isConnectionOK;
 
-        public ObservableCollection<oraEntity> items;
-        private ObservableCollection<FIX_STAN789_T> oraItems;
+        //public ObservableCollection<oraEntity> items;
+        //private ObservableCollection<FIX_STAN789_T> oraItems;
 
         public OraExchanger()
         {
@@ -34,8 +35,6 @@ namespace ClassLibOracle
                     OnReportMessage("Oracle Connection success");
                 }
 
-                items = new ObservableCollection<oraEntity>();
-                oraItems = new ObservableCollection<FIX_STAN789_T>();
                 
             }
             catch (Exception ex)
@@ -48,10 +47,32 @@ namespace ClassLibOracle
 
         }
 
-        public ObservableCollection<FIX_STAN789_T> bindContext()
+
+        public bool TestConnection()
+        {
+            if (context != null)
+            {
+                try
+                {
+                    if (context.FIX_STAN789_T.Count() > 0)
+                    {
+                        isConnectionOK = true;
+                    }
+                }
+                catch
+                {
+                    isConnectionOK = false;
+                }
+
+            }
+            return isConnectionOK;
+        }
+
+
+        public BindingList<FIX_STAN789_T> GetRecords()
         {
             context.FIX_STAN789_T.Load();
-            return context.FIX_STAN789_T.Local;
+            return context.FIX_STAN789_T.Local.ToBindingList();
         }
 
 
@@ -85,7 +106,7 @@ namespace ClassLibOracle
             return type.IsGenericType && type.GetGenericTypeDefinition().Equals(typeof(Nullable<>));
         }
 
-        public void bindData()
+        public bool  insert(List<mTag> items)
         {
             FIX_STAN789_T ent = new FIX_STAN789_T();
 
@@ -94,9 +115,9 @@ namespace ClassLibOracle
                 foreach (var p in ent.GetType().GetProperties())
                 {
 
-                    if (items.Any(k => k.Name == p.Name))
+                    if (items.Any(k => k.NameInDb == p.Name))
                     {
-                        oraEntity t = items.First(k => k.Name == p.Name);
+                        mTag t = items.First(k => k.NameInDb == p.Name);
 
                         var targetType = IsNullableType(p.PropertyType) ? Nullable.GetUnderlyingType(p.PropertyType) : p.PropertyType;
 
@@ -114,44 +135,49 @@ namespace ClassLibOracle
                 
             }
 
-            ent.INCOMIN_DATE = DateTime.Now;
+            ent.INCOMIN_DATE = DateTime.Now; // ! change!!!
             ent.WHEN = DateTime.Now;
 
 
-            insertData(ent);
+            return AddRecord(ent);
         }
 
-        public bool insertData()
+
+        public bool insert(List<FIX_STAN789_T> entities)
         {
             bool result = false;
-
-            try
+            if (entities.Count > 0)
             {
-                using (context = new OraContext())
+                try
                 {
                     decimal maxID = context.FIX_STAN789_T.First(x => x.ID == context.FIX_STAN789_T.Max(i => i.ID)).ID;
-                    FIX_STAN789_T r = generateRecord(++maxID);
-                    context.FIX_STAN789_T.Add(r);
+
+                    foreach (FIX_STAN789_T ent in entities)
+                    {
+                        ent.ID = maxID + 1;
+                        ent.WHEN = DateTime.Now;
+                        context.FIX_STAN789_T.Add(ent);
+                    }
+
+                    
                     context.SaveChanges();
+
+                    result = true;
                 }
 
-                result = true;
+                catch (Exception ex)
+                {
+                    result = false;
+                    OnReportMessage("Synchronization failed");
+                    OnReportMessage(ex.Message);
+                }
             }
-            catch (Exception ex)
-            {
-                OnReportMessage("Insert fail");
-                OnReportMessage(ex.Message.ToString());
 
-                if (ex.InnerException != null)
-                    OnReportMessage(ex.InnerException.Message.ToString());
-
-                result = false;
-            }
-         
             return result;
         }
 
-        public bool insertData(FIX_STAN789_T data)
+       
+        public bool AddRecord(FIX_STAN789_T data)
         {
             bool result = false;
 
@@ -163,13 +189,17 @@ namespace ClassLibOracle
                 context.FIX_STAN789_T.Add(data);
                 context.SaveChanges();
 
-                OnReportMessage("Inserted with id=" + data.ID.ToString());
+                isConnectionOK = true;
+                OnReportMessage("Remote DB, inserted with id=" + data.ID.ToString());
+
                 result = true;
             }
             catch (Exception ex)
             {
-                OnReportMessage("Insert fail");
+                OnReportMessage("Insert fail for remote DB");
                 OnReportMessage(ex.Message.ToString());
+
+                isConnectionOK = false;
 
                 if (ex.InnerException != null)
                     OnReportMessage(ex.InnerException.Message.ToString());
