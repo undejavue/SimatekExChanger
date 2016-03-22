@@ -61,27 +61,37 @@ namespace ClassLibOPC
 
         public ObservableCollection<mServerItem> GetServers(string hostname)
         {
-            OpcCom.ServerEnumerator discovery = new OpcCom.ServerEnumerator();
+            try {
+                OpcCom.ServerEnumerator discovery = new OpcCom.ServerEnumerator();
 
-            if (hostname == "") hostname = "localhost";
+                if (hostname == "") hostname = "localhost";
 
-            selectedServer.Host = hostname;
+                selectedServer.Host = hostname;
 
-            //Get all local OPC DA servers of version 3.0
-            Opc.Server[] localservers = discovery.GetAvailableServers(Opc.Specification.COM_DA_30, hostname, null);
+                //Get all local OPC DA servers of version 3.0
+                Opc.Server[] localservers = discovery.GetAvailableServers(Opc.Specification.COM_DA_20, hostname, null);
 
-            listServers.Clear();
+                listServers.Clear();
 
-            foreach ( Opc.Server srv in localservers)
-            {
-                mServerItem si = new mServerItem(true);
+                foreach (Opc.Server srv in localservers)
+                {
+                    mServerItem si = new mServerItem(true);
 
-                si.Name = srv.Name;
-                si.Description = srv.Locale;
-                si.UrlString = srv.Url.ToString();
+                    si.Name = srv.Name;
+                    si.Description = srv.Locale;
+                    si.UrlString = srv.Url.ToString();
 
-                listServers.Add(si);
+                    listServers.Add(si);
+                }
             }
+            catch (Exception ex)
+            {
+                OnReportMessage("Opc server enumerator failed");
+                OnReportMessage(ex.Message);
+            }
+
+
+
 
             //Get all OPC DA servers of version 2.0 of machine "MyMachine"
             //Opc.Server[] hostservers = discovery.GetAvailableServers(Opc.Specification.COM_DA_20, "MNS1-179N", null);

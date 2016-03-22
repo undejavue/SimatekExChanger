@@ -59,9 +59,11 @@ namespace ClassLibOracle
                         isConnectionOK = true;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
                     isConnectionOK = false;
+                    OnReportMessage("Oracle connection fail");
+                    OnReportMessage(ex.ToString());
                 }
 
             }

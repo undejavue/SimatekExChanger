@@ -78,7 +78,7 @@
 
         <DataGrid Name="dgrid_Tags" Grid.Row="1" Grid.Column="2" ItemsSource="{Binding opcListTagsInBranch}" MouseDoubleClick="dgrid_Tags_MouseDoubleClick" 
                   IsEnabled="{Binding list_Tags_isEnable}"
-                  Height="Auto" Margin="10" Width="150" VerticalAlignment="Stretch" HorizontalAlignment="Left"
+                  Height="Auto" Margin="10" Width="320" VerticalAlignment="Stretch" HorizontalAlignment="Left"
                   FontSize="12" AutoGenerateColumns="False" IsReadOnly="True" >
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Tag name" Width="Auto" Binding="{Binding Name}" IsReadOnly="True" />
@@ -171,7 +171,7 @@
                     <DataGridCheckBoxColumn Header="Flag" Width="Auto" Binding="{Binding onChange}" />
                     <DataGridTextColumn Header="Field" Width="Auto" Binding="{Binding NameInDb}" FontSize="11" IsReadOnly="True" />
                     <DataGridTextColumn Header="Tag name" Width="Auto" Binding="{Binding Name}" />
-                    
+
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -185,7 +185,7 @@
                     <DataGridTextColumn Header="Tag name" Width="Auto" Binding="{Binding Name}" />
                     <DataGridTextColumn Header="Value" Width="Auto" Binding="{Binding Value}" />
                     <DataGridTextColumn Header="Quality" Width="Auto" Binding="{Binding Quality}" />
-                    
+
                 </DataGrid.Columns>
             </DataGrid>
             <Border BorderBrush="Gray" BorderThickness="1" Margin="50,10" Visibility="{Binding Path=lbl_InitConnection_isVisible,  Converter={StaticResource BoolToVis}}" >
@@ -218,8 +218,9 @@
                         Click="btn_oraStartSync_Click" IsEnabled="{Binding btn_SyncOn_isEnable}"/>
                     <Button Content="Sync off" x:Name="btn_oraStopSync" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Width="64" Height="26" 
                         Click="btn_oraStopSync_Click" IsEnabled="{Binding btn_SyncOff_isEnable}" />
-                    <Button Content="Test" x:Name="btn_oraTestConnection" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Width="64" Height="26" 
-                        Click="btn_oraTestConnection_Click"  IsEnabled="{Binding btn_SyncOn_isEnable}" />
+                    <Button Content="Test Ora conn" x:Name="btn_oraTestConnection" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Width="89" Height="26" 
+                        Click="btn_oraTestConnection_Click"   />
+                    <Button x:Name="btn_OraTableInit" Content=".NET ver?" Width="74" Height="24" Margin="10,0" Click="btn_OraTableInit_Click"/>
                 </StackPanel>
             </Border>
 
@@ -255,16 +256,16 @@
             </Border>
             <StackPanel Orientation="Vertical" >
                 <StackPanel Orientation="Horizontal">
-                    <Button x:Name="btn_OraTableInit" Content="Init" Width="74" Height="24" Margin="10" Click="btn_OraTableInit_Click"/>
-                    <Button x:Name="btn_LocalTableInsert" Content="Test Insert" Width="74" Height="24" Margin="4,0" Click="btn_LocalTableInsert_Click"/>
+                    <Button x:Name="btn_LocalTableInsert" Content="Test Insert" Width="74" Height="24" Margin="10,0" Click="btn_LocalTableInsert_Click"/>
+                    
                 </StackPanel>
                 <Border Background="#FFECECEC" Margin="10,0" BorderBrush="Gray" BorderThickness="1"
                         Visibility="{Binding Path=isSyncInProgress,  Converter={StaticResource BoolToVis}}" >
-                <StackPanel Orientation="Horizontal">
-                    <Label Content="Synhronization progress" Margin="0"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Synhronization progress" Margin="0"/>
                         <ProgressBar Height="10" Width="170" x:Name="progressSync" Margin="10" Value="{Binding progressBarSync}">
                         </ProgressBar>
-                </StackPanel>
+                    </StackPanel>
                 </Border>
             </StackPanel>
 
