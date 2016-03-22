@@ -30,6 +30,8 @@ namespace WPFinterface
         private BackgroundWorker bgwOraTestConnection;
         private BackgroundWorker bgwOraSync;
 
+        private BackgroundWorker bgwOPC;
+
         private dbLocalManager dbManager;
 
         
@@ -66,6 +68,10 @@ namespace WPFinterface
             bgwOraSync.WorkerSupportsCancellation = true;
             bgwOraSync.WorkerReportsProgress = true;
 
+            bgwOPC = new BackgroundWorker();
+            bgwOPC.DoWork += BgwOPC_DoWork;
+            bgwOPC.RunWorkerCompleted += BgwOPC_RunWorkerCompleted;
+
             opcServer = new exOPCserver();
             
             Model.opcError = new vmError(opcServer.error);
@@ -80,6 +86,32 @@ namespace WPFinterface
             SearchServers("localhost");
             bgWorker.RunWorkerAsync();
           
+        }
+
+        private void BgwOPC_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Result != null)
+            {
+                bool isOk = (bool)e.Result;
+                if (isOk)
+                {
+                    Model.changeState(ModelState.opcConneted);
+                    Model.selectedOPCserver = opcServer.selectedServer;
+                }
+                else
+                {
+                    Model.addLogRecord("OPC connection timed out");
+                }
+            }
+
+            Model.isOPCwaiting = false;
+        }
+
+        private void BgwOPC_DoWork(object sender, DoWorkEventArgs e)
+        {
+            string url = (string)e.Argument;
+            e.Result = opcServer.ConnectServer(url);
+
         }
 
         private void BgwOraSync_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -156,14 +188,15 @@ namespace WPFinterface
         {
             bool isOk = (bool)e.Result;
             Model.isRemoteDBConnected = isOk;
+            Model.addLogRecord("Ora connectin test finished...result = " + isOk.ToString());
 
-            if ( (!bgwOraSync.IsBusy) & (isOk) )
-                bgwOraSync.RunWorkerAsync();
+            //if ( (!bgwOraSync.IsBusy) & (isOk) )
+            //bgwOraSync.RunWorkerAsync();
         }
 
         private void BgwOraTestConnection_DoWork(object sender, DoWorkEventArgs e)
         {
-            
+
             e.Result = oraEx.TestConnection();
         }
 
@@ -340,12 +373,30 @@ namespace WPFinterface
             mServerItem selected_Server = (mServerItem)lst_Servers.SelectedItem;
             if (selected_Server != null)
             {
-                if (opcServer.ConnectServer(selected_Server.UrlString))
-                {
-                    Model.changeState(ModelState.opcConneted);
-                }
-                Model.selectedOPCserver = opcServer.selectedServer;
+                Model.addLogRecord("Trying to connect to selected server");
+                Model.isOPCwaiting = true;
+
+
+               if (opcServer.ConnectServer(selected_Server.UrlString))
+               {
+                        Model.changeState(ModelState.opcConneted);
+                        
+               }
+               Model.selectedOPCserver = opcServer.selectedServer;
+               Model.isOPCwaiting = false;
+
             }
+
+
+
+            //mServerItem selected_Server = (mServerItem)lst_Servers.SelectedItem;
+            //if (selected_Server != null)
+            //{
+            //    Model.addLogRecord("Trying to connect to selected server");
+            //    Model.isOPCwaiting = true;
+
+            //    bgwOPC.RunWorkerAsync(selected_Server.UrlString);
+            //}
         }
 
         private void Disconnect()
@@ -655,6 +706,7 @@ namespace WPFinterface
 
         private void btn_oraTestConnection_Click(object sender, RoutedEventArgs e)
         {
+            Model.addLogRecord("Ora connectin test started...");
             bgwOraTestConnection.RunWorkerAsync();
         }
 

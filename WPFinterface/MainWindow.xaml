@@ -49,8 +49,7 @@
             <Button Content="Try connect" x:Name="btn_ConfigConnect" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="68" Height="22" 
                         Click="btn_ConfigConnect_Click" IsEnabled="{Binding btn_TryConfig_isEnable}"  />
         </StackPanel>
-
-        <ListBox Name="lst_Servers" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding opcListServers}"  IsEnabled="{Binding list_Servers_isEnable}"
+        <ListBox x:Name="lst_Servers" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding opcListServers}"  IsEnabled="{Binding list_Servers_isEnable}"
                      Height="Auto" Margin="10" Width="Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                      MouseDoubleClick="lst_Servers_MouseDoubleClick"  SelectionChanged="lst_Servers_SelectionChanged" >
             <ListBox.ItemTemplate >
@@ -64,6 +63,30 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+
+        <Border Grid.Row="1" Grid.Column="0" BorderBrush="Gray" Background="WhiteSmoke" BorderThickness="1" Margin="0,10"
+                 Visibility="{Binding Path=isOPCwaiting,  Converter={StaticResource BoolToVis}}" Height="60" >
+            <StackPanel Orientation="Vertical"  >
+                <Label x:Name="lbl_PlsWaitOPC" Content="Waiting connection..."  
+                   HorizontalContentAlignment="Center" FontSize="14" />
+                <ProgressBar Height="10" Width="Auto" x:Name="progressOPC" Margin="10">
+                    <ProgressBar.Triggers>
+                        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation
+                					Storyboard.TargetName="progress" 
+                					Storyboard.TargetProperty="Value"
+                					From="0" To="100" Duration="0:0:5"  />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </ProgressBar.Triggers>
+                </ProgressBar>
+            </StackPanel>
+        </Border>
+
+
 
         <TreeView Name="treeControl" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding opcTreeNodes}" IsEnabled="{Binding list_Branches_isEnable}"  
                   ScrollViewer.VerticalScrollBarVisibility="Auto" FontSize="12"
@@ -257,7 +280,7 @@
             <StackPanel Orientation="Vertical" >
                 <StackPanel Orientation="Horizontal">
                     <Button x:Name="btn_LocalTableInsert" Content="Test Insert" Width="74" Height="24" Margin="10,0" Click="btn_LocalTableInsert_Click"/>
-                    
+
                 </StackPanel>
                 <Border Background="#FFECECEC" Margin="10,0" BorderBrush="Gray" BorderThickness="1"
                         Visibility="{Binding Path=isSyncInProgress,  Converter={StaticResource BoolToVis}}" >

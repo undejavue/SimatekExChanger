@@ -138,7 +138,7 @@ namespace ClassLibOracle
             }
 
             ent.INCOMIN_DATE = DateTime.Now; // ! change!!!
-            ent.WHEN = DateTime.Now;
+            //ent. = DateTime.Now;
 
 
             return AddRecord(ent);
@@ -157,7 +157,7 @@ namespace ClassLibOracle
                     foreach (FIX_STAN789_T ent in entities)
                     {
                         ent.ID = maxID + 1;
-                        ent.WHEN = DateTime.Now;
+                        //ent.WHEN = DateTime.Now;
                         context.FIX_STAN789_T.Add(ent);
                     }
 
@@ -228,7 +228,7 @@ namespace ClassLibOracle
             r.N_STAN = id + 2;
             r.REPLAC = false;
             r.START_STOP = true;
-            r.WHEN = DateTime.Now;
+            //r.WHEN = DateTime.Now;
             r.G_UCHASTOK = "s";
 
             return r;

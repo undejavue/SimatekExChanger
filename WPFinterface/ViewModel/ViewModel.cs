@@ -162,6 +162,20 @@ namespace WPFinterface
             }
         }
 
+        private bool _isOPCwaiting;
+        public bool isOPCwaiting
+        {
+            get
+            {
+                return _isOPCwaiting;
+            }
+            set
+            {
+                _isOPCwaiting = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("isOPCwaiting"));
+            }
+        }
+
         private bool _isSyncInProgress;
         public bool isSyncInProgress
         {
