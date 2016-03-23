@@ -5,7 +5,7 @@ using EFlocalDB;
 using System.ComponentModel;
 using System.Windows.Media;
 
-namespace WPFinterface
+namespace SimatekExCnahger
 {
     /// <summary>
     /// Interaction logic for ucDBtblRemote.xaml

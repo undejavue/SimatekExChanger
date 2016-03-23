@@ -26,7 +26,7 @@ namespace EFlocalDB
             oraEnt.N_STAN = rec.N_STAN;
             oraEnt.REPLAC = rec.REPLAC;
             oraEnt.START_STOP = rec.START_STOP;
-            oraEnt.WHEN = rec.WHEN;
+            oraEnt.WHEN_DATE = rec.WHEN_DATE;
 
             return oraEnt;
         }

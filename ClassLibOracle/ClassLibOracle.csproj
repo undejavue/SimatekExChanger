@@ -133,6 +133,10 @@
       <Project>{db85b424-be73-4cb3-ba1d-2b9a79f381ce}</Project>
       <Name>ClassLibOPC</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Global\ClassLibGlobal.csproj">
+      <Project>{ff2664cd-ab52-4dd9-b9e7-9de81eea383b}</Project>
+      <Name>ClassLibGlobal</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

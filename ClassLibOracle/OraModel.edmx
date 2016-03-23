@@ -4,48 +4,47 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="Хранилище OraModel" Provider="Oracle.ManagedDataAccess.Client" ProviderManifestToken="11.2" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="Хранилище OraModel" Provider="Oracle.ManagedDataAccess.Client" ProviderManifestToken="11.2" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="FIX_STAN789_T">
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="number" Precision="38" Scale="0" Nullable="false" />
-          <Property Name="WHEN" Type="date" Nullable="false" />
+          <Property Name="WHEN_DATE" Type="date" />
+          <Property Name="G_UCHASTOK" Type="char" MaxLength="1" />
           <Property Name="N_STAN" Type="number" Precision="38" Scale="0" />
           <Property Name="START_STOP" Type="number" Precision="1" Scale="0" />
           <Property Name="ERASE" Type="number" Precision="1" Scale="0" />
           <Property Name="BREAK" Type="number" Precision="1" Scale="0" />
           <Property Name="REPLAC" Type="number" Precision="1" Scale="0" />
-          <Property Name="COUNTER" Type="number" Precision="6" Scale="0" />
-          <Property Name="INCOMIN_DATE" Type="date" Nullable="false" />
-          <Property Name="G_UCHASTOK" Type="char" MaxLength="1" />
+          <Property Name="COUNTER" Type="number" Precision="38" Scale="0" />
+          <Property Name="INCOMIN_DATE" Type="date" />
+          <Property Name="ID" Type="number" Precision="38" Scale="0" Nullable="false" />
         </EntityType>
         <EntityContainer Name="Хранилище OraModelContainer">
           <EntitySet Name="FIX_STAN789_T" EntityType="Self.FIX_STAN789_T" Schema="SYSTEM" store:Type="Tables" />
         </EntityContainer>
-      </Schema>
-    </edmx:StorageModels>
+      </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="OraModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="OraContext" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="FIX_STAN789_T" EntityType="OraModel.FIX_STAN789_T" />
+        </EntityContainer>
         <EntityType Name="FIX_STAN789_T">
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="Decimal" Precision="38" Scale="0" Nullable="false" />
-          <Property Name="WHEN" Type="DateTime" Nullable="false" />
+          <Property Name="WHEN_DATE" Type="DateTime" />
+          <Property Name="G_UCHASTOK" Type="String" MaxLength="1" FixedLength="true" Unicode="false" />
           <Property Name="N_STAN" Type="Decimal" Precision="38" Scale="0" />
           <Property Name="START_STOP" Type="Boolean" />
           <Property Name="ERASE" Type="Boolean" />
           <Property Name="BREAK" Type="Boolean" />
           <Property Name="REPLAC" Type="Boolean" />
-          <Property Name="COUNTER" Type="Int32" />
-          <Property Name="INCOMIN_DATE" Type="DateTime" Nullable="false" />
-          <Property Name="G_UCHASTOK" Type="String" MaxLength="1" FixedLength="true" Unicode="false" />
+          <Property Name="COUNTER" Type="Decimal" Precision="38" Scale="0" />
+          <Property Name="INCOMIN_DATE" Type="DateTime" />
+          <Property Name="ID" Type="Decimal" Nullable="false" Precision="38" Scale="0" />
         </EntityType>
-        <EntityContainer Name="OraContext" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="FIX_STAN789_T" EntityType="Self.FIX_STAN789_T" />
-        </EntityContainer>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -56,15 +55,15 @@
             <EntityTypeMapping TypeName="OraModel.FIX_STAN789_T">
               <MappingFragment StoreEntitySet="FIX_STAN789_T">
                 <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="WHEN" ColumnName="WHEN" />
-                <ScalarProperty Name="N_STAN" ColumnName="N_STAN" />
-                <ScalarProperty Name="START_STOP" ColumnName="START_STOP" />
-                <ScalarProperty Name="ERASE" ColumnName="ERASE" />
-                <ScalarProperty Name="BREAK" ColumnName="BREAK" />
-                <ScalarProperty Name="REPLAC" ColumnName="REPLAC" />
-                <ScalarProperty Name="COUNTER" ColumnName="COUNTER" />
                 <ScalarProperty Name="INCOMIN_DATE" ColumnName="INCOMIN_DATE" />
+                <ScalarProperty Name="COUNTER" ColumnName="COUNTER" />
+                <ScalarProperty Name="REPLAC" ColumnName="REPLAC" />
+                <ScalarProperty Name="BREAK" ColumnName="BREAK" />
+                <ScalarProperty Name="ERASE" ColumnName="ERASE" />
+                <ScalarProperty Name="START_STOP" ColumnName="START_STOP" />
+                <ScalarProperty Name="N_STAN" ColumnName="N_STAN" />
                 <ScalarProperty Name="G_UCHASTOK" ColumnName="G_UCHASTOK" />
+                <ScalarProperty Name="WHEN_DATE" ColumnName="WHEN_DATE" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

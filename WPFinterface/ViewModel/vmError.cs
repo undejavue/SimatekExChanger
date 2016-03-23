@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using ClassLibGlobal;
 
-namespace WPFinterface
+namespace SimatekExCnahger
 {
     public class vmError : gErrorEntity
     {

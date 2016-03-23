@@ -32,6 +32,8 @@ namespace ClassLibOPC
 
         public gErrorEntity error { get; set; }
 
+        
+
 
         public exOPCserver ()
         {
@@ -150,6 +152,7 @@ namespace ClassLibOPC
 
             try
             {
+                OnReportMessage(1, "Connection started...");
                 selectedServer = selectedServer ?? new mServerItem(true);
                 server.Connect();
                 if (isConnected = server.IsConnected)
@@ -162,12 +165,12 @@ namespace ClassLibOPC
                 }
                 else
                 {
-                    OnReportMessage("Server connection fail, unknown error");
+                    OnReportMessage(777,"Server connection fail, unknown error");
                 }
             }
             catch (Exception ex)
             {
-                OnReportMessage(ex.Message.ToString());               
+                OnReportMessage(444, ex.Message.ToString());               
             }
             
             return isConnected;

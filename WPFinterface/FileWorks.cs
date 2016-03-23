@@ -3,7 +3,7 @@ using EFlocalDB;
 using System.ComponentModel;
 using Microsoft.Win32;
 
-namespace WPFinterface
+namespace SimatekExCnahger
 {
     public class FileWorks: Entity
 

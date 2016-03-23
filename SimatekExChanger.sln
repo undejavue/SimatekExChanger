@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "xTestConsole", "SimatekExCh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibOPC", "ClassLibOPC\ClassLibOPC.csproj", "{DB85B424-BE73-4CB3-BA1D-2B9A79F381CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPFinterface", "WPFinterface\WPFinterface.csproj", "{947454D7-943D-4AE5-BCE7-18CDCE313BE7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimatekExchanger", "WPFinterface\SimatekExchanger.csproj", "{947454D7-943D-4AE5-BCE7-18CDCE313BE7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibGlobal", "Global\ClassLibGlobal.csproj", "{FF2664CD-AB52-4DD9-B9E7-9DE81EEA383B}"
 EndProject

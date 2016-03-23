@@ -41,7 +41,7 @@ namespace SimatekExChanger
 
             foreach (dbTagItem tag in s.opcMonitoredTags)
             {
-                System.Console.WriteLine("Server name = {0}", tag.Name);
+                System.Console.WriteLine("Server name = {0}", tag.srvID);
             }
 
 

@@ -32,10 +32,6 @@ namespace EFlocalDB
         }
 
 
-        public void bindCollection(ObservableCollection<dbLocalRecord> records)
-        {
-
-        }
 
         public void insert(ObservableCollection<mTag> tags, bool flag)
         {
@@ -91,7 +87,7 @@ namespace EFlocalDB
                 }
 
                 ent.INCOMIN_DATE = DateTime.Now;
-                ent.WHEN = DateTime.Now;
+                ent.WHEN_DATE = DateTime.Now;
                 ent.flagIsSent = false;
 
             }
@@ -126,17 +122,34 @@ namespace EFlocalDB
 
         public BindingList<dbLocalRecord> getAllRecords()
         {
-            context.dbRecords.Load();
+            try {
+                context.dbRecords.Load();
+                return context.dbRecords.Local.ToBindingList();
+            }
+            catch (Exception ex)
+            {
+                logMessage("LocalDb load context failed");
+                logMessage(ex.Message);
+            }
 
-            return context.dbRecords.Local.ToBindingList();
+            return new BindingList<dbLocalRecord>();
         }
 
         public List<dbLocalRecord> getNotSyncRecords()
         {
-            List<dbLocalRecord> records =
-                new List<dbLocalRecord>(context.dbRecords.Where(r => r.flagIsSent == false).ToList());
+            try {
+                List<dbLocalRecord> records =
+                    new List<dbLocalRecord>(context.dbRecords.Where(r => r.flagIsSent == false).ToList());
 
-            return records;
+                return records;
+            }
+            catch (Exception ex)
+            {
+                logMessage("LocalDb getNotSyncREcords() failed");
+                logMessage(ex.Message);
+            }
+
+            return new List<dbLocalRecord>();
         }
 
 

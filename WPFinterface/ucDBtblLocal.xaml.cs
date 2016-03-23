@@ -9,7 +9,7 @@ using System.Windows.Data;
 using System.Collections.Specialized;
 using System.Windows.Media;
 
-namespace WPFinterface
+namespace SimatekExCnahger
 {
     /// <summary>
     /// Interaction logic for ucDBtblRemote.xaml

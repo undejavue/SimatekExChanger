@@ -4,60 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
+using ClassLibOPC;
 
 namespace EFlocalDB
 {
-    public class dbTagItem :Entity
+    public class dbTagItem : mTag
     {
-
-        //private string _srvID;
-        //public string srvID
-        //{
-        //    get { return _srvID; }
-        //    set
-        //    {
-        //        _srvID = value;
-
-        //        OnPropertyChanged(new PropertyChangedEventArgs("srvID"));
-        //    }
-        //}
-        
-        private string _name;
-        public string Name
-        {
-            get { return _name; }
-            set
-            {
-                _name = value;
-
-                OnPropertyChanged(new PropertyChangedEventArgs("Name"));
-            }
-        }
-
-        private string _path;
-        public string Path
-        {
-            get { return _path; }
-            set
-            {
-                _path = value;
-
-                OnPropertyChanged(new PropertyChangedEventArgs("Path"));
-            }
-        }
-
-        private string _description;
-        public string Description
-        {
-            get { return _description; }
-            set
-            {
-                _description = value;
-
-                OnPropertyChanged(new PropertyChangedEventArgs("Description"));
-            }
-        }
-
         public virtual dbServerItem srvID {get; set; }
 
         public dbTagItem ()
@@ -71,11 +23,15 @@ namespace EFlocalDB
             this.Path = path;
         }
 
-        public dbTagItem(string name, string path, string desc)
+        public dbTagItem(mTag tag)
         {
-            this.Name = name;
-            this.Path = path;
-            this.Description = desc;
+            this.Name = tag.Name;
+            this.NameInDb = tag.NameInDb;
+            this.onChange = tag.onChange;
+            this.Path = tag.Path;
+            this.Quality = tag.Quality;
+            this.Value = string.Empty;
         }
+
     }
 }

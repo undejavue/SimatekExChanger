@@ -13,9 +13,21 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Collections;
 using Microsoft.Win32;
+using System.Windows.Threading;
 
-namespace WPFinterface
+namespace SimatekExCnahger
 {
+    public enum workerMode
+    {
+        ConnectingOPC,
+        Connected,
+        Disconnected,
+        Worked
+
+    }
+
+
+
     /// <summary>
     /// Логика взаимодействия для MainWindow.xaml
     /// </summary>
@@ -26,17 +38,12 @@ namespace WPFinterface
         private OraExchanger oraEx;
         private Timer oraTransmitFreq;
 
-        private BackgroundWorker bgWorker;
+        private BackgroundWorker bgwStarter;
         private BackgroundWorker bgwOraTestConnection;
         private BackgroundWorker bgwOraSync;
-
         private BackgroundWorker bgwOPC;
 
         private dbLocalManager dbManager;
-
-        
-
-
 
 
         public MainWindow()
@@ -50,11 +57,11 @@ namespace WPFinterface
             Model = new ViewModel();
             this.DataContext = Model;
 
-            bgWorker = new BackgroundWorker();
-            bgWorker.DoWork += BgWorker_DoWork;
-            bgWorker.RunWorkerCompleted += BgWorker_RunWorkerCompleted;
-            bgWorker.ProgressChanged += BgWorker_ProgressChanged;
-            bgWorker.WorkerSupportsCancellation = true;
+            bgwStarter = new BackgroundWorker();
+            bgwStarter.DoWork += BgWorker_DoWork;
+            bgwStarter.RunWorkerCompleted += BgWorker_RunWorkerCompleted;
+            bgwStarter.ProgressChanged += BgWorker_ProgressChanged;
+            bgwStarter.WorkerSupportsCancellation = true;
 
             bgwOraTestConnection = new BackgroundWorker();
             bgwOraTestConnection.DoWork += BgwOraTestConnection_DoWork;
@@ -73,23 +80,79 @@ namespace WPFinterface
             bgwOPC.RunWorkerCompleted += BgwOPC_RunWorkerCompleted;
 
             opcServer = new exOPCserver();
-            
             Model.opcError = new vmError(opcServer.error);
-            //Model.gError = opcServer.error;
-
             opcServer.ReportMessage += opcServer_ReportMessage;
             opcServer.MarkedTagsChanged += OpcServer_MarkedTagsChanged;
 
 
-            configureOraTransmitRate();
+            //configureOraTransmitRate();
 
             SearchServers("localhost");
-            bgWorker.RunWorkerAsync();
+            bgwStarter.RunWorkerAsync();
           
         }
 
-        private void BgwOPC_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        #region Message Handlers
+
+
+        private void OpcServer_MarkedTagsChanged(object sender)
         {
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                DataInsertProcedure();
+
+            }));
+        }
+
+        private void DbManager_ReportMessage(object sender, gEventArgs args)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                Model.addLogRecord(args.message);
+
+            }));
+
+        }
+
+        /// <summary>
+        /// Event handle for OPC server class
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void opcServer_ReportMessage(object sender, exEventArgs args)
+        {
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                Model.addLogRecord(args.message);
+
+                if (args.error != 0)
+                {
+
+                }
+
+                //Model.isOPCwaiting = args.error == 1 ? true : false;
+
+            }));
+        }
+
+        private void oraEx_ReportMessage(object sender, oraEventArgs args)
+        {
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                Model.addLogRecord(args.message);
+            }));
+        }
+
+        #endregion
+
+
+
+        #region Background works
+
+        private void BgwOPC_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {           
             if (e.Result != null)
             {
                 bool isOk = (bool)e.Result;
@@ -102,13 +165,13 @@ namespace WPFinterface
                 {
                     Model.addLogRecord("OPC connection timed out");
                 }
-            }
-
-            Model.isOPCwaiting = false;
+            }  
         }
 
         private void BgwOPC_DoWork(object sender, DoWorkEventArgs e)
         {
+
+            Model.isOPCwaiting = true;
             string url = (string)e.Argument;
             e.Result = opcServer.ConnectServer(url);
 
@@ -155,7 +218,7 @@ namespace WPFinterface
                 bgwOraSync.ReportProgress(30);
 
                 //Cancellation check
-                if (bgWorker.CancellationPending) { e.Cancel = true; return;}
+                if (bgwStarter.CancellationPending) { e.Cancel = true; return;}
 
                 //Save id's of not sync records
                 List<int> ids = records.Select(r => r.pid).ToList();
@@ -174,7 +237,7 @@ namespace WPFinterface
                 }
 
                 //Cancellation check
-                if (bgWorker.CancellationPending) { e.Cancel = true; return; }
+                if (bgwStarter.CancellationPending) { e.Cancel = true; return; }
 
                 if (oraEx.insert(oraRecords))
                 {
@@ -209,6 +272,9 @@ namespace WPFinterface
 
         private void BgWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+
+
+
             oraEx.ReportMessage -= oraEx_ReportMessage;
             oraEx.ReportMessage += oraEx_ReportMessage;
             OraTableInit();
@@ -219,7 +285,7 @@ namespace WPFinterface
 
         private void BgWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            if (bgWorker.CancellationPending)
+            if (bgwStarter.CancellationPending)
             {
                 e.Cancel = true;
                 return;
@@ -228,11 +294,11 @@ namespace WPFinterface
             Model.lbl_InitConnection_isVisible = true;
 
             oraEx = new OraExchanger();
-            bgWorker.ReportProgress(100);
+            bgwStarter.ReportProgress(100);
 
         }
 
-
+        #endregion
 
 
 
@@ -304,59 +370,7 @@ namespace WPFinterface
 
         #endregion
 
-        #region Message Handlers
-
-
-        private void OpcServer_MarkedTagsChanged(object sender)
-        {
-           
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                DataInsertProcedure();
-
-            }));
-        }
-
-        private void DbManager_ReportMessage(object sender, gEventArgs args)
-        {
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                Model.addLogRecord(args.message);
-
-            }));
-
-        }
-
-        /// <summary>
-        /// Event handle for OPC server class
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        private void opcServer_ReportMessage(object sender, exEventArgs args)
-        {
-
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                Model.addLogRecord(args.message);
-
-                if (args.error != 0)
-                {
-                    //Model.opcError.code = args.error;
-                    // Model.opcError.message = args.message;
-                }
-
-            }));
-        }
-
-        private void oraEx_ReportMessage(object sender, oraEventArgs args)
-        {
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                Model.addLogRecord(args.message);
-            }));
-        }
-
-        #endregion
+      
 
 
         #region OPC Server operations
@@ -374,16 +388,15 @@ namespace WPFinterface
             if (selected_Server != null)
             {
                 Model.addLogRecord("Trying to connect to selected server");
-                Model.isOPCwaiting = true;
 
 
-               if (opcServer.ConnectServer(selected_Server.UrlString))
-               {
-                        Model.changeState(ModelState.opcConneted);
-                        
-               }
-               Model.selectedOPCserver = opcServer.selectedServer;
-               Model.isOPCwaiting = false;
+
+                if (opcServer.ConnectServer(selected_Server.UrlString))
+                {
+                    Model.changeState(ModelState.opcConneted);
+
+                }
+                Model.selectedOPCserver = opcServer.selectedServer;
 
             }
 
@@ -393,7 +406,7 @@ namespace WPFinterface
             //if (selected_Server != null)
             //{
             //    Model.addLogRecord("Trying to connect to selected server");
-            //    Model.isOPCwaiting = true;
+            //    //Model.isOPCwaiting = true;
 
             //    bgwOPC.RunWorkerAsync(selected_Server.UrlString);
             //}
@@ -612,7 +625,7 @@ namespace WPFinterface
             if (oraEx != null)
                 if (oraEx.isConnectionOK)
                 {
-                    return oraEx.insert(Model.opcMonitoredTags.ToList());
+                    return oraEx.insert(Model.opcMonitoredTags.ToList(),Model.specialEnt);
                 }
 
             return false;
@@ -657,8 +670,14 @@ namespace WPFinterface
 
         private void lst_Servers_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            Connect();
-            BrowseServer();
+            Model.isOPCwaiting = true;
+            Application.Current.Dispatcher.Invoke(DispatcherPriority.Background,
+                                          new Action(delegate {
+                                              Connect();
+                                              BrowseServer();
+                                          }));
+
+            Model.isOPCwaiting = false;
         }
 
         private void dgrid_Tags_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -746,7 +765,8 @@ namespace WPFinterface
 
         private void btn_LocalTableInsert_Click(object sender, RoutedEventArgs e)
         {
-            DataInsertProcedure();
+            Model.addLogRecord("Local Db test record to insert...");
+            LocalDBInsert(true);
         }
 
         private void btn_LocalTableView_Click(object sender, RoutedEventArgs e)
@@ -756,7 +776,7 @@ namespace WPFinterface
 
         private void btn_WaitingCancel_Click(object sender, RoutedEventArgs e)
         {
-            bgWorker.CancelAsync();
+            bgwStarter.CancelAsync();
         }
 
         // Checking the version using >= will enable forward compatibility, 
@@ -847,6 +867,11 @@ namespace WPFinterface
             }
 
             return outlist;
+        }
+
+        private void btn_RemoteTableInsert_Click(object sender, RoutedEventArgs e)
+        {
+            oraEx.AddTestRecord();
         }
     }
 }

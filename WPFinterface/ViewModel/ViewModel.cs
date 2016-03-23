@@ -11,7 +11,7 @@ using System.Windows.Threading;
 using EFlocalDB;
 using System.Windows.Media;
 
-namespace WPFinterface
+namespace SimatekExCnahger
 {
 
     public enum ModelState
@@ -217,6 +217,9 @@ namespace WPFinterface
                 OnPropertyChanged(new PropertyChangedEventArgs("progressBarOraTestConn"));
             }
         }
+
+        public gSpecialEntity specialEnt { get; set; }
+
 
         #endregion
 
@@ -593,6 +596,11 @@ namespace WPFinterface
             
             gError = new gErrorEntity(1, "Created in model");
             opcError = new vmError(gError);
+
+            specialEnt = new gSpecialEntity();
+            specialEnt.N_STAN = 5;
+            specialEnt.G_UCHASTOK = "Z";
+
         }
 
         public void Clear()
@@ -618,8 +626,7 @@ namespace WPFinterface
 
             foreach (mTag tag in opcMonitoredTags)
             {
-                dbTagItem t = new dbTagItem(tag.Name, tag.Path, tag.NameInDb);
-                configuredServer.opcMonitoredTags.Add(t);
+                configuredServer.opcMonitoredTags.Add(new dbTagItem(tag));
             }
             addLogRecord("Server configuration copied");
         }
@@ -638,7 +645,7 @@ namespace WPFinterface
 
                 foreach (dbTagItem tag in srv.opcMonitoredTags)
                 {
-                    mTag t = new mTag(tag.Name, tag.Path);
+                    mTag t = tag;
                     opcSubscribedTags.Add(t);
                 }
                 addLogRecord("Server configuration loaded successfully");
