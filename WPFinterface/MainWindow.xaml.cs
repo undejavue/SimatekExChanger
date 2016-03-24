@@ -23,9 +23,7 @@ namespace SimatekExCnahger
         Connected,
         Disconnected,
         Worked
-
     }
-
 
 
     /// <summary>
@@ -33,6 +31,8 @@ namespace SimatekExCnahger
     /// </summary>
     public partial class MainWindow : Window
     {
+        private static string TAG = LogFilter.GUI.ToString();
+
         private ViewModel Model;
         private exOPCserver opcServer;
         private OraExchanger oraEx;
@@ -45,6 +45,8 @@ namespace SimatekExCnahger
 
         private dbLocalManager dbManager;
 
+
+        #region Constructors
 
         public MainWindow()
         {
@@ -92,16 +94,18 @@ namespace SimatekExCnahger
           
         }
 
+        #endregion
+
+
+
         #region Message Handlers
 
 
         private void OpcServer_MarkedTagsChanged(object sender)
         {
-
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 DataInsertProcedure();
-
             }));
         }
 
@@ -109,31 +113,22 @@ namespace SimatekExCnahger
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                Model.addLogRecord(args.message);
-
+                string TAG = dbLocalManager.TAG;
+                Model.addLogRecord(TAG, args.message);
             }));
 
         }
 
-        /// <summary>
-        /// Event handle for OPC server class
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
         private void opcServer_ReportMessage(object sender, exEventArgs args)
         {
-
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                Model.addLogRecord(args.message);
+                string TAG = exOPCserver.TAG;
+                Model.addLogRecord(TAG, args.message);
 
                 if (args.error != 0)
                 {
-
                 }
-
-                //Model.isOPCwaiting = args.error == 1 ? true : false;
-
             }));
         }
 
@@ -141,7 +136,8 @@ namespace SimatekExCnahger
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                Model.addLogRecord(args.message);
+                string TAG = OraExchanger.TAG;
+                Model.addLogRecord(TAG,args.message);
             }));
         }
 
@@ -163,7 +159,7 @@ namespace SimatekExCnahger
                 }
                 else
                 {
-                    Model.addLogRecord("OPC connection timed out");
+                    Model.addLogRecord(exOPCserver.TAG, "OPC connection timed out");
                 }
             }  
         }
@@ -186,23 +182,19 @@ namespace SimatekExCnahger
         {
             if (e.Cancelled)
             {
-                Model.addLogRecord("Synchronization cancelled");
+                Model.addLogRecord(OraExchanger.TAG,"Synchronization cancelled");
                 return;
             }
 
             if (e.Result != null)
             {
                 List<int> ids = (List<int>)e.Result; 
-                Model.addLogRecord(ids.Count().ToString() + " local records pushed to remote db");
-
+                Model.addLogRecord(OraExchanger.TAG, ids.Count().ToString() + " local records pushed to remote db");
 
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     dbManager.updateFlags(ids.ToList());
-
-                }));
-                
-
+                }));             
                 Model.isSyncInProgress = false;
             }
         }
@@ -249,36 +241,37 @@ namespace SimatekExCnahger
 
         private void BgwOraTestConnection_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            bool isOk = (bool)e.Result;
-            Model.isRemoteDBConnected = isOk;
-            Model.addLogRecord("Ora connectin test finished...result = " + isOk.ToString());
+            if (!e.Cancelled)
+            {
+                bool isOk = (bool)e.Result;
+                Model.isRemoteDBConnected = isOk;
+                Model.addLogRecord(OraExchanger.TAG, "Ora connectin test finished...result = " + isOk.ToString());
 
-            //if ( (!bgwOraSync.IsBusy) & (isOk) )
-            //bgwOraSync.RunWorkerAsync();
+                if ((!bgwOraSync.IsBusy) & (isOk))
+                    bgwOraSync.RunWorkerAsync();
+            }
         }
 
         private void BgwOraTestConnection_DoWork(object sender, DoWorkEventArgs e)
         {
-
-            e.Result = oraEx.TestConnection();
+            if (oraEx != null)
+                e.Result = oraEx.TestConnection();
+            else
+                e.Cancel = true;
         }
 
         private void BgWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            Model.progressBarOraTestConn = e.ProgressPercentage;
-            
+            Model.progressBarOraTestConn = e.ProgressPercentage;           
             progress.Value = e.ProgressPercentage;
         }
 
         private void BgWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-
-
-
             oraEx.ReportMessage -= oraEx_ReportMessage;
             oraEx.ReportMessage += oraEx_ReportMessage;
             OraTableInit();
-            Model.addLogRecord("Finish test oracle connection");
+            Model.addLogRecord(OraExchanger.TAG, "Finish test oracle connection");
             Model.isRemoteDBConnected = oraEx.isConnectionOK;
             Model.lbl_InitConnection_isVisible = false;
         }
@@ -292,10 +285,8 @@ namespace SimatekExCnahger
             }
 
             Model.lbl_InitConnection_isVisible = true;
-
             oraEx = new OraExchanger();
             bgwStarter.ReportProgress(100);
-
         }
 
         #endregion
@@ -306,25 +297,35 @@ namespace SimatekExCnahger
 
         private void LocalDBCreate()
         {
-
             FileWorks fw = new FileWorks();
-
             string path = fw.GetSaveFilePath();
             if (path != "")
             {
-                dbManager = new dbLocalManager(path);
+                dbManager = new dbLocalManager(path, true);
                 dbManager.ReportMessage -= DbManager_ReportMessage;
                 dbManager.ReportMessage += DbManager_ReportMessage;
+                Model.isLocalDBConnected = true;
             }
+        }
 
-            Model.isLocalDBConnected = true;
+
+        private void LocalDBLoad()
+        {
+            FileWorks fw = new FileWorks();
+            string path = fw.GetLoadFilePath();
+            if (path != "")
+            {
+                dbManager = new dbLocalManager(path, false);
+                dbManager.ReportMessage -= DbManager_ReportMessage;
+                dbManager.ReportMessage += DbManager_ReportMessage;
+                Model.isLocalDBConnected = true;
+            }           
         }
 
 
 
         private void LocalDBInsert(bool flag)
         {
-
             if ((dbManager != null) & (Model.opcMonitoredTags.Count > 0)) 
             {
                 dbManager.insert(Model.opcMonitoredTags, flag);
@@ -334,16 +335,19 @@ namespace SimatekExCnahger
 
         private void LocalDBGetRecords()
         {
-
+            Model.isLocalDbLoading = true;
             if (dbManager != null)
             {
-                ucDBtblLocal ucLocalTable = new ucDBtblLocal(dbManager.getAllRecords());
-                wndDBbrowser dbWindow = new wndDBbrowser();
-
-                dbWindow.Content = ucLocalTable;
-                dbWindow.Title = "Local database ";
-                dbWindow.Show();
+                Dispatcher.Invoke(DispatcherPriority.Background,
+                              new Action(delegate {
+                                  ucDBtblLocal ucLocalTable = new ucDBtblLocal(dbManager.getAllRecords());
+                                  wndDBbrowser dbWindow = new wndDBbrowser();
+                                  dbWindow.Content = ucLocalTable;
+                                  dbWindow.Title = "Local database ";
+                                  dbWindow.Show();
+                              }));
             }
+            Model.isLocalDbLoading = false;
         }
 
         
@@ -372,14 +376,13 @@ namespace SimatekExCnahger
 
       
 
-
         #region OPC Server operations
 
         private void SearchServers(string hostName)
         {
             Model.opcListServers.Clear();
             foreach (mServerItem i in opcServer.GetServers(hostName)) { Model.opcListServers.Add(i); }
-            Model.addLogRecord("Server search complited...");
+            Model.addLogRecord(exOPCserver.TAG, "Server search complited...");
         }
 
         private void Connect()
@@ -387,19 +390,13 @@ namespace SimatekExCnahger
             mServerItem selected_Server = (mServerItem)lst_Servers.SelectedItem;
             if (selected_Server != null)
             {
-                Model.addLogRecord("Trying to connect to selected server");
-
-
-
+                Model.addLogRecord(exOPCserver.TAG, "Trying to connect to selected server");
                 if (opcServer.ConnectServer(selected_Server.UrlString))
                 {
                     Model.changeState(ModelState.opcConneted);
-
                 }
                 Model.selectedOPCserver = opcServer.selectedServer;
-
             }
-
 
 
             //mServerItem selected_Server = (mServerItem)lst_Servers.SelectedItem;
@@ -447,17 +444,19 @@ namespace SimatekExCnahger
 
         private void SelectTagsForMonitor()
         {
-            mItem selectedTag = (mItem)dgrid_Tags.SelectedItem;
-            mTag tag = new mTag(selectedTag.Name, selectedTag.Path);
-
-            var contain = Model.opcSubscribedTags.Any(t => t.Name == tag.Name);
-            if (!contain)
+            
+            if ( (dgrid_Tags.SelectedItem != null) & (dgrid_Subscribed.SelectedItem != null) )
             {
-                mTag newTag = (mTag)dgrid_Subscribed.SelectedItem as mTag;
+                mItem selectedTag = (mItem)dgrid_Tags.SelectedItem;
 
-                var mt = Model.opcSubscribedTags.FirstOrDefault(t => t.NameInDb == newTag.NameInDb);
-                mt.Name = tag.Name;
-                mt.Path = tag.Path;
+                bool contain = Model.opcSubscribedTags.Any(t => t.Name == selectedTag.Name);
+                if (!contain)
+                {
+                    mTag subscrTag = (mTag)dgrid_Subscribed.SelectedItem as mTag;
+                    mTag sourceTag = Model.opcSubscribedTags.FirstOrDefault(t => t.NameInDb == subscrTag.NameInDb);
+                    sourceTag.Name = selectedTag.Name;
+                    sourceTag.Path = selectedTag.Path;
+                }
             }
         }
 
@@ -499,7 +498,9 @@ namespace SimatekExCnahger
         #endregion
 
 
+
         #region Configuration Save-Load operations
+
         private void SaveConfiguration()
         {
             if (Model.selectedOPCserver != null)
@@ -513,7 +514,8 @@ namespace SimatekExCnahger
             string path = fw.GetSaveFilePath();
             if (path != "")
             {
-                config.Save(Model.configuredServer, path);
+                if (config.Save(Model.configuredServer, path))
+                Model.addLogRecord(TAG, "Config saved");
             }
         }
 
@@ -546,7 +548,8 @@ namespace SimatekExCnahger
         #endregion
 
 
-        #region Database operations
+
+        #region Remote Database operations
 
 
         private void OraTableInit()
@@ -565,15 +568,21 @@ namespace SimatekExCnahger
 
         private void OraShowTable()
         {
+            if (oraEx != null)
+            {
+                Model.isRemoteDbLoading = true;
+                Dispatcher.Invoke(DispatcherPriority.Background,
+                  new Action(delegate
+                  {
+                      ucDBtblRemote ucOraTable = new ucDBtblRemote(oraEx.GetRecords());
+                      wndDBbrowser dbWindow = new wndDBbrowser();
 
-            ucDBtblRemote ucOraTable = new ucDBtblRemote(oraEx.GetRecords());
-            wndDBbrowser dbWindow = new wndDBbrowser();
-
-            dbWindow.Content = ucOraTable;
-            dbWindow.Title = "Remote database";
-            dbWindow.Show();
-            
-            
+                      dbWindow.Content = ucOraTable;
+                      dbWindow.Title = "Remote database";
+                      dbWindow.Show();
+                  }));
+                Model.isRemoteDbLoading = false;
+            }
         }
 
 
@@ -585,14 +594,10 @@ namespace SimatekExCnahger
 
         private void configureOraTransmitRate()
         {
-
             oraTransmitFreq = new System.Timers.Timer();
-
             oraTransmitFreq.Interval = 8000;
             oraTransmitFreq.AutoReset = false;
-
             oraTransmitFreq.Elapsed += oraTransmitFreq_Elapsed;
-
         }
 
         private void oraTransmitFreq_Elapsed(object sender, ElapsedEventArgs e)
@@ -618,8 +623,6 @@ namespace SimatekExCnahger
 
 
 
-
-
         private bool OraInsert()
         {
             if (oraEx != null)
@@ -627,14 +630,12 @@ namespace SimatekExCnahger
                 {
                     return oraEx.insert(Model.opcMonitoredTags.ToList(),Model.specialEnt);
                 }
-
             return false;
         }
 
-
-
         
         #endregion
+
 
 
         #region Interface
@@ -721,11 +722,11 @@ namespace SimatekExCnahger
             OracleSyncStartStop(false);
         }
 
-        #endregion
+        
 
         private void btn_oraTestConnection_Click(object sender, RoutedEventArgs e)
         {
-            Model.addLogRecord("Ora connectin test started...");
+            Model.addLogRecord(OraExchanger.TAG, "Ora connectin test started...");
             bgwOraTestConnection.RunWorkerAsync();
         }
 
@@ -760,12 +761,12 @@ namespace SimatekExCnahger
 
         private void btn_ShowLocalTable_Click(object sender, RoutedEventArgs e)
         {
-            LocalDBCreate();
+            LocalDBLoad();
         }
 
         private void btn_LocalTableInsert_Click(object sender, RoutedEventArgs e)
         {
-            Model.addLogRecord("Local Db test record to insert...");
+            Model.addLogRecord(dbLocalManager.TAG, "Local Db test record to insert...");
             LocalDBInsert(true);
         }
 
@@ -778,6 +779,31 @@ namespace SimatekExCnahger
         {
             bgwStarter.CancelAsync();
         }
+
+        private void btn_RemoteTableInsert_Click(object sender, RoutedEventArgs e)
+        {
+            if (oraEx != null)
+            {
+                Dispatcher.Invoke(DispatcherPriority.Background,
+                    new Action(delegate
+                    {
+                        oraEx.AddTestRecord();
+                    }));
+            }
+
+
+        }
+
+        private void btn_CreateLocalDb_Click(object sender, RoutedEventArgs e)
+        {
+            LocalDBCreate();
+        }
+
+        #endregion
+
+
+
+        #region Additional functions
 
         // Checking the version using >= will enable forward compatibility, 
         // however you should always compile your code on newer versions of
@@ -869,9 +895,23 @@ namespace SimatekExCnahger
             return outlist;
         }
 
-        private void btn_RemoteTableInsert_Click(object sender, RoutedEventArgs e)
+
+
+        #endregion
+
+        private void btn_LogFilter_Click(object sender, RoutedEventArgs e)
         {
-            oraEx.AddTestRecord();
+            LogFilter TAG = (LogFilter)((Button)sender).Tag;
+
+            Model.SetLogFilter(TAG);
+        }
+
+        private void btn_RemoteInitFields_Click(object sender, RoutedEventArgs e)
+        {
+            if (oraEx != null)
+            {
+                OraTableInit();
+            }
         }
     }
 }

@@ -9,6 +9,21 @@ namespace ClassLibGlobal
 {
     public class gLogEntity : Entity
     {
+        private string _tag;
+        public string Tag
+        {
+            get
+            {
+                return _tag;
+            }
+            set
+            {
+                _tag = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("Tag"));
+            }
+        }
+
+
         private string _message;
         public string message
         {
@@ -52,8 +67,14 @@ namespace ClassLibGlobal
             }
         }
 
-        public gLogEntity (string m)
+        public gLogEntity()
         {
+
+        }
+
+        public gLogEntity (string TAG, string m)
+        {
+            Tag = TAG;
             message = m;
             time = DateTime.Now.ToString("hh:mm:ss");
             Entry = time + ": " + message;

@@ -12,6 +12,8 @@ namespace EFlocalDB
         public DbSet<dbServerItem> dbServerConfig { get; set; }
         public DbSet<dbTagItem> dbTag { get; set; }
 
+        public DbSet<dbLogItem> dbLog{ get; set; }
+
 
         public dbConfContext(bool isNew)
             : base(OneConnectionString(""))

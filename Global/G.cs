@@ -6,6 +6,16 @@ using System.Threading.Tasks;
 
 namespace ClassLibGlobal
 {
+
+    public enum LogFilter
+    {
+        All,
+        OPC,
+        LocalDB,
+        RemoteDB,
+        GUI
+    }
+
     public static class G
     {
 

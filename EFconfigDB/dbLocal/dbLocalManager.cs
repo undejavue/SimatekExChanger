@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.Data.Entity;
 using ClassLibGlobal;
-using ClassLibOracle;
 using System.Linq;
 using ClassLibOPC;
 using System.ComponentModel;
@@ -12,16 +11,17 @@ namespace EFlocalDB
 {
     public class dbLocalManager
     {
-        dbLocalContext context;
-        public ObservableCollection<gLogEntity> messageLog;
-        private ObservableCollection<dbLocalRecord> records;
+        public static string TAG = LogFilter.LocalDB.ToString();
 
-        public dbLocalManager(string filename)
+        private dbLocalContext context;
+        public ObservableCollection<gLogEntity> messageLog;
+
+        public dbLocalManager(string filename, bool isNew)
         {
             messageLog = new ObservableCollection<gLogEntity>();
 
             try {
-                context = new dbLocalContext(filename);
+                context = new dbLocalContext(filename, isNew);
                 logMessage("Local database created, stored in " + filename);
             }
             catch (Exception ex)
@@ -171,7 +171,7 @@ namespace EFlocalDB
 
         private void logMessage(string message)
         {
-            messageLog.Add(new gLogEntity(message));
+            messageLog.Add(new gLogEntity(TAG, message));
             OnReportMessage(message);
         }
 

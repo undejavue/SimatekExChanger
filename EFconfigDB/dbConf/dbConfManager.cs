@@ -16,36 +16,72 @@ namespace EFlocalDB
 {
     public class dbConfManager
     {
-        dbConfContext context;
+        private dbConfContext context;
+        private string dbPath;
 
         public dbConfManager()
         {
 
- 
-
         }
 
-        public void Save(dbServerItem server, string dbFilePath)
+        public bool Save(dbServerItem server, string dbFilePath)
         {
-            using (context = new dbConfContext(dbFilePath))
-            {             
-                context.dbServerConfig.Add(server);
-                context.SaveChanges();
+            dbPath = dbFilePath;
+
+            try {
+
+                using (context = new dbConfContext(dbFilePath))
+                {
+                    context.dbServerConfig.Add(server);
+                    context.SaveChanges();
+
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
             }
         }
 
         public dbServerItem Load(string dbFilePath)
         {
+
+            dbPath = dbFilePath;
             ObservableCollection<dbServerItem> config = new ObservableCollection<dbServerItem>();
 
-            using (context = new dbConfContext(dbFilePath))
+            try
             {
-                context.dbServerConfig.Include(s => s.opcMonitoredTags).Load();
 
-                config = context.dbServerConfig.Local;
+                using (context = new dbConfContext(dbFilePath))
+                {
+                    context.dbServerConfig.Include(s => s.opcMonitoredTags).Load();
+                    config = context.dbServerConfig.Local;
+                }
+
+                return config.LastOrDefault();
+            }
+            catch
+            {
+                return new dbServerItem();
             }
 
-            return config.LastOrDefault();
+            
+        }
+
+
+        public bool SaveLogs(List<dbLogItem> logs)
+        {
+            if (!string.IsNullOrEmpty(dbPath))
+            {
+                using (context = new dbConfContext(dbPath))
+                {
+                    context.dbLog.AddRange(logs);
+                    context.SaveChanges();
+                    return true;
+                }
+            }
+            return false;
         }
 
     }

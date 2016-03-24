@@ -14,6 +14,8 @@ namespace ClassLibOPC
 {
     public class exOPCserver
     {
+        public static string TAG = LogFilter.OPC.ToString();
+
         private Opc.URL url;
         private Opc.Da.Server server;
         private OpcCom.Factory factory;
@@ -27,13 +29,11 @@ namespace ClassLibOPC
         public ObservableCollection<mTag> monitoredTags;
         public List<mTag> restoredTagList;
         public mServerItem selectedServer;
-
         public List<string> messageLog;
 
         public gErrorEntity error { get; set; }
 
-        
-
+       
 
         public exOPCserver ()
         {
@@ -50,9 +50,7 @@ namespace ClassLibOPC
             selectedServer.ReconnectInterval = 5000;
 
             configureWatchDog();
-
             error = new gErrorEntity(0, "Initialized");
-
         }
 
 
@@ -112,27 +110,22 @@ namespace ClassLibOPC
             {
                 try
                 {
-
                     selectedServer.isConnected = server.IsConnected;
                     selectedServer.Name = server.Name;
                     selectedServer.UrlString = server.Url.ToString();
-
                     serverStatus = server.GetStatus();
                     selectedServer.StatusInfo = serverStatus.StatusInfo;
                     selectedServer.ServerState = serverStatus.ServerState.ToString();
                     selectedServer.ProductVersion = serverStatus.ProductVersion;
                     selectedServer.VendorInfo = serverStatus.VendorInfo;
-
                 }
                 catch (Exception ex)
                 {
                     OnReportMessage("Fail to get server status, " + ex.Message.ToString());
-
                     selectedServer.StatusInfo = "unknown";
                     selectedServer.ServerState = "unknown";
                     selectedServer.ProductVersion = "unknown";
                     selectedServer.VendorInfo = "unknown";
-
                 }
             }
         }

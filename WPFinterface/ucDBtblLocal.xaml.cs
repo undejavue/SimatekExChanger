@@ -75,7 +75,7 @@ namespace SimatekExCnahger
         {
             InitializeComponent();
 
-            context = new dbLocalContext(dbFileName);
+            context = new dbLocalContext(dbFileName, false);
             context.dbRecords.Load();
 
             dgv_DBtable.ItemsSource = context.dbRecords.Local.ToBindingList();

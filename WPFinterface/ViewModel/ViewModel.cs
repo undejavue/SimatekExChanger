@@ -10,6 +10,7 @@ using ClassLibGlobal;
 using System.Windows.Threading;
 using EFlocalDB;
 using System.Windows.Media;
+using System.Windows;
 
 namespace SimatekExCnahger
 {
@@ -24,14 +25,20 @@ namespace SimatekExCnahger
         configLoaded
     }
 
+
     public class ViewModel : INotifyPropertyChanged
     {
         #region Public Properties
 
+        public LogFilter logFilter;
+
+        public static string TAG = LogFilter.GUI.ToString();
+
         /// <summary>
         /// Log of messages, buffer of strings
         /// </summary>
-        public ObservableCollection<gLogEntity> messageLog { get; set; }
+        private ObservableCollection<gLogEntity> messageLog { get; set; }
+        public ObservableCollection<gLogEntity> messageLogFiltered { get; set; }
         /// <summary>
         /// List of OPC servers
         /// </summary>
@@ -133,7 +140,6 @@ namespace SimatekExCnahger
             }
         }
 
-
         private bool _isRemoteDBConnected;
         public bool isRemoteDBConnected
         {
@@ -173,6 +179,34 @@ namespace SimatekExCnahger
             {
                 _isOPCwaiting = value;
                 OnPropertyChanged(new PropertyChangedEventArgs("isOPCwaiting"));
+            }
+        }
+
+        private bool _isLocalDbLoading;
+        public bool isLocalDbLoading
+        {
+            get
+            {
+                return _isLocalDbLoading;
+            }
+            set
+            {
+                _isLocalDbLoading = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("isLocalDbLoading"));
+            }
+        }
+
+        private bool _isRemoteDbLoading;
+        public bool isRemoteDbLoading
+        {
+            get
+            {
+                return _isRemoteDbLoading;
+            }
+            set
+            {
+                _isRemoteDbLoading = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("isRemoteDbLoading"));
             }
         }
 
@@ -225,6 +259,117 @@ namespace SimatekExCnahger
 
 
         #region Interface Buttons
+
+
+        private object _btn_LogFilterAll_Tag;
+        public object btn_LogFilterAll_Tag
+        {
+            get { return _btn_LogFilterAll_Tag; }
+            set
+            {
+                _btn_LogFilterAll_Tag = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("btn_LogFilterAll_Tag"));
+            }
+        }
+
+        private object _btn_LogFilterGUI_Tag;
+        public object btn_LogFilterGUI_Tag
+        {
+            get { return _btn_LogFilterGUI_Tag; }
+            set
+            {
+                _btn_LogFilterGUI_Tag = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("btn_LogFilterGUI_Tag"));
+            }
+        }
+
+        private object _btn_LogFilterOPC_Tag;
+        public object btn_LogFilterOPC_Tag
+        {
+            get { return _btn_LogFilterOPC_Tag; }
+            set
+            {
+                _btn_LogFilterOPC_Tag = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("btn_LogFilterOPC_Tag"));
+            }
+        }
+
+        private object _btn_LogFilterLocalDb_Tag;
+        public object btn_LogFilterLocalDb_Tag
+        {
+            get { return _btn_LogFilterLocalDb_Tag; }
+            set
+            {
+                _btn_LogFilterLocalDb_Tag = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("btn_LogFilterLocalDb_Tag"));
+            }
+        }
+
+        private object _btn_LogFilterRemoteDb_Tag;
+        public object btn_LogFilterRemoteDb_Tag
+        {
+            get { return _btn_LogFilterRemoteDb_Tag; }
+            set
+            {
+                _btn_LogFilterRemoteDb_Tag = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("btn_LogFilterRemoteDb_Tag"));
+            }
+        }
+
+        private Brush _btn_LogFilterAll_Brush;
+        public Brush btn_LogFilterAll_Brush
+        {
+            get { return _btn_LogFilterAll_Brush; }
+            set
+            {
+                _btn_LogFilterAll_Brush = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("btn_LogFilterAll_Brush"));
+            }
+        }
+
+        private Brush _btn_LogFilterGUI_Brush;
+        public Brush btn_LogFilterGUI_Brush
+        {
+            get { return _btn_LogFilterGUI_Brush; }
+            set
+            {
+                _btn_LogFilterGUI_Brush = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("btn_LogFilterGUI_Brush"));
+            }
+        }
+
+        private Brush _btn_LogFilterOPC_Brush;
+        public Brush btn_LogFilterOPC_Brush
+        {
+            get { return _btn_LogFilterOPC_Brush; }
+            set
+            {
+                _btn_LogFilterOPC_Brush = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("btn_LogFilterOPC_Brush"));
+            }
+        }
+
+        private Brush _btn_LogFilterLocalDb_Brush;
+        public Brush btn_LogFilterLocalDb_Brush
+        {
+            get { return _btn_LogFilterLocalDb_Brush; }
+            set
+            {
+                _btn_LogFilterLocalDb_Brush = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("btn_LogFilterLocalDb_Brush"));
+            }
+        }
+
+        private Brush _btn_LogFilterRemoteDb_Brush;
+        public Brush btn_LogFilterRemoteDb_Brush
+        {
+            get { return _btn_LogFilterRemoteDb_Brush; }
+            set
+            {
+                _btn_LogFilterRemoteDb_Brush = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("btn_LogFilterRemoteDb_Brush"));
+            }
+        }
 
 
         private bool _btn_Connect_isEnable;
@@ -433,22 +578,17 @@ namespace SimatekExCnahger
         #endregion
 
 
+        #region Constructors
         public ViewModel()
         {
             changeState(ModelState.initialized);
 
         }
+        #endregion
 
-        public void addLogRecord(string record)
-        {
-            messageLog.Add(new gLogEntity(record));
-        }
 
-        public List<string> unloadMessageLog()
-        {
-            return messageLog.Select(k => k.Entry).ToList();
-        }
-
+        #region Public methods
+      
         public void changeState(ModelState s)
         {
             state = s;
@@ -554,7 +694,6 @@ namespace SimatekExCnahger
             }
         }
 
-
         public void Initialize()
         {
             opcListServers = new ObservableCollection<mServerItem>();
@@ -565,7 +704,8 @@ namespace SimatekExCnahger
             selectedOPCserver = new mServerItem(true);
 
             messageLog = new ObservableCollection<gLogEntity>();
-            messageLog.Add(new gLogEntity("Start log"));
+            messageLog.Add(new gLogEntity(TAG, "Start log"));
+            messageLogFiltered = new ObservableCollection<gLogEntity>();
 
             btn_ClearTags_isEnable = false;
             btn_Connect_isEnable = true;
@@ -601,6 +741,9 @@ namespace SimatekExCnahger
             specialEnt.N_STAN = 5;
             specialEnt.G_UCHASTOK = "Z";
 
+            FilterButtonsSetTags();
+            SetLogFilter(LogFilter.All);
+
         }
 
         public void Clear()
@@ -613,7 +756,7 @@ namespace SimatekExCnahger
 
             infoLineColor = new SolidColorBrush(Colors.WhiteSmoke);
 
-            addLogRecord("ViewModel is cleared");
+            addLogRecord(TAG, "ViewModel is cleared");
         }
 
         public void SaveServer()
@@ -628,7 +771,7 @@ namespace SimatekExCnahger
             {
                 configuredServer.opcMonitoredTags.Add(new dbTagItem(tag));
             }
-            addLogRecord("Server configuration copied");
+            addLogRecord(TAG, "Server configuration copied");
         }
 
 
@@ -648,18 +791,127 @@ namespace SimatekExCnahger
                     mTag t = tag;
                     opcSubscribedTags.Add(t);
                 }
-                addLogRecord("Server configuration loaded successfully");
-                addLogRecord("Server url is: " + selectedOPCserver.UrlString);
-                addLogRecord("Tags count for subscribtion: " + opcSubscribedTags.Count.ToString());
+                addLogRecord(TAG, "Server configuration loaded successfully");
+                addLogRecord(TAG, "Server url is: " + selectedOPCserver.UrlString);
+                addLogRecord(TAG, "Tags count for subscribtion: " + opcSubscribedTags.Count.ToString());
                 return true;
             }
             catch (Exception ex)
             {
-                addLogRecord("Fail to load server configuration...");
-                addLogRecord(ex.Message);
+                addLogRecord(TAG, "Fail to load server configuration...");
+                addLogRecord(TAG, ex.Message);
                 return false;
             }
         }
+
+        #endregion
+
+
+        #region Message Log filter
+
+        public void addLogRecord(string TAG, string record)
+        {
+            messageLog.Add(new gLogEntity(TAG, record));
+            if (TAG.Equals(logFilter.ToString()) | logFilter.Equals(LogFilter.All))
+            {
+                messageLogFiltered.Add(new gLogEntity(TAG, record));
+            }
+
+            if (messageLog.Count > 1000)
+            {
+                //using (dbConfManager conf = new dbConfManager())
+                //{
+                //    conf.SaveLogs(messageLog.ToList());
+                //}
+                // MAKE DROP FOR BIG COUNT
+            }
+        }
+
+        public List<string> unloadMessageLog()
+        {
+            return messageLog.Select(k => k.Entry).ToList();
+        }
+
+        public void SetLogFilter(LogFilter TAG)
+        {
+            FilterLog(TAG);
+
+            Brush active = new SolidColorBrush(Colors.LightGreen);
+            Brush inactive = new SolidColorBrush(Colors.WhiteSmoke);
+
+            switch (TAG)
+            {
+                case LogFilter.All:
+                    btn_LogFilterAll_Brush = active;
+                    btn_LogFilterGUI_Brush = active;
+                    btn_LogFilterOPC_Brush = active;
+                    btn_LogFilterLocalDb_Brush = active;
+                    btn_LogFilterRemoteDb_Brush = active;
+                    break;
+                case LogFilter.GUI:
+                    btn_LogFilterAll_Brush = inactive;
+                    btn_LogFilterGUI_Brush = active;
+                    btn_LogFilterOPC_Brush = inactive;
+                    btn_LogFilterLocalDb_Brush = inactive;
+                    btn_LogFilterRemoteDb_Brush = inactive;
+                    break;
+                case LogFilter.LocalDB:
+                    btn_LogFilterAll_Brush = inactive;
+                    btn_LogFilterGUI_Brush = inactive;
+                    btn_LogFilterOPC_Brush = inactive;
+                    btn_LogFilterLocalDb_Brush = active;
+                    btn_LogFilterRemoteDb_Brush = inactive;
+                    break;
+                case LogFilter.RemoteDB:
+                    btn_LogFilterAll_Brush = inactive;
+                    btn_LogFilterGUI_Brush = inactive;
+                    btn_LogFilterOPC_Brush = inactive;
+                    btn_LogFilterLocalDb_Brush = inactive;
+                    btn_LogFilterRemoteDb_Brush = active;
+                    break;
+                case LogFilter.OPC:
+                    btn_LogFilterAll_Brush = inactive;
+                    btn_LogFilterGUI_Brush = inactive;
+                    btn_LogFilterOPC_Brush = active;
+                    btn_LogFilterLocalDb_Brush = inactive;
+                    btn_LogFilterRemoteDb_Brush = inactive;
+                    break;
+            }
+
+            
+        }
+
+        private void  FilterButtonsSetTags()
+        {
+            btn_LogFilterAll_Tag = LogFilter.All;
+            btn_LogFilterGUI_Tag = LogFilter.GUI;
+            btn_LogFilterOPC_Tag = LogFilter.OPC;
+            btn_LogFilterLocalDb_Tag = LogFilter.LocalDB;
+            btn_LogFilterRemoteDb_Tag = LogFilter.RemoteDB;
+        }
+
+        private void FilterLog(LogFilter TAG)
+        {
+            logFilter = TAG;
+
+            if (TAG == LogFilter.All)
+            {
+                messageLogFiltered.Clear();
+                foreach (gLogEntity entry in messageLog)
+                {
+                    messageLogFiltered.Add(entry);
+                }
+            }
+            else
+            {
+                messageLogFiltered.Clear();
+                foreach (gLogEntity entry in messageLog.Where(m => m.Tag == TAG.ToString()))
+                {
+                    messageLogFiltered.Add(entry);
+                }
+            }
+        }
+        #endregion
 
 
         public event PropertyChangedEventHandler PropertyChanged;

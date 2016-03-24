@@ -78,6 +78,7 @@
     <Compile Include="dbLocal\dbLocalContext.cs" />
     <Compile Include="dbLocal\dbLocalManager.cs" />
     <Compile Include="dbLocal\dbLocalRecord.cs" />
+    <Compile Include="dbConf\dbLogItem.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RecordLocalToRemoteConverter.cs" />
@@ -99,6 +100,9 @@
       <Project>{ff2664cd-ab52-4dd9-b9e7-9de81eea383b}</Project>
       <Name>ClassLibGlobal</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="dbLog\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

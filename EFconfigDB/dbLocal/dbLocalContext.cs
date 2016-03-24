@@ -29,9 +29,12 @@ namespace EFlocalDB
         }
 
 
-        public dbLocalContext(string filename): base(OneConnectionString(filename))
+        public dbLocalContext(string filename, bool isNew): base(OneConnectionString(filename))
         {
-            Database.SetInitializer<dbConfContext>(new DropCreateDatabaseIfModelChanges<dbConfContext>());
+            if (isNew)
+                Database.SetInitializer<dbConfContext>(new DropCreateDatabaseAlways<dbConfContext>());
+            else
+                Database.SetInitializer<dbConfContext>(new DropCreateDatabaseIfModelChanges<dbConfContext>());
 
             this.Configuration.LazyLoadingEnabled = false;
         }

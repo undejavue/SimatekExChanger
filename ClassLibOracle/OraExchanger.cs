@@ -13,6 +13,7 @@ namespace ClassLibOracle
 {
     public class OraExchanger
     {
+        public static string TAG = LogFilter.RemoteDB.ToString(); 
 
         private OraContext context;
         public bool isConnectionOK;
@@ -22,21 +23,15 @@ namespace ClassLibOracle
 
         public OraExchanger()
         {
-
             try
             {
-                int c = 0;
                 context = new OraContext();
                 
-                c = context.FIX_STAN789_T.Count();
-                
-                if (c > 0)
+                if ( context.FIX_STAN789_T.Any() )
                 {
                     isConnectionOK = true;
                     OnReportMessage("Oracle Connection success");
                 }
-
-                
             }
             catch (Exception ex)
             {
@@ -55,7 +50,7 @@ namespace ClassLibOracle
             {
                 try
                 {
-                    if (context.FIX_STAN789_T.Count() > 0)
+                    if (context.FIX_STAN789_T.Any())
                     {
                         isConnectionOK = true;
                     }
@@ -74,8 +69,14 @@ namespace ClassLibOracle
 
         public BindingList<FIX_STAN789_T> GetRecords()
         {
-            context.FIX_STAN789_T.Load();
-            return context.FIX_STAN789_T.Local.ToBindingList();
+            try {
+                context.FIX_STAN789_T.Load();
+                return context.FIX_STAN789_T.Local.ToBindingList();
+            }
+            catch (Exception ex)
+            {
+                return new BindingList<FIX_STAN789_T>();
+            }
         }
 
 
@@ -86,22 +87,18 @@ namespace ClassLibOracle
         public List<string> GetFields()
         {
             FIX_STAN789_T ent = new FIX_STAN789_T();
-
             List<string> list = new List<string>();
 
             foreach (var prop in ent.GetType().GetProperties())
             { 
-                if (prop.PropertyType != typeof(DateTime)   & !prop.Name.Equals("id", StringComparison.OrdinalIgnoreCase) 
+                if (prop.PropertyType != typeof(DateTime?)  & !prop.Name.Equals("id", StringComparison.OrdinalIgnoreCase) 
                                                             & !prop.Name.Contains("N_STAN")
                                                             & !prop.Name.Contains("G_UCHASTOK") )
                 {
-
                     string s = prop.Name;
-                    list.Add(s);
-                    
+                    list.Add(s);   
                 }
             }
-
             return list;
         }
 
