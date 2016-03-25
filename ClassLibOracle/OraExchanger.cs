@@ -26,12 +26,12 @@ namespace ClassLibOracle
             try
             {
                 context = new OraContext();
+
+                context.FIX_STAN789_T.Count();
                 
-                if ( context.FIX_STAN789_T.Any() )
-                {
-                    isConnectionOK = true;
-                    OnReportMessage("Oracle Connection success");
-                }
+                isConnectionOK = true;
+                OnReportMessage("Oracle Connection success");
+
             }
             catch (Exception ex)
             {
@@ -50,10 +50,9 @@ namespace ClassLibOracle
             {
                 try
                 {
-                    if (context.FIX_STAN789_T.Any())
-                    {
-                        isConnectionOK = true;
-                    }
+                    context.FIX_STAN789_T.Count();
+                    isConnectionOK = true;
+
                 }
                 catch (Exception ex)
                 {
@@ -190,7 +189,9 @@ namespace ClassLibOracle
             {
 
                 //var maxID = context.FIX_STAN789_T.First(x => x.ID == context.FIX_STAN789_T.Max(i => i.ID)).ID;
-                decimal maxID = context.FIX_STAN789_T.Max(f => f.ID);
+                decimal maxID = 0;
+                if ( context.FIX_STAN789_T.Count() > 0 )
+                    maxID = context.FIX_STAN789_T.Max(f => f.ID);
                 data.ID = maxID + 1;
                 context.FIX_STAN789_T.Add(data);
                 context.SaveChanges();
@@ -222,8 +223,10 @@ namespace ClassLibOracle
             bool result = false;
 
             try
-            {              
-                decimal maxID = context.FIX_STAN789_T.Max(f => f.ID);
+            {
+                decimal maxID = 0;
+                if (context.FIX_STAN789_T.Count() > 0)
+                    maxID = context.FIX_STAN789_T.Max(f => f.ID);
                 FIX_STAN789_T data = generateRecord(maxID + 1);
                 context.FIX_STAN789_T.Add(data);
                 context.SaveChanges();

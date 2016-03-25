@@ -269,7 +269,7 @@
                        VerticalAlignment="Center"  />
                 </StackPanel>
 
-                    <StackPanel Name="panel_MonitorControls" Grid.Row="0" Grid.Column="1"  Orientation="Horizontal" Margin="0,0" VerticalAlignment="Center"   >
+                    <StackPanel Name="panel_MonitorControls" Grid.Row="0" Grid.Column="1"  Orientation="Horizontal" Margin="0,0" VerticalAlignment="Center"    >
                     <Button Content="Monitor ON" x:Name="btn_Subscribe" HorizontalAlignment="Left" Margin="0,0,0,0" 
                         Click="btn_Subscribe_Click" IsEnabled="{Binding btn_Subscribe_isEnable}" Style="{StaticResource btn_workBtn}"/>
                     <Button Content="Monitor OFF" x:Name="btn_UnSubscribe" HorizontalAlignment="Left" Margin="10,0,0,0" 
@@ -277,7 +277,7 @@
                     <Button Content="Clear" x:Name="btn_ClearSubscription" HorizontalAlignment="Left" Margin="10,0,0,0" 
                         Click="btn_ClearSubscription_Click" IsEnabled="{Binding btn_ClearTags_isEnable}" Style="{StaticResource btn_workBtn}" />
 
-                        <Border Style="{StaticResource st_border}" Width="Auto" Margin="18,0" Background="#FFD0D7DC">
+                        <Border Style="{StaticResource st_border}" Width="Auto" Margin="14,0" Background="#FFD0D7DC">
                             <StackPanel Orientation="Horizontal"  >
                                 <Label Content="N_STAN" Width="Auto" />
                                 <TextBox Text="{Binding specialEnt.N_STAN}" Width="26" Margin="4,2" />
@@ -298,7 +298,7 @@
             </Border>
             <StackPanel Name="panel_LocalDb" Grid.Row="1" Grid.Column="0" >
                 <Border Background="#FFECECEC" Margin="10,10" BorderBrush="Gray" BorderThickness="1" Height="180" >
-                    <StackPanel Orientation="Vertical" Margin="10" >
+                    <StackPanel Orientation="Vertical" Margin="0,10" >
                         <Grid x:Name="grid_LocalDB" Margin="0"  DataContext="{Binding }">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -310,13 +310,13 @@
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="10*" />
-                                <ColumnDefinition Width="10*" />
+                                <ColumnDefinition Width="12*" />
                             </Grid.ColumnDefinitions>
                             <Label Grid.Row="0" Grid.Column="0" Content="Status" />
-                            <Label Grid.Row="0" Grid.Column="1" Content="NotLoaded" Background="DarkRed" Foreground="White" 
-                                       HorizontalAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Margin="2"  FontSize="12" Width="70" Height="24"   />
-                            <Label Grid.Row="0" Grid.Column="1" Content=" LOADED " Background="LightGreen" Foreground="Gray" 
-                                       HorizontalAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" Margin="2" FontSize="12" Width="70" Height="24" 
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text=" DISCONNECTED " Background="DarkRed" Foreground="White" Width="100"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center"  Margin="2"  FontSize="12"    />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="  CONNECTED   " Background="LightGreen" Foreground="Gray" Width="100"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"  Margin="2" FontSize="12" TextAlignment="Center"
                                    Visibility="{Binding isLocalDBConnected, Converter={StaticResource BoolToVis}}" />
 
                             <Label Grid.Row="1" Grid.Column="0" Content="New local Db" />
@@ -327,15 +327,16 @@
                                     Content="Load DB" Margin="2" Click="btn_ShowLocalTable_Click"/>
 
                             <Label Grid.Row="3" Grid.Column="0" Content="View Local Data" />
+                            <Button Grid.Row="3" Grid.Column="1" x:Name="btn_LocalTableView" Style="{StaticResource btn_workBtn}"
+                                    Content="View"  Margin="2" Click="btn_LocalTableView_Click"/>
                             
-                            <Border Grid.Row="3" Grid.Column="0" Style="{StaticResource st_border}" Background="#FF83D88F" Margin="2"
+                            <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource st_border}" Background="#FF83D88F" Margin="0"
                                     Visibility="{Binding isLocalDbLoading, Converter={StaticResource BoolToVis}}">
                                 <Label  Content="Loading..." HorizontalContentAlignment="Center" FontSize="13"  />
                             </Border>
                             
                             
-                            <Button Grid.Row="3" Grid.Column="1" x:Name="btn_LocalTableView" Style="{StaticResource btn_workBtn}"
-                                    Content="View"  Margin="2" Click="btn_LocalTableView_Click"/>
+                            
 
                             <Label Grid.Row="4" Grid.Column="0" Content="Test insert" />
                             <Button Grid.Row="4" Grid.Column="1"  Name="btn_LocalTableInsert" Style="{StaticResource btn_workBtn}"
@@ -363,24 +364,26 @@
                                 <ColumnDefinition Width="10*" />
                             </Grid.ColumnDefinitions>
                             <Label Grid.Row="0" Grid.Column="0" Content="Status" />
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text=" DISCONNECTED " Background="DarkRed" Foreground="White" 
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"  TextAlignment="Center" FontSize="12" Width="100"  />
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text=" CONNECTED " Background="LightGreen" Foreground="Gray" 
-                                       HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="12" Width="100" 
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text=" DISCONNECTED " Background="DarkRed" Foreground="White" Width="100"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"  TextAlignment="Center" FontSize="12"  />
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="  CONNECTED  " Background="LightGreen" Foreground="Gray" Width="100"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="12" 
                                    Visibility="{Binding isRemoteDBConnected, Converter={StaticResource BoolToVis}}" />
 
                             <Label Grid.Row="1" Grid.Column="0" Content="Test connection" />
                             <Button Grid.Row="1" Grid.Column="1" Content="Test Ora" x:Name="btn_oraTestConnection" Margin="2" 
                                 Click="btn_oraTestConnection_Click"  Style="{StaticResource btn_workBtn}" />
+
+                            <Button Grid.Row="2" Grid.Column="1" x:Name="btn_OraShowTable" Style="{StaticResource btn_workBtn}"
+                                    Content="View" Margin="2" Click="btn_OraShowTable_Click"/>
                             
                             <Label Grid.Row="2" Grid.Column="0" Content="View remote Data" />
-                            <Border Grid.Row="2" Grid.Column="0" Style="{StaticResource st_border}" Background="#FF83D88F" Margin="0"
+                            <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource st_border}" Background="#FF83D88F" Margin="0"
                                     Visibility="{Binding isRemoteDbLoading, Converter={StaticResource BoolToVis}}">
                                 <Label  Content="Loading..." HorizontalContentAlignment="Center" FontSize="13"  />
                             </Border>
 
-                            <Button Grid.Row="2" Grid.Column="1" x:Name="btn_OraShowTable" Style="{StaticResource btn_workBtn}"
-                                    Content="View" Margin="2" Click="btn_OraShowTable_Click"/>
+                            
 
                             <Label Grid.Row="3" Grid.Column="0" Content="Test insert" />
                             <Button Grid.Row="3" Grid.Column="1" x:Name="btn_RemoteTableInsert" Style="{StaticResource btn_workBtn}"
@@ -456,7 +459,7 @@
         </Grid>
 
 
-        <StackPanel Name="log_panel" Grid.Row="4" Grid.Column="0" Orientation="Vertical"  Margin="4,0" >
+        <StackPanel Name="log_panel" Grid.Row="4" Grid.Column="0" Orientation="Vertical"  Margin="5,0" >
             <Border Style="{StaticResource st_border}" Margin="4,0" BorderThickness="1,1,1,0"  >
                 <StackPanel Orientation="Horizontal" Height="24" Margin="5,0" >
                 <TextBlock Text="Filter log " FontSize="12" VerticalAlignment="Center" />
