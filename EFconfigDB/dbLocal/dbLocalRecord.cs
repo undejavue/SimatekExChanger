@@ -3,7 +3,7 @@ using ClassLibOracle;
 
 namespace EFlocalDB
 {
-    public class dbLocalRecord : FIX_STAN789_T, INotifyPropertyChanged
+    public class dbLocalRecord : oraEntity, INotifyPropertyChanged
     {
         private bool _flagIsSent;
         public bool flagIsSent
@@ -24,18 +24,11 @@ namespace EFlocalDB
             set
             {
                 _id = value;
-
                 OnPropertyChanged(new PropertyChangedEventArgs("pid"));
             }
         }
 
-
         public dbLocalRecord() { }
-
-        public dbLocalRecord(FIX_STAN789_T ent)
-        {
-            
-        }
 
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -52,14 +45,8 @@ namespace EFlocalDB
         private void test()
         {
             dbLocalRecord rec = new dbLocalRecord();
-
-            FIX_STAN789_T ent = new FIX_STAN789_T();
-
+            oraEntity ent = new oraEntity();
             ent = rec;
-
-            
-            
-
         }
     }
 

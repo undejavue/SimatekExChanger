@@ -19,17 +19,14 @@ namespace ClassLibOracle
         public bool isConnectionOK;
 
         //public ObservableCollection<oraEntity> items;
-        //private ObservableCollection<FIX_STAN789_T> oraItems;
+        //private ObservableCollection<ORA_TABLE> oraItems;
 
         public OraExchanger()
         {
             try
             {
                 context = new OraContext();
-
-                context.FIX_STAN789_T.Count();
-                
-                isConnectionOK = true;
+                isConnectionOK = context.Database.Exists();
                 OnReportMessage("Oracle Connection success");
 
             }
@@ -50,9 +47,7 @@ namespace ClassLibOracle
             {
                 try
                 {
-                    context.FIX_STAN789_T.Count();
-                    isConnectionOK = true;
-
+                    isConnectionOK = context.Database.Exists();
                 }
                 catch (Exception ex)
                 {
@@ -60,21 +55,22 @@ namespace ClassLibOracle
                     OnReportMessage("Oracle connection fail");
                     OnReportMessage(ex.ToString());
                 }
-
             }
             return isConnectionOK;
         }
 
 
-        public BindingList<FIX_STAN789_T> GetRecords()
+        public BindingList<oraEntity> GetRecords()
         {
-            try {
-                context.FIX_STAN789_T.Load();
-                return context.FIX_STAN789_T.Local.ToBindingList();
+            try
+            {
+                //context.ORA_TABLE.Load();
+                //return context.ORA_TABLE.Local.ToBindingList();
+                throw new NotImplementedException("Select procedure not defined");
             }
             catch (Exception ex)
             {
-                return new BindingList<FIX_STAN789_T>();
+                return new BindingList<oraEntity>();
             }
         }
 
@@ -85,11 +81,13 @@ namespace ClassLibOracle
         /// <returns></returns>
         public List<string> GetFields()
         {
-            FIX_STAN789_T ent = new FIX_STAN789_T();
+            oraEntity ent = new oraEntity();
             List<string> list = new List<string>();
 
             foreach (var prop in ent.GetType().GetProperties())
-            { 
+            {
+                gSpecialEntity gSpec = new gSpecialEntity();
+                
                 if (prop.PropertyType != typeof(DateTime?)  & !prop.Name.Equals("id", StringComparison.OrdinalIgnoreCase) 
                                                             & !prop.Name.Contains("N_STAN")
                                                             & !prop.Name.Contains("G_UCHASTOK") )
@@ -109,8 +107,8 @@ namespace ClassLibOracle
 
         public bool  insert(List<mTag> items , gSpecialEntity spec)
         {
-            FIX_STAN789_T ent = new FIX_STAN789_T();
-
+            DateTime insertTime = DateTime.Now;
+            oraEntity ent = new oraEntity();
             try
             {
                 foreach (var p in ent.GetType().GetProperties())
@@ -138,38 +136,34 @@ namespace ClassLibOracle
 
             ent.G_UCHASTOK = spec.G_UCHASTOK;
             ent.N_STAN = spec.N_STAN;
-            ent.INCOMIN_DATE = DateTime.Now; // ! change!!!
-            ent.WHEN_DATE = DateTime.Now;
+            ent.INCOMIN_DATE = insertTime;
 
-            
 
             return AddRecord(ent);
         }
 
 
-        public bool insert(List<FIX_STAN789_T> entities)
+        public bool insert(List<oraEntity> entities)
         {
             bool result = false;
             if (entities.Count > 0)
             {
                 try
                 {
-                    decimal maxID = context.FIX_STAN789_T.Max(i => i.ID);
 
-                    foreach (FIX_STAN789_T ent in entities)
+                    foreach (oraEntity ent in entities)
                     {
-                        ent.ID = maxID + 1;
-                        ent.WHEN_DATE = DateTime.Now;
-                        context.FIX_STAN789_T.Add(ent);
+                        // Insert procedure call
+                        
                     }
 
-                    
-                    context.SaveChanges();
+                    throw new InvalidOperationException("Storage procedure missing!");
 
+                    context.SaveChanges();
                     result = true;
                 }
 
-                catch (Exception ex)
+                catch (InvalidOperationException ex)
                 {
                     result = false;
                     OnReportMessage("Synchronization failed");
@@ -181,23 +175,25 @@ namespace ClassLibOracle
         }
 
        
-        public bool AddRecord(FIX_STAN789_T data)
+        public bool AddRecord(oraEntity data)
         {
             bool result = false;
-
             try
             {
+                int retVal = context.SP_INS_FIX_STAN789_T(data.INCOMIN_DATE, 
+                    data.N_STAN, 
+                    null, 
+                    null, 
+                    null, 
+                    null, 
+                    data.COUNTER, 
+                    data.INCOMIN_DATE, 
+                    data.G_UCHASTOK);
 
-                //var maxID = context.FIX_STAN789_T.First(x => x.ID == context.FIX_STAN789_T.Max(i => i.ID)).ID;
-                decimal maxID = 0;
-                if ( context.FIX_STAN789_T.Count() > 0 )
-                    maxID = context.FIX_STAN789_T.Max(f => f.ID);
-                data.ID = maxID + 1;
-                context.FIX_STAN789_T.Add(data);
                 context.SaveChanges();
 
                 isConnectionOK = true;
-                OnReportMessage("Remote DB, inserted with id=" + data.ID.ToString());
+                OnReportMessage("Remote DB, inserted with retVal = " + retVal.ToString());
 
                 result = true;
             }
@@ -224,19 +220,16 @@ namespace ClassLibOracle
 
             try
             {
-                decimal maxID = 0;
-                if (context.FIX_STAN789_T.Count() > 0)
-                    maxID = context.FIX_STAN789_T.Max(f => f.ID);
-                FIX_STAN789_T data = generateRecord(maxID + 1);
-                context.FIX_STAN789_T.Add(data);
+                oraEntity data = generateRecord();
+
+                throw new InvalidOperationException("Storage procedure missing!");
+
                 context.SaveChanges();
 
                 isConnectionOK = true;
-                OnReportMessage("Remote DB, TEST record inserted with id=" + data.ID.ToString());
-
                 result = true;
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 OnReportMessage("Insert fail for remote DB");
                 OnReportMessage(ex.Message.ToString());
@@ -253,23 +246,17 @@ namespace ClassLibOracle
         }
 
 
-        private FIX_STAN789_T generateRecord(decimal id)
+        private oraEntity generateRecord()
         {
-            FIX_STAN789_T r = new FIX_STAN789_T();
-
-            int i = Decimal.ToInt32(id);
-
-            r.ID = id;
-            r.COUNTER = i * 2;
+            oraEntity r = new oraEntity();
+            r.COUNTER = 22;
             r.BREAK = true;
             r.ERASE = true;
             r.INCOMIN_DATE = DateTime.Now;
             r.N_STAN = 0;
             r.REPLAC = false;
             r.START_STOP = true;
-            r.WHEN_DATE = DateTime.Now;
             r.G_UCHASTOK = "T";
-
             return r;
         }
         

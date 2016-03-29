@@ -56,14 +56,14 @@ namespace EFlocalDB
 
         private dbLocalRecord TagsToRecordEntity(ObservableCollection<mTag> items)
         {
-            dbLocalRecord ent = new dbLocalRecord();
+            dbLocalRecord localEnt = new dbLocalRecord();
 
             if (items.Count > 0)
             {
 
                 try
                 {
-                    foreach (var p in ent.GetType().GetProperties())
+                    foreach (var p in localEnt.GetType().GetProperties())
                     {
 
                         if (items.Any(k => k.NameInDb == p.Name))
@@ -77,7 +77,7 @@ namespace EFlocalDB
                             object propertyVal = Convert.ChangeType(t.Value, targetType);
 
                             //Set the value of the property
-                            p.SetValue(ent, propertyVal, null);
+                            p.SetValue(localEnt, propertyVal, null);
                         }
                     }
                 }
@@ -85,14 +85,10 @@ namespace EFlocalDB
                 {
 
                 }
-
-                ent.INCOMIN_DATE = DateTime.Now;
-                ent.WHEN_DATE = DateTime.Now;
-                ent.flagIsSent = false;
-
+                localEnt.INCOMIN_DATE = DateTime.Now;
+                localEnt.flagIsSent = false;
             }
-
-            return ent;
+            return localEnt;
         }
 
 

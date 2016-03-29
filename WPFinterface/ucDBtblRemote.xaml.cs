@@ -17,7 +17,7 @@ namespace SimatekExCnahger
         private ScrollViewer scroll;
 
 
-        public ucDBtblRemote(BindingList<FIX_STAN789_T> collection)
+        public ucDBtblRemote(BindingList<oraEntity> collection)
         {
             InitializeComponent();
 

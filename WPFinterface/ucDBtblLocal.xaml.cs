@@ -55,7 +55,7 @@ namespace SimatekExCnahger
             //dgv_DBtable.ScrollIntoView(CollectionView.NewItemPlaceholder);
         }
 
-        public ucDBtblLocal(ObservableCollection<FIX_STAN789_T> collection)
+        public ucDBtblLocal(ObservableCollection<oraEntity> collection)
         {
             InitializeComponent();
 

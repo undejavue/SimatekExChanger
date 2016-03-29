@@ -82,9 +82,6 @@
     <Compile Include="oraEntity.cs" />
     <Compile Include="oraEventArgs.cs" />
     <Compile Include="OraExchanger.cs" />
-    <Compile Include="FIX_STAN789_T.cs">
-      <DependentUpon>OraModel.tt</DependentUpon>
-    </Compile>
     <Compile Include="OraModel.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

@@ -9,14 +9,14 @@ namespace EFlocalDB
 {
     public class RecordLocalToRemoteConverter
     {
-        private FIX_STAN789_T oraEnt;
+        private oraEntity oraEnt;
 
         public RecordLocalToRemoteConverter()
         {
-            oraEnt = new FIX_STAN789_T();
+            oraEnt = new oraEntity();
         }
 
-        public FIX_STAN789_T return_oraRecord(dbLocalRecord rec)
+        public oraEntity return_oraRecord(dbLocalRecord rec)
         {
             oraEnt.BREAK = rec.BREAK;
             oraEnt.COUNTER = rec.COUNTER;
@@ -26,7 +26,6 @@ namespace EFlocalDB
             oraEnt.N_STAN = rec.N_STAN;
             oraEnt.REPLAC = rec.REPLAC;
             oraEnt.START_STOP = rec.START_STOP;
-            oraEnt.WHEN_DATE = rec.WHEN_DATE;
 
             return oraEnt;
         }

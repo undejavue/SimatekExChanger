@@ -216,7 +216,7 @@ namespace SimatekExCnahger
                 List<int> ids = records.Select(r => r.pid).ToList();
                 bgwOraSync.ReportProgress(40);
 
-                List<FIX_STAN789_T> oraRecords = new List<FIX_STAN789_T>();
+                List<oraEntity> oraRecords = new List<oraEntity>();
                 float p = 40;
                 float max = records.Count();
                 float step = (70f - p) / max;
@@ -790,7 +790,6 @@ namespace SimatekExCnahger
                         oraEx.AddTestRecord();
                     }));
             }
-
 
         }
 

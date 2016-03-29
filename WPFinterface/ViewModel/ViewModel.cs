@@ -738,8 +738,8 @@ namespace SimatekExCnahger
             opcError = new vmError(gError);
 
             specialEnt = new gSpecialEntity();
-            specialEnt.N_STAN = 5;
-            specialEnt.G_UCHASTOK = "Z";
+            specialEnt.N_STAN = 3;
+            specialEnt.G_UCHASTOK = "D";
 
             FilterButtonsSetTags();
             SetLogFilter(LogFilter.All);
