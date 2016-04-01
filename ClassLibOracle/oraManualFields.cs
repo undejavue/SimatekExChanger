@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
-namespace ClassLibGlobal
+namespace ClassLibOracle
 {
-    public class gSpecialEntity : Entity
+    public class oraManualFields : INotifyPropertyChanged
     {
         private string _G_UCHASTOK;
         public string G_UCHASTOK
@@ -19,7 +14,7 @@ namespace ClassLibGlobal
             set
             {
                 _G_UCHASTOK = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("isOPCwaiting"));
+                OnPropertyChanged(new PropertyChangedEventArgs("G_UCHASTOK"));
             }
         }
 
@@ -35,6 +30,14 @@ namespace ClassLibGlobal
                 _N_STAN = value;
                 OnPropertyChanged(new PropertyChangedEventArgs("N_STAN"));
             }
+        }
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChanged(PropertyChangedEventArgs e)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, e);
         }
 
     }

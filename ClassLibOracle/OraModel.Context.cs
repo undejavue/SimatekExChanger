@@ -28,11 +28,11 @@ namespace ClassLibOracle
         }
     
     
-        public virtual int SP_INS_FIX_STAN789_T(Nullable<System.DateTime> wHEN_VAR, Nullable<decimal> n_STAN_VAR, Nullable<decimal> sTART_STOP_VAR, Nullable<decimal> eRASE_VAR, Nullable<decimal> bREAK_VAR, Nullable<decimal> rEPLAC_VAR, Nullable<decimal> cOUNTER_VAR, Nullable<System.DateTime> iNCOMIN_DATE_VAR, string g_UCHASTOK_VAR)
+        public virtual int SP_INSERT_STAN(string g_UCHASTOK_VAR, Nullable<decimal> n_STAN_VAR, Nullable<decimal> sTART_STOP_VAR, Nullable<decimal> eRASE_VAR, Nullable<decimal> bREAK_VAR, Nullable<decimal> rEPLAC_VAR, Nullable<decimal> cOUNTER_VAR, Nullable<System.DateTime> iNCOMIN_DATE_VAR)
         {
-            var wHEN_VARParameter = wHEN_VAR.HasValue ?
-                new ObjectParameter("WHEN_VAR", wHEN_VAR) :
-                new ObjectParameter("WHEN_VAR", typeof(System.DateTime));
+            var g_UCHASTOK_VARParameter = g_UCHASTOK_VAR != null ?
+                new ObjectParameter("G_UCHASTOK_VAR", g_UCHASTOK_VAR) :
+                new ObjectParameter("G_UCHASTOK_VAR", typeof(string));
     
             var n_STAN_VARParameter = n_STAN_VAR.HasValue ?
                 new ObjectParameter("N_STAN_VAR", n_STAN_VAR) :
@@ -62,11 +62,7 @@ namespace ClassLibOracle
                 new ObjectParameter("INCOMIN_DATE_VAR", iNCOMIN_DATE_VAR) :
                 new ObjectParameter("INCOMIN_DATE_VAR", typeof(System.DateTime));
     
-            var g_UCHASTOK_VARParameter = g_UCHASTOK_VAR != null ?
-                new ObjectParameter("G_UCHASTOK_VAR", g_UCHASTOK_VAR) :
-                new ObjectParameter("G_UCHASTOK_VAR", typeof(string));
-    
-            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("SP_INS_FIX_STAN789_T", wHEN_VARParameter, n_STAN_VARParameter, sTART_STOP_VARParameter, eRASE_VARParameter, bREAK_VARParameter, rEPLAC_VARParameter, cOUNTER_VARParameter, iNCOMIN_DATE_VARParameter, g_UCHASTOK_VARParameter);
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction("SP_INSERT_STAN", g_UCHASTOK_VARParameter, n_STAN_VARParameter, sTART_STOP_VARParameter, eRASE_VARParameter, bREAK_VARParameter, rEPLAC_VARParameter, cOUNTER_VARParameter, iNCOMIN_DATE_VARParameter);
         }
     }
 }

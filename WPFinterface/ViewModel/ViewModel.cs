@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ClassLibOPC;
 using ClassLibGlobal;
-using System.Windows.Threading;
+using ClassLibOracle;
 using EFlocalDB;
 using System.Windows.Media;
-using System.Windows;
 
 namespace SimatekExCnahger
 {
@@ -252,7 +249,7 @@ namespace SimatekExCnahger
             }
         }
 
-        public gSpecialEntity specialEnt { get; set; }
+        public oraManualFields specialFields { get; set; }
 
 
         #endregion
@@ -737,9 +734,9 @@ namespace SimatekExCnahger
             gError = new gErrorEntity(1, "Created in model");
             opcError = new vmError(gError);
 
-            specialEnt = new gSpecialEntity();
-            specialEnt.N_STAN = 3;
-            specialEnt.G_UCHASTOK = "D";
+            specialFields = new oraManualFields();
+            specialFields.N_STAN = 3;
+            specialFields.G_UCHASTOK = "D";
 
             FilterButtonsSetTags();
             SetLogFilter(LogFilter.All);

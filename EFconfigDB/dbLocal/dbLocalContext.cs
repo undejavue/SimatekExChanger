@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
+﻿using System.Data.Entity;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EFlocalDB
@@ -20,9 +15,9 @@ namespace EFlocalDB
         {
 
             if (isNew)
-                Database.SetInitializer<dbConfContext>(new DropCreateDatabaseAlways<dbConfContext>());
+                Database.SetInitializer(new DropCreateDatabaseAlways<dbLocalContext>());
             else
-                Database.SetInitializer<dbConfContext>(new DropCreateDatabaseIfModelChanges<dbConfContext>());
+                Database.SetInitializer(new DropCreateDatabaseIfModelChanges<dbLocalContext>());
 
             this.Configuration.LazyLoadingEnabled = false;
 
@@ -32,9 +27,9 @@ namespace EFlocalDB
         public dbLocalContext(string filename, bool isNew): base(OneConnectionString(filename))
         {
             if (isNew)
-                Database.SetInitializer<dbConfContext>(new DropCreateDatabaseAlways<dbConfContext>());
+                Database.SetInitializer(new DropCreateDatabaseAlways<dbLocalContext>());
             else
-                Database.SetInitializer<dbConfContext>(new DropCreateDatabaseIfModelChanges<dbConfContext>());
+                Database.SetInitializer(new DropCreateDatabaseIfModelChanges<dbLocalContext>());
 
             this.Configuration.LazyLoadingEnabled = false;
         }

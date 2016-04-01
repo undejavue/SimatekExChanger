@@ -4,9 +4,9 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="Хранилище OraModel" Provider="Oracle.ManagedDataAccess.Client" ProviderManifestToken="11.2" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
-        <Function Name="SP_INS_FIX_STAN789_T" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="SYSTEM">
-          <Parameter Name="WHEN_VAR" Type="date" Mode="In" />
+    <Schema Namespace="Хранилище OraModel" Provider="Oracle.ManagedDataAccess.Client" ProviderManifestToken="11.2" Alias="Self" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <Function Name="SP_INSERT_STAN" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="SYSTEM">
+          <Parameter Name="G_UCHASTOK_VAR" Type="varchar2" Mode="In" />
           <Parameter Name="N_STAN_VAR" Type="number" Mode="In" />
           <Parameter Name="START_STOP_VAR" Type="number" Mode="In" />
           <Parameter Name="ERASE_VAR" Type="number" Mode="In" />
@@ -14,17 +14,15 @@
           <Parameter Name="REPLAC_VAR" Type="number" Mode="In" />
           <Parameter Name="COUNTER_VAR" Type="number" Mode="In" />
           <Parameter Name="INCOMIN_DATE_VAR" Type="date" Mode="In" />
-          <Parameter Name="G_UCHASTOK_VAR" Type="varchar2" Mode="In" />
         </Function>
-        <EntityContainer Name="Хранилище OraModelContainer">
-        </EntityContainer>
+        <EntityContainer Name="Хранилище OraModelContainer" />
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="OraModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
         <EntityContainer Name="OraContext" annotation:LazyLoadingEnabled="true">
-          <FunctionImport Name="SP_INS_FIX_STAN789_T">
-            <Parameter Name="WHEN_VAR" Mode="In" Type="DateTime" />
+          <FunctionImport Name="SP_INSERT_STAN">
+            <Parameter Name="G_UCHASTOK_VAR" Mode="In" Type="String" />
             <Parameter Name="N_STAN_VAR" Mode="In" Type="Decimal" />
             <Parameter Name="START_STOP_VAR" Mode="In" Type="Decimal" />
             <Parameter Name="ERASE_VAR" Mode="In" Type="Decimal" />
@@ -32,17 +30,16 @@
             <Parameter Name="REPLAC_VAR" Mode="In" Type="Decimal" />
             <Parameter Name="COUNTER_VAR" Mode="In" Type="Decimal" />
             <Parameter Name="INCOMIN_DATE_VAR" Mode="In" Type="DateTime" />
-            <Parameter Name="G_UCHASTOK_VAR" Mode="In" Type="String" />
           </FunctionImport>
-          </EntityContainer>
+        </EntityContainer>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="Хранилище OraModelContainer" CdmEntityContainer="OraContext">
-          <FunctionImportMapping FunctionImportName="SP_INS_FIX_STAN789_T" FunctionName="Хранилище OraModel.SP_INS_FIX_STAN789_T" />
-          </EntityContainerMapping>
+          <FunctionImportMapping FunctionImportName="SP_INSERT_STAN" FunctionName="Хранилище OraModel.SP_INSERT_STAN" />
+        </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
   </edmx:Runtime>
@@ -56,7 +53,7 @@
     <Options>
       <DesignerInfoPropertySet>
         <DesignerProperty Name="ValidateOnBuild" Value="true" />
-        <DesignerProperty Name="EnablePluralization" Value="True" />
+        <DesignerProperty Name="EnablePluralization" Value="False" />
         <DesignerProperty Name="IncludeForeignKeysInModel" Value="false" />
         <DesignerProperty Name="UseLegacyProvider" Value="false" />
         <DesignerProperty Name="CodeGenerationStrategy" Value="Нет" />

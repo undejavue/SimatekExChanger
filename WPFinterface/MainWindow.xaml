@@ -222,6 +222,7 @@
                     <TextBlock Text="{Binding opcError.code }" VerticalAlignment="Center" Margin="10,0" Width="30" Foreground="{Binding opcError.foreColor}" />
                     <TextBlock Text="{Binding opcError.message}" VerticalAlignment="Center" Margin="4,0" Width="Auto" Foreground="{Binding opcError.foreColor}" />
                 </StackPanel>
+                
             </Border>
 
             <StackPanel Name="panel_url" Orientation="Vertical" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" VerticalAlignment="Center">
@@ -280,9 +281,9 @@
                         <Border Style="{StaticResource st_border}" Width="Auto" Margin="14,0" Background="#FFD0D7DC">
                             <StackPanel Orientation="Horizontal"  >
                                 <Label Content="N_STAN" Width="Auto" />
-                                <TextBox Text="{Binding specialEnt.N_STAN}" Width="26" Margin="4,2" />
+                                <TextBox Text="{Binding specialFields.N_STAN}" Width="26" Margin="4,2" />
                                 <Label Content="G_UCHASTOK" Width="Auto" />
-                                <TextBox Text="{Binding specialEnt.G_UCHASTOK}" Width="26" Margin="4,2"  />
+                                <TextBox Text="{Binding specialFields.G_UCHASTOK}" Width="26" Margin="4,2"  />
                             </StackPanel>
                         </Border>
 
@@ -375,7 +376,7 @@
                                 Click="btn_oraTestConnection_Click"  Style="{StaticResource btn_workBtn}" />
 
                             <Button Grid.Row="2" Grid.Column="1" x:Name="btn_OraShowTable" Style="{StaticResource btn_workBtn}"
-                                    Content="View" Margin="2" Click="btn_OraShowTable_Click"/>
+                                    Content="View" Margin="2" Click="btn_OraShowTable_Click" IsEnabled="False"/>
                             
                             <Label Grid.Row="2" Grid.Column="0" Content="View remote Data" />
                             <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource st_border}" Background="#FF83D88F" Margin="0"

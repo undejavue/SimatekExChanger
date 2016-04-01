@@ -556,9 +556,8 @@ namespace SimatekExCnahger
         {
             Model.opcSubscribedTags.Clear();
 
-            if (oraEx != null)
 
-            foreach (string s in oraEx.GetFields())
+            foreach (string s in OraExchanger.GetFields())
             {
                 mTag tag = new mTag();
                 tag.NameInDb = s;
@@ -628,7 +627,7 @@ namespace SimatekExCnahger
             if (oraEx != null)
                 if (oraEx.isConnectionOK)
                 {
-                    return oraEx.insert(Model.opcMonitoredTags.ToList(),Model.specialEnt);
+                    return oraEx.insert(Model.opcMonitoredTags.ToList(),Model.specialFields);
                 }
             return false;
         }
@@ -784,11 +783,13 @@ namespace SimatekExCnahger
         {
             if (oraEx != null)
             {
-                Dispatcher.Invoke(DispatcherPriority.Background,
-                    new Action(delegate
-                    {
-                        oraEx.AddTestRecord();
-                    }));
+                //Dispatcher.Invoke(DispatcherPriority.Background,
+                //    new Action(delegate
+                //    {
+                //        //oraEx.AddTestRecord();
+                //    }));
+                oraManualFields man = new oraManualFields();
+                oraEx.insert(Model.opcMonitoredTags.ToList(), man );
             }
 
         }
@@ -907,10 +908,9 @@ namespace SimatekExCnahger
 
         private void btn_RemoteInitFields_Click(object sender, RoutedEventArgs e)
         {
-            if (oraEx != null)
-            {
-                OraTableInit();
-            }
+
+            OraTableInit();
+
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Data.Entity;
 using System.ComponentModel;
 using ClassLibOPC;
 using ClassLibGlobal;
+using System.Globalization;
 
 namespace ClassLibOracle
 {
@@ -28,7 +29,6 @@ namespace ClassLibOracle
                 context = new OraContext();
                 isConnectionOK = context.Database.Exists();
                 OnReportMessage("Oracle Connection success");
-
             }
             catch (Exception ex)
             {
@@ -36,8 +36,7 @@ namespace ClassLibOracle
                 OnReportMessage("Oracle Connection fail");
                 OnReportMessage(ex.ToString());
             }
-            
-
+           
         }
 
 
@@ -75,23 +74,28 @@ namespace ClassLibOracle
         }
 
 
+
         /// <summary>
         /// Get list of names of database table fields 
         /// </summary>
         /// <returns></returns>
-        public List<string> GetFields()
+        public static List<string> GetFields()
         {
             oraEntity ent = new oraEntity();
             List<string> list = new List<string>();
 
             foreach (var prop in ent.GetType().GetProperties())
             {
-                gSpecialEntity gSpec = new gSpecialEntity();
+                oraManualFields gSpec = new oraManualFields();
                 
+                
+
                 if (prop.PropertyType != typeof(DateTime?)  & !prop.Name.Equals("id", StringComparison.OrdinalIgnoreCase) 
                                                             & !prop.Name.Contains("N_STAN")
                                                             & !prop.Name.Contains("G_UCHASTOK") )
                 {
+                    
+
                     string s = prop.Name;
                     list.Add(s);   
                 }
@@ -105,34 +109,33 @@ namespace ClassLibOracle
             return type.IsGenericType && type.GetGenericTypeDefinition().Equals(typeof(Nullable<>));
         }
 
-        public bool  insert(List<mTag> items , gSpecialEntity spec)
+        public bool  insert(List<mTag> items , oraManualFields spec)
         {
             DateTime insertTime = DateTime.Now;
             oraEntity ent = new oraEntity();
-            try
+
+            foreach (var p in ent.GetType().GetProperties())
             {
-                foreach (var p in ent.GetType().GetProperties())
+
+                if (items.Any(k => k.NameInDb == p.Name))
                 {
+                    mTag t = items.First(k => k.NameInDb == p.Name);
 
-                    if (items.Any(k => k.NameInDb == p.Name))
+                    var targetType = IsNullableType(p.PropertyType) ? Nullable.GetUnderlyingType(p.PropertyType) : p.PropertyType;
+
+                    try
                     {
-                        mTag t = items.First(k => k.NameInDb == p.Name);
-
-                        var targetType = IsNullableType(p.PropertyType) ? Nullable.GetUnderlyingType(p.PropertyType) : p.PropertyType;
-
                         //Returns an System.Object with the specified System.Type and whose value is
                         //equivalent to the specified object.
-                        object propertyVal = Convert.ChangeType(t.Value, targetType);
+                        object propertyVal = Convert.ChangeType(t.Value, targetType, CultureInfo.InvariantCulture);
 
                         //Set the value of the property
                         p.SetValue(ent, propertyVal, null);
                     }
+                    catch (Exception ex) { string s = ex.Message; }
                 }
             }
-            catch (Exception ex)
-            {
-                
-            }
+
 
             ent.G_UCHASTOK = spec.G_UCHASTOK;
             ent.N_STAN = spec.N_STAN;
@@ -146,19 +149,26 @@ namespace ClassLibOracle
         public bool insert(List<oraEntity> entities)
         {
             bool result = false;
+            int retVal = 0;
             if (entities.Count > 0)
             {
                 try
                 {
 
-                    foreach (oraEntity ent in entities)
+                    foreach (oraEntity e in entities)
                     {
-                        // Insert procedure call
-                        
+                        retVal = context.SP_INSERT_STAN(e.G_UCHASTOK,
+                        e.N_STAN,
+                       null,// e.START_STOP,
+                        e.ERASE,
+                        e.BREAK,
+                        e.REPLAC,
+                        e.COUNTER,
+                        e.INCOMIN_DATE);
                     }
 
-                    throw new InvalidOperationException("Storage procedure missing!");
-
+                    //throw new InvalidOperationException("Storage procedure missing!");
+                    OnReportMessage("Synchronization success, retVal = " + retVal.ToString());
                     context.SaveChanges();
                     result = true;
                 }
@@ -175,23 +185,22 @@ namespace ClassLibOracle
         }
 
        
-        public bool AddRecord(oraEntity data)
+        public bool AddRecord(oraEntity e)
         {
             bool result = false;
             try
             {
-                int retVal = context.SP_INS_FIX_STAN789_T(data.INCOMIN_DATE, 
-                    data.N_STAN, 
-                    null, 
-                    null, 
-                    null, 
-                    null, 
-                    data.COUNTER, 
-                    data.INCOMIN_DATE, 
-                    data.G_UCHASTOK);
-
+                int retVal =
+                    context.SP_INSERT_STAN(e.G_UCHASTOK,
+                                            e.N_STAN,
+                                            null, //e.START_STOP,
+                                            e.ERASE,
+                                            e.BREAK,
+                                            e.REPLAC,
+                                            e.COUNTER,
+                                            e.INCOMIN_DATE);
+                   
                 context.SaveChanges();
-
                 isConnectionOK = true;
                 OnReportMessage("Remote DB, inserted with retVal = " + retVal.ToString());
 
@@ -220,13 +229,20 @@ namespace ClassLibOracle
 
             try
             {
-                oraEntity data = generateRecord();
+                oraEntity e = generateRecord();
 
-                throw new InvalidOperationException("Storage procedure missing!");
+                int retVal = context.SP_INSERT_STAN(e.G_UCHASTOK,
+                            e.N_STAN,
+                            null, //e.START_STOP,
+                            e.ERASE,
+                            e.BREAK,
+                            e.REPLAC,
+                            e.COUNTER,
+                            e.INCOMIN_DATE);
 
                 context.SaveChanges();
-
                 isConnectionOK = true;
+                OnReportMessage("Remote DB, inserted with retVal = " + retVal.ToString());
                 result = true;
             }
             catch (InvalidOperationException ex)
@@ -250,12 +266,12 @@ namespace ClassLibOracle
         {
             oraEntity r = new oraEntity();
             r.COUNTER = 22;
-            r.BREAK = true;
-            r.ERASE = true;
+            r.BREAK = 1;
+            r.ERASE = 1;
             r.INCOMIN_DATE = DateTime.Now;
             r.N_STAN = 0;
-            r.REPLAC = false;
-            r.START_STOP = true;
+            r.REPLAC = 0;
+            //r.START_STOP = 1;
             r.G_UCHASTOK = "T";
             return r;
         }
