@@ -808,12 +808,6 @@ namespace SimatekExCnahger
 
         public void addLogRecord(string TAG, string record)
         {
-            messageLog.Add(new gLogEntity(TAG, record));
-            if (TAG.Equals(logFilter.ToString()) | logFilter.Equals(LogFilter.All))
-            {
-                messageLogFiltered.Add(new gLogEntity(TAG, record));
-            }
-
             if (messageLog.Count > 1000)
             {
                 //using (dbConfManager conf = new dbConfManager())
@@ -821,6 +815,15 @@ namespace SimatekExCnahger
                 //    conf.SaveLogs(messageLog.ToList());
                 //}
                 // MAKE DROP FOR BIG COUNT
+
+                messageLog.Clear();
+                messageLogFiltered.Clear();
+            }
+
+            messageLog.Add(new gLogEntity(TAG, record));
+            if (TAG.Equals(logFilter.ToString()) | logFilter.Equals(LogFilter.All))
+            {
+                messageLogFiltered.Add(new gLogEntity(TAG, record));
             }
         }
 

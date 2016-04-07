@@ -9,19 +9,23 @@ using System.ComponentModel;
 using ClassLibOPC;
 using ClassLibGlobal;
 using System.Globalization;
+using System.Data.Entity.Core.Objects;
 
 namespace ClassLibOracle
 {
+    /// <summary>
+    /// Remote databse (Oracle) exchange class
+    /// </summary>
     public class OraExchanger
     {
         public static string TAG = LogFilter.RemoteDB.ToString(); 
-
         private OraContext context;
         public bool isConnectionOK;
 
-        //public ObservableCollection<oraEntity> items;
-        //private ObservableCollection<ORA_TABLE> oraItems;
 
+        /// <summary>
+        /// Operation with remote Oracle database
+        /// </summary>
         public OraExchanger()
         {
             try
@@ -35,11 +39,13 @@ namespace ClassLibOracle
                 isConnectionOK = false;
                 OnReportMessage("Oracle Connection fail");
                 OnReportMessage(ex.ToString());
-            }
-           
+            }           
         }
 
-
+        /// <summary>
+        /// Test connection by checking if database exist in context
+        /// </summary>
+        /// <returns>True if connected, fail message if not</returns>
         public bool TestConnection()
         {
             if (context != null)
@@ -58,7 +64,10 @@ namespace ClassLibOracle
             return isConnectionOK;
         }
 
-
+        /// <summary>
+        /// Select records from remote table
+        /// </summary>
+        /// <returns>Binding list as a result of select operation</returns>
         public BindingList<oraEntity> GetRecords()
         {
             try
@@ -76,9 +85,9 @@ namespace ClassLibOracle
 
 
         /// <summary>
-        /// Get list of names of database table fields 
+        /// Get database table field names list
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Field names</returns>
         public static List<string> GetFields()
         {
             oraEntity ent = new oraEntity();
@@ -86,16 +95,11 @@ namespace ClassLibOracle
 
             foreach (var prop in ent.GetType().GetProperties())
             {
-                oraManualFields gSpec = new oraManualFields();
-                
-                
-
+                oraManualFields gSpec = new oraManualFields();                          
                 if (prop.PropertyType != typeof(DateTime?)  & !prop.Name.Equals("id", StringComparison.OrdinalIgnoreCase) 
                                                             & !prop.Name.Contains("N_STAN")
                                                             & !prop.Name.Contains("G_UCHASTOK") )
-                {
-                    
-
+                {                   
                     string s = prop.Name;
                     list.Add(s);   
                 }
@@ -109,6 +113,14 @@ namespace ClassLibOracle
             return type.IsGenericType && type.GetGenericTypeDefinition().Equals(typeof(Nullable<>));
         }
 
+
+        /// <summary>
+        /// Insert tag values to database
+        /// Convert list of tags in db table fields values to insert
+        /// </summary>
+        /// <param name="items">Tag items</param>
+        /// <param name="spec">Manually entered from UI params</param>
+        /// <returns>True if insert procedure is ok</returns>
         public bool  insert(List<mTag> items , oraManualFields spec)
         {
             DateTime insertTime = DateTime.Now;
@@ -116,36 +128,38 @@ namespace ClassLibOracle
 
             foreach (var p in ent.GetType().GetProperties())
             {
-
                 if (items.Any(k => k.NameInDb == p.Name))
                 {
                     mTag t = items.First(k => k.NameInDb == p.Name);
-
                     var targetType = IsNullableType(p.PropertyType) ? Nullable.GetUnderlyingType(p.PropertyType) : p.PropertyType;
 
                     try
                     {
-                        //Returns an System.Object with the specified System.Type and whose value is
-                        //equivalent to the specified object.
                         object propertyVal = Convert.ChangeType(t.Value, targetType, CultureInfo.InvariantCulture);
-
-                        //Set the value of the property
                         p.SetValue(ent, propertyVal, null);
                     }
-                    catch (Exception ex) { string s = ex.Message; }
+                    catch (Exception ex)
+                    {
+                        OnReportMessage("Tags <=> Fields conversion fail ");
+                        OnReportMessage(ex.Message);
+                    }
                 }
             }
 
-
+            // Values from UI
             ent.G_UCHASTOK = spec.G_UCHASTOK;
             ent.N_STAN = spec.N_STAN;
-            ent.INCOMIN_DATE = insertTime;
 
+            ent.INCOMIN_DATE = insertTime;
 
             return AddRecord(ent);
         }
 
-
+        /// <summary>
+        /// Insert collection of entities to database
+        /// </summary>
+        /// <param name="entities">Oracle entity list</param>
+        /// <returns>True if insert ok</returns>
         public bool insert(List<oraEntity> entities)
         {
             bool result = false;
@@ -154,17 +168,17 @@ namespace ClassLibOracle
             {
                 try
                 {
-
                     foreach (oraEntity e in entities)
                     {
-                        retVal = context.SP_INSERT_STAN(e.G_UCHASTOK,
-                        e.N_STAN,
-                       null,// e.START_STOP,
-                        e.ERASE,
-                        e.BREAK,
-                        e.REPLAC,
-                        e.COUNTER,
-                        e.INCOMIN_DATE);
+                        
+                        context.RUN_PROC_GUILD_OPC(e.G_UCHASTOK, 
+                            e.N_STAN, 
+                            e.START_STOP, 
+                            e.ERASE, e.BREAK, 
+                            e.REPLAC, 
+                            e.COUNTER, 
+                            e.INCOMIN_DATE);
+                            
                     }
 
                     //throw new InvalidOperationException("Storage procedure missing!");
@@ -172,7 +186,6 @@ namespace ClassLibOracle
                     context.SaveChanges();
                     result = true;
                 }
-
                 catch (InvalidOperationException ex)
                 {
                     result = false;
@@ -180,35 +193,46 @@ namespace ClassLibOracle
                     OnReportMessage(ex.Message);
                 }
             }
-
             return result;
         }
 
-       
-        public bool AddRecord(oraEntity e)
+       /// <summary>
+       /// Insert entity to db table
+       /// </summary>
+       /// <param name="e">Oracle entity</param>
+       /// <returns>True if added and commited</returns>
+        private bool AddRecord(oraEntity e)
         {
             bool result = false;
+
             try
             {
-                int retVal =
-                    context.SP_INSERT_STAN(e.G_UCHASTOK,
-                                            e.N_STAN,
-                                            null, //e.START_STOP,
-                                            e.ERASE,
-                                            e.BREAK,
-                                            e.REPLAC,
-                                            e.COUNTER,
-                                            e.INCOMIN_DATE);
-                   
+                int ret = 
+                context.RUN_PROC_GUILD_OPC(e.G_UCHASTOK,
+                            e.N_STAN,
+                            e.START_STOP,
+                            e.ERASE, e.BREAK,
+                            e.REPLAC,
+                            e.COUNTER,
+                            e.INCOMIN_DATE);
+
                 context.SaveChanges();
                 isConnectionOK = true;
-                OnReportMessage("Remote DB, inserted with retVal = " + retVal.ToString());
 
-                result = true;
+                if (ret == 1)
+                {
+                    OnReportMessage("Remote DB, insert ok");
+                    result = true;
+                }
+                else
+                {
+                    OnReportMessage("Remote DB, insert fail, return_value = " + ret.ToString());
+                    result = false;
+                }
             }
             catch (Exception ex)
             {
-                OnReportMessage("Insert fail for remote DB");
+                OnReportMessage("Remote DB, insert fail with exception");
                 OnReportMessage(ex.Message.ToString());
 
                 isConnectionOK = false;
@@ -223,6 +247,11 @@ namespace ClassLibOracle
         }
 
 
+        /// <summary>
+        /// Remote db testing purpose,
+        /// generate random entity and trying to insert
+        /// </summary>
+        /// <returns>True if insert ok</returns>
         public bool AddTestRecord()
         {
             bool result = false;
@@ -231,19 +260,28 @@ namespace ClassLibOracle
             {
                 oraEntity e = generateRecord();
 
-                int retVal = context.SP_INSERT_STAN(e.G_UCHASTOK,
+                int ret =
+                context.RUN_PROC_GUILD_OPC(e.G_UCHASTOK,
                             e.N_STAN,
-                            null, //e.START_STOP,
-                            e.ERASE,
-                            e.BREAK,
+                            e.START_STOP,
+                            e.ERASE, e.BREAK,
                             e.REPLAC,
                             e.COUNTER,
                             e.INCOMIN_DATE);
 
                 context.SaveChanges();
                 isConnectionOK = true;
-                OnReportMessage("Remote DB, inserted with retVal = " + retVal.ToString());
-                result = true;
+
+                if (ret == 1)
+                {
+                    OnReportMessage("Remote DB, insert ok");
+                    result = true;
+                }
+                else
+                {
+                    OnReportMessage("Remote DB, insert fail, return_value = " + ret.ToString());
+                    result = false;
+                }
             }
             catch (InvalidOperationException ex)
             {
@@ -261,22 +299,27 @@ namespace ClassLibOracle
             return result;
         }
 
-
+        /// <summary>
+        /// Test entity generator
+        /// </summary>
+        /// <returns>Oracle entity</returns>
         private oraEntity generateRecord()
         {
             oraEntity r = new oraEntity();
             r.COUNTER = 22;
-            r.BREAK = 1;
-            r.ERASE = 1;
+            r.BREAK = true;
+            r.ERASE = true;
             r.INCOMIN_DATE = DateTime.Now;
-            r.N_STAN = 0;
-            r.REPLAC = 0;
-            //r.START_STOP = 1;
+            r.N_STAN = 33;
+            r.REPLAC = false;
+            r.START_STOP = false;
             r.G_UCHASTOK = "T";
             return r;
         }
-        
 
+
+
+        #region Message handlers
 
         public delegate void oraEventHandler(object sender, oraEventArgs args);
 
@@ -291,6 +334,7 @@ namespace ClassLibOracle
             }
         }
 
+        #endregion
 
 
     }

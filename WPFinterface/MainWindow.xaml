@@ -341,7 +341,7 @@
 
                             <Label Grid.Row="4" Grid.Column="0" Content="Test insert" />
                             <Button Grid.Row="4" Grid.Column="1"  Name="btn_LocalTableInsert" Style="{StaticResource btn_workBtn}"
-                                    Content="Test Insert L" Margin="2" Click="btn_LocalTableInsert_Click"/>
+                                    Content="Test Insert" Margin="2" Click="btn_LocalTableInsert_Click"/>
 
                         </Grid>
                     </StackPanel>
@@ -388,7 +388,7 @@
 
                             <Label Grid.Row="3" Grid.Column="0" Content="Test insert" />
                             <Button Grid.Row="3" Grid.Column="1" x:Name="btn_RemoteTableInsert" Style="{StaticResource btn_workBtn}"
-                                    Content="Test Insert R"  Margin="2" Click="btn_RemoteTableInsert_Click"/>
+                                    Content="Test Insert"  Margin="2" Click="btn_RemoteTableInsert_Click"/>
 
                             <Label Grid.Row="4" Grid.Column="0" Content="Init table" />
                             <Button Grid.Row="4" Grid.Column="1" x:Name="btn_RemoteInitFields" Style="{StaticResource btn_workBtn}"

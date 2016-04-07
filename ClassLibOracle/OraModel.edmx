@@ -5,15 +5,16 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
     <Schema Namespace="Хранилище OraModel" Provider="Oracle.ManagedDataAccess.Client" ProviderManifestToken="11.2" Alias="Self" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
-        <Function Name="SP_INSERT_STAN" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="SYSTEM">
-          <Parameter Name="G_UCHASTOK_VAR" Type="varchar2" Mode="In" />
-          <Parameter Name="N_STAN_VAR" Type="number" Mode="In" />
-          <Parameter Name="START_STOP_VAR" Type="number" Mode="In" />
-          <Parameter Name="ERASE_VAR" Type="number" Mode="In" />
-          <Parameter Name="BREAK_VAR" Type="number" Mode="In" />
-          <Parameter Name="REPLAC_VAR" Type="number" Mode="In" />
-          <Parameter Name="COUNTER_VAR" Type="number" Mode="In" />
-          <Parameter Name="INCOMIN_DATE_VAR" Type="date" Mode="In" />
+        <Function Name="RUN_PROC_GUILD_OPC" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="SYSTEM">
+          <Parameter Name="INS_G_UCHASTOK" Type="char" Mode="In" />
+          <Parameter Name="INS_N_STAN" Type="number" Mode="In" />
+          <Parameter Name="INS_START_STOP" Type="number" Mode="In" />
+          <Parameter Name="INS_ERASE" Type="number" Mode="In" />
+          <Parameter Name="INS_BREAK" Type="number" Mode="In" />
+          <Parameter Name="INS_REPLAC" Type="number" Mode="In" />
+          <Parameter Name="INS_COUNTER" Type="number" Mode="In" />
+          <Parameter Name="INS_INCOMIN_DATE" Type="date" Mode="In" />
+          <Parameter Name="RET_OUT" Type="number" Mode="Out" />
         </Function>
         <EntityContainer Name="Хранилище OraModelContainer" />
       </Schema></edmx:StorageModels>
@@ -21,15 +22,16 @@
     <edmx:ConceptualModels>
       <Schema Namespace="OraModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
         <EntityContainer Name="OraContext" annotation:LazyLoadingEnabled="true">
-          <FunctionImport Name="SP_INSERT_STAN">
-            <Parameter Name="G_UCHASTOK_VAR" Mode="In" Type="String" />
-            <Parameter Name="N_STAN_VAR" Mode="In" Type="Decimal" />
-            <Parameter Name="START_STOP_VAR" Mode="In" Type="Decimal" />
-            <Parameter Name="ERASE_VAR" Mode="In" Type="Decimal" />
-            <Parameter Name="BREAK_VAR" Mode="In" Type="Decimal" />
-            <Parameter Name="REPLAC_VAR" Mode="In" Type="Decimal" />
-            <Parameter Name="COUNTER_VAR" Mode="In" Type="Decimal" />
-            <Parameter Name="INCOMIN_DATE_VAR" Mode="In" Type="DateTime" />
+          <FunctionImport Name="RUN_PROC_GUILD_OPC">
+            <Parameter Name="INS_G_UCHASTOK" Mode="In" Type="String" />
+            <Parameter Name="INS_N_STAN" Mode="In" Type="Decimal" />
+            <Parameter Name="INS_START_STOP" Mode="In" Type="Decimal" />
+            <Parameter Name="INS_ERASE" Mode="In" Type="Decimal" />
+            <Parameter Name="INS_BREAK" Mode="In" Type="Decimal" />
+            <Parameter Name="INS_REPLAC" Mode="In" Type="Decimal" />
+            <Parameter Name="INS_COUNTER" Mode="In" Type="Decimal" />
+            <Parameter Name="INS_INCOMIN_DATE" Mode="In" Type="DateTime" />
+            <Parameter Name="RET_OUT" Mode="Out" Type="Decimal" />
           </FunctionImport>
         </EntityContainer>
       </Schema>
@@ -38,7 +40,7 @@
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="Хранилище OraModelContainer" CdmEntityContainer="OraContext">
-          <FunctionImportMapping FunctionImportName="SP_INSERT_STAN" FunctionName="Хранилище OraModel.SP_INSERT_STAN" />
+          <FunctionImportMapping FunctionImportName="RUN_PROC_GUILD_OPC" FunctionName="Хранилище OraModel.RUN_PROC_GUILD_OPC" />
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
