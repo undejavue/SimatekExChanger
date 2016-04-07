@@ -58,6 +58,18 @@ namespace ClassLibOPC
             }
         }
 
+        private object _ovalue;
+        public object oValue
+        {
+            get { return _ovalue; }
+            set
+            {
+                _ovalue = value;
+
+                OnPropertyChanged(new PropertyChangedEventArgs("oValue"));
+            }
+        }
+
         private string _quality;
         public string Quality
         {

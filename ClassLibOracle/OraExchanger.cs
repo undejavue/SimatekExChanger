@@ -135,7 +135,7 @@ namespace ClassLibOracle
 
                     try
                     {
-                        object propertyVal = Convert.ChangeType(t.Value, targetType, CultureInfo.InvariantCulture);
+                        object propertyVal = Convert.ChangeType(t.oValue, targetType, CultureInfo.InvariantCulture);
                         p.SetValue(ent, propertyVal, null);
                     }
                     catch (Exception ex)
@@ -171,25 +171,34 @@ namespace ClassLibOracle
                     foreach (oraEntity e in entities)
                     {
                         
-                        context.RUN_PROC_GUILD_OPC(e.G_UCHASTOK, 
+                        retVal = context.RUN_PROC_GUILD_OPC(e.G_UCHASTOK, 
                             e.N_STAN, 
                             e.START_STOP, 
                             e.ERASE, e.BREAK, 
                             e.REPLAC, 
-                            e.COUNTER, 
+                            (int)e.COUNTER, 
                             e.INCOMIN_DATE);
                             
                     }
+           
+                    context.SaveChanges();
 
                     //throw new InvalidOperationException("Storage procedure missing!");
-                    OnReportMessage("Synchronization success, retVal = " + retVal.ToString());
-                    context.SaveChanges();
-                    result = true;
+                    if (retVal == 1)
+                    {
+                        OnReportMessage("Synchronization success");
+                        result = true;
+                    }
+                    else
+                    {
+                        OnReportMessage("Synchronization fail, return_value = " + retVal.ToString());
+                        result = false;
+                    }
                 }
                 catch (InvalidOperationException ex)
                 {
                     result = false;
-                    OnReportMessage("Synchronization failed");
+                    OnReportMessage("Synchronization failed with exception");
                     OnReportMessage(ex.Message);
                 }
             }
@@ -213,7 +222,7 @@ namespace ClassLibOracle
                             e.START_STOP,
                             e.ERASE, e.BREAK,
                             e.REPLAC,
-                            e.COUNTER,
+                            (int)e.COUNTER,
                             e.INCOMIN_DATE);
 
                 context.SaveChanges();
@@ -266,7 +275,7 @@ namespace ClassLibOracle
                             e.START_STOP,
                             e.ERASE, e.BREAK,
                             e.REPLAC,
-                            e.COUNTER,
+                            (int)e.COUNTER,
                             e.INCOMIN_DATE);
 
                 context.SaveChanges();
