@@ -125,9 +125,18 @@
 
                 </Grid>
             </Border>
-            <ListBox x:Name="lst_Servers" Grid.Row="2" Grid.Column="0"  IsEnabled="{Binding list_Servers_isEnable}"
+            <ListBox x:Name="lst_Servers" Grid.Row="2" Grid.Column="0" ItemsSource="{Binding opcListServers}"  IsEnabled="{Binding list_Servers_isEnable}"
                      Height="Auto" Margin="10,4,4,4" Width="Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                      MouseDoubleClick="lst_Servers_MouseDoubleClick"  SelectionChanged="lst_Servers_SelectionChanged" >
+                <ListBox.ItemTemplate >
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Name}"/>
+
+                            <!--<TextBlock Text="{Binding UrlString}" Margin="10,0,0,0" FontSize="10"/>-->
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
             </ListBox>
 
 
