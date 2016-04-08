@@ -43,6 +43,7 @@
     </Window.DataContext>
 
 
+
     <Grid Name="grid_main" Width="Auto" Height="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="0" />
@@ -55,15 +56,13 @@
             <ColumnDefinition Width="1*" />
         </Grid.ColumnDefinitions>
 
-        
-        
-       
 
         <Grid Name="grid_opc" Grid.Row="1" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  >
             <Grid.RowDefinitions>
                 <RowDefinition Height="44" />
-                <RowDefinition Height="200" />
                 <RowDefinition Height="36" />
+                <RowDefinition Height="200" />
+
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="8*" />
@@ -74,26 +73,26 @@
 
             <Border Name="brdr_btnsOPC" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" 
                     Margin="10,4" Style="{StaticResource st_border}"  >
-            <Grid Name="grid_btnsOPC"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  >
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="8*" />
-                    <ColumnDefinition Width="8*" />
-                    <ColumnDefinition Width="8*" />
-                    <ColumnDefinition Width="12*" />
-                </Grid.ColumnDefinitions>
+                <Grid Name="grid_btnsOPC"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="8*" />
+                        <ColumnDefinition Width="8*" />
+                        <ColumnDefinition Width="8*" />
+                        <ColumnDefinition Width="12*" />
+                    </Grid.ColumnDefinitions>
 
-                <StackPanel Name="btns_Search" Grid.Row="0" Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Left"
+                    <StackPanel Name="btns_Search" Grid.Row="0" Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Left"
                             Margin="4,0" Width="184" Height="Auto" VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal" Margin="0" >
-                        <TextBox x:Name="txt_hostname" Text="{Binding selectedOPCserver.Host}" Margin="0,0" FontWeight="Bold"  Width="80"
+                        <StackPanel Orientation="Horizontal" Margin="0" >
+                            <TextBox x:Name="txt_hostname" Text="{Binding selectedOPCserver.Host}" Margin="0,0" FontWeight="Bold"  Width="80"
                          Visibility="{Binding ElementName=btn_GetServers}" VerticalContentAlignment="Center" />
                             <Button Content="Search" x:Name="btn_GetServers" HorizontalAlignment="Right" Margin="34,0" VerticalAlignment="Top" 
                         Click="btn_GetServers_Click" IsEnabled="{Binding btn_Search_isEnable}" Style="{StaticResource btn_workBtn}" />
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
 
                     <StackPanel Name="panel_Disconnect" Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0,4" Height="Auto" VerticalAlignment="Center">
                         <Button Content="Disconnect" x:Name="btn_Disconnect" Style="{StaticResource btn_workBtn}"
@@ -105,43 +104,34 @@
                             <TextBox Text="{Binding selectedOPCserver.ReconnectInterval}" VerticalContentAlignment="Center" 
                              VerticalAlignment="Center" Width="40" Margin="0,0,2,0" />
                         </StackPanel>
-                    
-                </StackPanel>
 
-                <StackPanel Name="panelInfo" Grid.Row="0" Grid.Column="2" Orientation="Vertical" Margin="10,0" VerticalAlignment="Center" HorizontalAlignment="Stretch" >
-                    <TextBlock Text="{Binding ModelStateString}" FontSize="14" FontWeight="Medium" Foreground="#FF487DA2"
+                    </StackPanel>
+
+                    <StackPanel Name="panelInfo" Grid.Row="0" Grid.Column="2" Orientation="Vertical" Margin="10,0" VerticalAlignment="Center" HorizontalAlignment="Stretch" >
+                        <TextBlock Text="{Binding ModelStateString}" FontSize="14" FontWeight="Medium" Foreground="#FF487DA2"
                        HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" />
-                </StackPanel>
+                    </StackPanel>
 
                     <StackPanel Name="btns_Config" Grid.Row="0" Grid.Column="3" Orientation="Horizontal" Margin="4,4" VerticalAlignment="Center" >
-                    <Button Content="Save config" x:Name="btn_SaveConfig" HorizontalAlignment="Left" Margin="4,0,0,0" VerticalAlignment="Top" 
+                        <Button Content="Save config" x:Name="btn_SaveConfig" HorizontalAlignment="Left" Margin="4,0,0,0" VerticalAlignment="Top" 
                         Click="btn_SaveConfig_Click"  IsEnabled="{Binding btn_SaveConfig_isEnable}" Style="{StaticResource btn_workBtn}"/>
-                    <Button Content="Load config" x:Name="btn_LoadConfig" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" 
+                        <Button Content="Load config" x:Name="btn_LoadConfig" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" 
                         Click="btn_LoadConfig_Click"  IsEnabled="{Binding btn_LoadConfig_isEnable}" Style="{StaticResource btn_workBtn}"/>
-                    <Button Content="Try connect" x:Name="btn_ConfigConnect" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" 
+                        <Button Content="Try connect" x:Name="btn_ConfigConnect" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" 
                         Click="btn_ConfigConnect_Click" IsEnabled="{Binding btn_TryConfig_isEnable}" Style="{StaticResource btn_workBtn}"  />
-                     <Button x:Name="btn_OraTableInit" Content=".NET?" Width="40" Margin="10,0" 
+                        <Button x:Name="btn_OraTableInit" Content=".NET?" Width="40" Margin="10,0" 
                                 Click="btn_OraTableInit_Click" Style="{StaticResource btn_workBtn}" Background="#FFC2DACE"/>
                     </StackPanel>
 
-            </Grid>
+                </Grid>
             </Border>
-            <ListBox x:Name="lst_Servers" Grid.Row="1" Grid.Column="0" ItemsSource="{Binding opcListServers}"  IsEnabled="{Binding list_Servers_isEnable}"
+            <ListBox x:Name="lst_Servers" Grid.Row="2" Grid.Column="0"  IsEnabled="{Binding list_Servers_isEnable}"
                      Height="Auto" Margin="10,4,4,4" Width="Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                      MouseDoubleClick="lst_Servers_MouseDoubleClick"  SelectionChanged="lst_Servers_SelectionChanged" >
-                <ListBox.ItemTemplate >
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Name}"/>
-
-                            <!--<TextBlock Text="{Binding UrlString}" Margin="10,0,0,0" FontSize="10"/>-->
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
             </ListBox>
 
 
-            <StackPanel Name="panel_serverInfo" Grid.Row="1" Grid.Column="1"  Orientation="Vertical" Width="Auto" Height="Auto" HorizontalAlignment="Stretch" >
+            <StackPanel Name="panel_serverInfo" Grid.Row="2" Grid.Column="1"  Orientation="Vertical" Width="Auto" Height="Auto" HorizontalAlignment="Stretch" >
                 <Border Background="#FFEEEBE2" Margin="4,4" BorderBrush="Gray" BorderThickness="1" HorizontalAlignment="Stretch" Height="192" >
                     <Grid x:Name="grid_ServerStatus" Margin="4,0"  DataContext="{Binding selectedOPCserver}" HorizontalAlignment="Stretch" >
                         <Grid.RowDefinitions>
@@ -173,7 +163,7 @@
             </StackPanel>
 
 
-            <TreeView Name="treeControl" Grid.Row="1" Grid.Column="2" ItemsSource="{Binding opcTreeNodes}" IsEnabled="{Binding list_Branches_isEnable}"  
+            <TreeView Name="treeControl" Grid.Row="2" Grid.Column="2" ItemsSource="{Binding opcTreeNodes}" IsEnabled="{Binding list_Branches_isEnable}"  
                   ScrollViewer.VerticalScrollBarVisibility="Auto" FontSize="12"
                   Height="Auto" Margin="4" Width="Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
             	  SelectedItemChanged="treeControl_SelectedItemChanged">
@@ -184,7 +174,7 @@
                 </TreeView.ItemTemplate>
             </TreeView>
 
-            <Border Grid.Row="1" Grid.Column="2" BorderBrush="Gray" Background="WhiteSmoke" BorderThickness="1" Margin="20,10"
+            <Border Grid.Row="2" Grid.Column="2" BorderBrush="Gray" Background="WhiteSmoke" BorderThickness="1" Margin="20,10"
                  Visibility="{Binding Path=isOPCwaiting,  Converter={StaticResource BoolToVis}}" Height="60" >
                 <StackPanel Orientation="Vertical"  >
                     <Label x:Name="lbl_PlsWaitOPC" Content="Loading..."  
@@ -206,7 +196,7 @@
                 </StackPanel>
             </Border>
 
-            <DataGrid Name="dgrid_Tags" Grid.Row="1" Grid.Column="3" ItemsSource="{Binding opcListTagsInBranch}" MouseDoubleClick="dgrid_Tags_MouseDoubleClick" 
+            <DataGrid Name="dgrid_Tags" Grid.Row="2" Grid.Column="3" ItemsSource="{Binding opcListTagsInBranch}" MouseDoubleClick="dgrid_Tags_MouseDoubleClick" 
                   IsEnabled="{Binding list_Tags_isEnable}"
                   Height="Auto" Margin="4" MinWidth="290" VerticalAlignment="Stretch" HorizontalAlignment="Left" 
                   FontSize="12" AutoGenerateColumns="False" IsReadOnly="True" >
@@ -216,22 +206,32 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-            <Border Grid.Row="2" Grid.Column="0" Margin="10,0,4,0" BorderThickness="1" BorderBrush="Gray" Width="186" Height="24"  HorizontalAlignment="Left"  >
+            <Border Grid.Row="1" Grid.Column="0" Margin="10,0,4,0" BorderThickness="1" BorderBrush="Gray" Width="186" Height="24"  HorizontalAlignment="Left"  >
                 <StackPanel Name="panel_Errors" Orientation="Horizontal" Background="{Binding opcError.backColor}"  HorizontalAlignment="Stretch">
                     <TextBlock Text=" Err:" FontSize="11" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding opcError.code }" VerticalAlignment="Center" Margin="10,0" Width="30" Foreground="{Binding opcError.foreColor}" />
                     <TextBlock Text="{Binding opcError.message}" VerticalAlignment="Center" Margin="4,0" Width="Auto" Foreground="{Binding opcError.foreColor}" />
                 </StackPanel>
-                
+
             </Border>
 
-            <StackPanel Name="panel_url" Orientation="Vertical" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" VerticalAlignment="Center">
-                <Border BorderThickness="1" BorderBrush="Gray" Width="Auto" Height="24" Margin="4,0,10,0" Background="{Binding infoLineColor}" >
+            <StackPanel Name="panel_url" Orientation="Vertical" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" VerticalAlignment="Center">
+                <Border BorderThickness="1" BorderBrush="Gray" Width="Auto" Height="24" Margin="4,0,4,0" Background="{Binding infoLineColor}" >
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" >
-                        <TextBlock Text="{Binding selectedOPCserver.UrlString}"  FontSize="12" TextAlignment="Center" Margin="0"
+                        <TextBlock Text="{Binding selectedOPCserver.UrlString}"  FontSize="10" TextAlignment="Center" Margin="0"
                                 HorizontalAlignment="Stretch"  VerticalAlignment="Center" />
                     </StackPanel>
                 </Border>
+            </StackPanel>
+
+            <StackPanel Name="panel_settings" Orientation="Horizontal" Grid.Row="1" Grid.Column="3"  VerticalAlignment="Center">
+                <Border BorderThickness="1" BorderBrush="Gray" Width="Auto" Height="24" Margin="4,0,4,0" Background="{Binding infoLineColor}" >
+                    <StackPanel Orientation="Horizontal"  HorizontalAlignment="Left" Width="250" >
+                        <CheckBox Name="chb_AutoRestart" IsChecked="{Binding isAutoRestart}" Content="Auto restart if shutdown" Margin="4,0" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="13"/>
+
+                    </StackPanel>
+                </Border>
+                <Expander Name="btn_expander" Margin="10,0,0,0" HorizontalAlignment="Right" />
             </StackPanel>
 
         </Grid>
@@ -254,28 +254,28 @@
 
             <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource st_border}" Margin="10,0" >
 
-            <Grid Name="grid_DbCaption"   Width="Auto" Height="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Center">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="8*" />
-                    <ColumnDefinition Width="16*" />
-                    <ColumnDefinition Width="8*" />
-                </Grid.ColumnDefinitions>
+                <Grid Name="grid_DbCaption"   Width="Auto" Height="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="8*" />
+                        <ColumnDefinition Width="16*" />
+                        <ColumnDefinition Width="8*" />
+                    </Grid.ColumnDefinitions>
 
-                <StackPanel Name="panel_LocalDbCaption" Grid.Row="0" Grid.Column="0" >
-                    <Label Content="Local Database" HorizontalAlignment="Center" 
+                    <StackPanel Name="panel_LocalDbCaption" Grid.Row="0" Grid.Column="0" >
+                        <Label Content="Local Database" HorizontalAlignment="Center" 
                        FontSize="14" FontWeight="Medium" Foreground="#FF487DA2"
                        VerticalAlignment="Center"  />
-                </StackPanel>
+                    </StackPanel>
 
                     <StackPanel Name="panel_MonitorControls" Grid.Row="0" Grid.Column="1"  Orientation="Horizontal" Margin="0,0" VerticalAlignment="Center"    >
-                    <Button Content="Monitor ON" x:Name="btn_Subscribe" HorizontalAlignment="Left" Margin="0,0,0,0" 
+                        <Button Content="Monitor ON" x:Name="btn_Subscribe" HorizontalAlignment="Left" Margin="0,0,0,0" 
                         Click="btn_Subscribe_Click" IsEnabled="{Binding btn_Subscribe_isEnable}" Style="{StaticResource btn_workBtn}"/>
-                    <Button Content="Monitor OFF" x:Name="btn_UnSubscribe" HorizontalAlignment="Left" Margin="10,0,0,0" 
+                        <Button Content="Monitor OFF" x:Name="btn_UnSubscribe" HorizontalAlignment="Left" Margin="10,0,0,0" 
                         Click="btn_UnSubscribe_Click" IsEnabled="{Binding btn_Unsubscribe_isEnable}" Style="{StaticResource btn_workBtn}" />
-                    <Button Content="Clear" x:Name="btn_ClearSubscription" HorizontalAlignment="Left" Margin="10,0,0,0" 
+                        <Button Content="Clear" x:Name="btn_ClearSubscription" HorizontalAlignment="Left" Margin="10,0,0,0" 
                         Click="btn_ClearSubscription_Click" IsEnabled="{Binding btn_ClearTags_isEnable}" Style="{StaticResource btn_workBtn}" />
 
                         <Border Style="{StaticResource st_border}" Width="Auto" Margin="14,0" Background="#FFD0D7DC">
@@ -289,12 +289,12 @@
 
                     </StackPanel>
 
-                <StackPanel Name="panel_RemoteDbCaption" Grid.Row="0" Grid.Column="2" >
-                    <Label Content="Remote Database" HorizontalAlignment="Center" 
+                    <StackPanel Name="panel_RemoteDbCaption" Grid.Row="0" Grid.Column="2" >
+                        <Label Content="Remote Database" HorizontalAlignment="Center" 
                        FontSize="14" FontWeight="Medium" Foreground="#FF487DA2"
                        VerticalAlignment="Center"  />
-                </StackPanel>
-            </Grid>
+                    </StackPanel>
+                </Grid>
 
             </Border>
             <StackPanel Name="panel_LocalDb" Grid.Row="1" Grid.Column="0" >
@@ -330,14 +330,14 @@
                             <Label Grid.Row="3" Grid.Column="0" Content="View Local Data" />
                             <Button Grid.Row="3" Grid.Column="1" x:Name="btn_LocalTableView" Style="{StaticResource btn_workBtn}"
                                     Content="View"  Margin="2" Click="btn_LocalTableView_Click"/>
-                            
+
                             <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource st_border}" Background="#FF83D88F" Margin="0"
                                     Visibility="{Binding isLocalDbLoading, Converter={StaticResource BoolToVis}}">
                                 <Label  Content="Loading..." HorizontalContentAlignment="Center" FontSize="13"  />
                             </Border>
-                            
-                            
-                            
+
+
+
 
                             <Label Grid.Row="4" Grid.Column="0" Content="Test insert" />
                             <Button Grid.Row="4" Grid.Column="1"  Name="btn_LocalTableInsert" Style="{StaticResource btn_workBtn}"
@@ -347,7 +347,7 @@
                     </StackPanel>
                 </Border>
             </StackPanel>
-            
+
             <StackPanel Name="panel_RemoteDb" Grid.Row="1" Grid.Column="2" >
                 <Border Background="#FFECECEC" Margin="5,10,10,10" BorderBrush="Gray" BorderThickness="1" Height="180" >
                     <StackPanel Orientation="Vertical" Margin="0,10,0,0" >
@@ -377,14 +377,14 @@
 
                             <Button Grid.Row="2" Grid.Column="1" x:Name="btn_OraShowTable" Style="{StaticResource btn_workBtn}"
                                     Content="View" Margin="2" Click="btn_OraShowTable_Click" IsEnabled="False"/>
-                            
+
                             <Label Grid.Row="2" Grid.Column="0" Content="View remote Data" />
                             <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource st_border}" Background="#FF83D88F" Margin="0"
                                     Visibility="{Binding isRemoteDbLoading, Converter={StaticResource BoolToVis}}">
                                 <Label  Content="Loading..." HorizontalContentAlignment="Center" FontSize="13"  />
                             </Border>
 
-                            
+
 
                             <Label Grid.Row="3" Grid.Column="0" Content="Test insert" />
                             <Button Grid.Row="3" Grid.Column="1" x:Name="btn_RemoteTableInsert" Style="{StaticResource btn_workBtn}"
@@ -463,21 +463,21 @@
         <StackPanel Name="log_panel" Grid.Row="4" Grid.Column="0" Orientation="Vertical"  Margin="5,0" >
             <Border Style="{StaticResource st_border}" Margin="4,0" BorderThickness="1,1,1,0"  >
                 <StackPanel Orientation="Horizontal" Height="24" Margin="5,0" >
-                <TextBlock Text="Filter log " FontSize="12" VerticalAlignment="Center" />
-                <Button Name="btn_LogFilterAll" Content="All" Height="20" Width="60" 
+                    <TextBlock Text="Filter log " FontSize="12" VerticalAlignment="Center" />
+                    <Button Name="btn_LogFilterAll" Content="All" Height="20" Width="60" 
                         Tag="{Binding btn_LogFilterAll_Tag}" Background="{Binding btn_LogFilterAll_Brush}" Click="btn_LogFilter_Click" />
-                <Button Name="btn_LogFilterGUI" Content="GUI" Height="20" Width="60" 
+                    <Button Name="btn_LogFilterGUI" Content="GUI" Height="20" Width="60" 
                         Tag="{Binding btn_LogFilterGUI_Tag}" Background="{Binding btn_LogFilterGUI_Brush}" Click="btn_LogFilter_Click" />
-                <Button Name="btn_LogFilterOPC" Content="OPC" Height="20" Width="60" 
+                    <Button Name="btn_LogFilterOPC" Content="OPC" Height="20" Width="60" 
                         Tag="{Binding btn_LogFilterOPC_Tag}" Background="{Binding btn_LogFilterOPC_Brush}" Click="btn_LogFilter_Click" />
-                <Button Name="btn_LogFilterLocalDB" Content="LocalDb" Height="20" Width="60" 
+                    <Button Name="btn_LogFilterLocalDB" Content="LocalDb" Height="20" Width="60" 
                         Tag="{Binding btn_LogFilterLocalDb_Tag}" Background="{Binding btn_LogFilterLocalDb_Brush}" Click="btn_LogFilter_Click" />
-                <Button Name="btn_LogFilterRemoteDb" Content="RemoteDb" Height="20" Width="60" 
+                    <Button Name="btn_LogFilterRemoteDb" Content="RemoteDb" Height="20" Width="60" 
                         Tag="{Binding btn_LogFilterRemoteDb_Tag}" Background="{Binding btn_LogFilterRemoteDb_Brush}" Click="btn_LogFilter_Click" />
-            </StackPanel>
+                </StackPanel>
             </Border>
-            
-        <ListBox    x:Name="list_Log"  HorizontalAlignment="Stretch" Margin="4,0" VerticalAlignment="Stretch" 
+
+            <ListBox    x:Name="list_Log"  HorizontalAlignment="Stretch" Margin="4,0" VerticalAlignment="Stretch" 
                      MinWidth="700" Height="74" ItemsSource="{Binding messageLogFiltered, Mode=OneWay}" local:ListBoxExtenders.AutoScrollToEnd="True"  >
                 <ListBox.ItemTemplate >
                     <DataTemplate>
@@ -489,8 +489,8 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </StackPanel>
-        
-        
+
+
     </Grid>
 
 </Window>

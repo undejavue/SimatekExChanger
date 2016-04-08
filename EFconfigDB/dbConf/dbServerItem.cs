@@ -84,7 +84,6 @@ namespace EFlocalDB
 
         public virtual List<dbTagItem> opcMonitoredTags {get; set;}
 
-
         public dbServerItem() 
         {
             opcMonitoredTags = new List<dbTagItem>();

@@ -45,12 +45,16 @@ namespace SimatekExCnahger
 
         private dbLocalManager dbManager;
 
+        private SimatekExChanger.wndLoading wndPrgLoading;
+
 
         #region Constructors
 
         public MainWindow()
         {
             InitializeComponent();
+            WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+
             Loaded += MainWindow_Loaded;
         }
 
@@ -58,6 +62,8 @@ namespace SimatekExCnahger
         {
             Model = new ViewModel();
             this.DataContext = Model;
+
+
 
             bgwStarter = new BackgroundWorker();
             bgwStarter.DoWork += BgWorker_DoWork;
@@ -91,7 +97,17 @@ namespace SimatekExCnahger
 
             SearchServers("localhost");
             bgwStarter.RunWorkerAsync();
-          
+
+            Model.isAutoRestart = SimatekExChanger.Properties.Settings.Default.isAutoRestart;
+
+            if (Model.isAutoRestart)
+            {
+                wndPrgLoading = new SimatekExChanger.wndLoading();
+                wndPrgLoading.Show();
+                AutoRestart();
+                wndPrgLoading.Close();
+            }
+
         }
 
         #endregion
@@ -305,6 +321,7 @@ namespace SimatekExCnahger
                 dbManager.ReportMessage -= DbManager_ReportMessage;
                 dbManager.ReportMessage += DbManager_ReportMessage;
                 Model.isLocalDBConnected = true;
+                Model.localDbPath = path;
             }
         }
 
@@ -319,9 +336,22 @@ namespace SimatekExCnahger
                 dbManager.ReportMessage -= DbManager_ReportMessage;
                 dbManager.ReportMessage += DbManager_ReportMessage;
                 Model.isLocalDBConnected = true;
+                Model.localDbPath = path;
             }           
         }
 
+
+        private void LocalDBLoadAuto(string path)
+        {
+            if (path != "")
+            {
+                dbManager = new dbLocalManager(path, false);
+                dbManager.ReportMessage -= DbManager_ReportMessage;
+                dbManager.ReportMessage += DbManager_ReportMessage;
+                Model.isLocalDBConnected = true;
+                Model.localDbPath = path;
+            }
+        }
 
 
         private void LocalDBInsert(bool flag)
@@ -517,13 +547,19 @@ namespace SimatekExCnahger
                 if (config.Save(Model.configuredServer, path))
                 Model.addLogRecord(TAG, "Config saved");
             }
+
+            SimatekExChanger.Properties.Settings.Default.configPath = path;
+            SimatekExChanger.Properties.Settings.Default.Save();
         }
 
 
-        private void LoadConfiguration()
+        private void LoadConfiguration(string path)
         {
-            FileWorks fw = new FileWorks();
-            string path = fw.GetLoadFilePath();
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                FileWorks fw = new FileWorks();
+                path = fw.GetLoadFilePath();
+            }
 
             if (path != "")
             {
@@ -542,7 +578,14 @@ namespace SimatekExCnahger
                 Model.changeState(ModelState.opcConneted);
                 Model.selectedOPCserver = opcServer.selectedServer;
                 Subscribe();
+                LocalDBLoadAuto(Model.localDbPath);
             }
+        }
+
+        private void AutoRestart()
+        {
+            LoadConfiguration(SimatekExChanger.Properties.Settings.Default.configPath);
+            ConnectFromConfig();
         }
 
         #endregion
@@ -692,7 +735,7 @@ namespace SimatekExCnahger
 
         private void btn_LoadConfig_Click(object sender, RoutedEventArgs e)
         {
-            LoadConfiguration();
+            LoadConfiguration(string.Empty);
         }
 
 

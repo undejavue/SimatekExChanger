@@ -14,7 +14,7 @@ namespace SimatekExCnahger
         public static Color backAlarm = Colors.Red;
         public static Color backWarning = Colors.OrangeRed;
         public static Color backInfo = Colors.LightGray;
-        public static Color backDefault = Colors.Gray;
+        public static Color backDefault = Colors.LightGreen;
 
         public static Color foreAlarm = Colors.Yellow;
         public static Color foreWarning = Colors.White;

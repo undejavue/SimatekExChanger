@@ -92,6 +92,9 @@ namespace SimatekExCnahger
             }
         }
 
+        public string localDbPath { get; set; }
+        public string localConfigPath { get; set; }
+
         /// <summary>
         /// Configured OPC server
         /// </summary>
@@ -250,6 +253,22 @@ namespace SimatekExCnahger
         }
 
         public oraManualFields specialFields { get; set; }
+
+        private bool _isAutoRestart;
+        public bool isAutoRestart
+        {
+            get
+            {
+                return _isAutoRestart;
+            }
+            set
+            {
+                _isAutoRestart = value;
+                SimatekExChanger.Properties.Settings.Default.isAutoRestart = value;
+                SimatekExChanger.Properties.Settings.Default.Save();
+                OnPropertyChanged(new PropertyChangedEventArgs("isAutoRestart"));
+            }
+        }
 
 
         #endregion
@@ -763,6 +782,7 @@ namespace SimatekExCnahger
             configuredServer.opcHost = selectedOPCserver.Host;
             configuredServer.opcURL = selectedOPCserver.UrlString;
             configuredServer.opcRecconect = selectedOPCserver.isReconnect;
+            configuredServer.dbConnString = localDbPath;
 
             foreach (mTag tag in opcMonitoredTags)
             {
