@@ -6,6 +6,7 @@ using System.Linq;
 using ClassLibOPC;
 using System.ComponentModel;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace EFlocalDB
 {
@@ -33,11 +34,13 @@ namespace EFlocalDB
 
 
 
-        public void insert(ObservableCollection<mTag> tags, bool flag)
+        public void insert(ObservableCollection<mTag> tags, bool flag, string GUSHASTIC, int NSTAN)
         {
             dbLocalRecord record = new dbLocalRecord();
             record = TagsToRecordEntity(tags);
             record.flagIsSent = flag;
+            record.G_UCHASTOK = GUSHASTIC;
+            record.N_STAN = NSTAN;
 
             try
             {
@@ -54,30 +57,32 @@ namespace EFlocalDB
 
         }
 
-        private dbLocalRecord TagsToRecordEntity(ObservableCollection<mTag> items)
+        private dbLocalRecord TagsToRecordEntity(ObservableCollection<mTag> items )
         {
-            dbLocalRecord localEnt = new dbLocalRecord();
+            dbLocalRecord ent = new dbLocalRecord();
 
             if (items.Count > 0)
             {
 
                 try
                 {
-                    foreach (var p in localEnt.GetType().GetProperties())
+                    foreach (var p in ent.GetType().GetProperties())
                     {
-
                         if (items.Any(k => k.NameInDb == p.Name))
                         {
                             mTag t = items.First(k => k.NameInDb == p.Name);
-
                             var targetType = G.IsNullableType(p.PropertyType) ? Nullable.GetUnderlyingType(p.PropertyType) : p.PropertyType;
 
-                            //Returns an System.Object with the specified System.Type and whose value is
-                            //equivalent to the specified object.
-                            object propertyVal = Convert.ChangeType(t.Value, targetType);
-
-                            //Set the value of the property
-                            p.SetValue(localEnt, propertyVal, null);
+                            try
+                            {
+                                object propertyVal = Convert.ChangeType(t.oValue, targetType, CultureInfo.InvariantCulture);
+                                p.SetValue(ent, propertyVal, null);
+                            }
+                            catch (Exception ex)
+                            {
+                                OnReportMessage("Tags <=> Fields conversion fail ");
+                                OnReportMessage(ex.Message);
+                            }
                         }
                     }
                 }
@@ -85,10 +90,11 @@ namespace EFlocalDB
                 {
 
                 }
-                localEnt.INCOMIN_DATE = DateTime.Now;
-                localEnt.flagIsSent = false;
+
+                ent.INCOMIN_DATE = DateTime.Now;
+                ent.flagIsSent = false;
             }
-            return localEnt;
+            return ent;
         }
 
 

@@ -149,7 +149,6 @@ namespace ClassLibOracle
             // Values from UI
             ent.G_UCHASTOK = spec.G_UCHASTOK;
             ent.N_STAN = spec.N_STAN;
-
             ent.INCOMIN_DATE = insertTime;
 
             return AddRecord(ent);
@@ -170,7 +169,11 @@ namespace ClassLibOracle
                 {
                     foreach (oraEntity e in entities)
                     {
-                        
+
+                        //e.G_UCHASTOK = spec.G_UCHASTOK;
+                        //e.N_STAN = spec.N_STAN;
+                        //e.INCOMIN_DATE = insertTime;
+
                         retVal = context.RUN_PROC_GUILD_OPC(e.G_UCHASTOK, 
                             e.N_STAN, 
                             e.START_STOP, 
@@ -213,6 +216,18 @@ namespace ClassLibOracle
         private bool AddRecord(oraEntity e)
         {
             bool result = false;
+
+            OnReportMessage("Remote DB, insert:");
+            OnReportMessage("COUNTER = " + e.COUNTER.ToString());
+            OnReportMessage("NSTAN  = " + e.N_STAN.ToString());
+            OnReportMessage("GUCHASTOK  = " + e.G_UCHASTOK.ToString());
+            OnReportMessage("bool fields  = " 
+                + e.BREAK.ToString() 
+                + " & " + e.ERASE.ToString() 
+                + " & " + e.REPLAC.ToString() 
+                + " & " + e.START_STOP.ToString() );
+            OnReportMessage("INC_DATE = " + e.INCOMIN_DATE.ToString());
+
 
             try
             {

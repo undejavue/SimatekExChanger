@@ -120,7 +120,7 @@
                         <Button Content="Try connect" x:Name="btn_ConfigConnect" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" 
                         Click="btn_ConfigConnect_Click" IsEnabled="{Binding btn_TryConfig_isEnable}" Style="{StaticResource btn_workBtn}"  />
                         <Button x:Name="btn_OraTableInit" Content=".NET?" Width="40" Margin="10,0" 
-                                Click="btn_OraTableInit_Click" Style="{StaticResource btn_workBtn}" Background="#FFC2DACE"/>
+                                Click="btn_OraTableInit_Click" Style="{StaticResource btn_workBtn}" Background="#FFB7C0E6"/>
                     </StackPanel>
 
                 </Grid>
@@ -402,17 +402,17 @@
                             <Label Grid.Row="4" Grid.Column="0" Content="Init table" />
                             <Button Grid.Row="4" Grid.Column="1" x:Name="btn_RemoteInitFields" Style="{StaticResource btn_workBtn}"
                                     Content="Get Fields"  Margin="2" Click="btn_RemoteInitFields_Click"/>
-                        </Grid>
+                        
 
-                        <Border Name="panel_SyncInProgress" Background="#FFECECEC" Margin="4,10" BorderBrush="Gray" BorderThickness="1"
+                        <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"  Name="panel_SyncInProgress" Background="#FFB4F1BC" Margin="0" BorderBrush="Gray" BorderThickness="1"
                         Visibility="{Binding Path=isSyncInProgress,  Converter={StaticResource BoolToVis}}" >
                             <StackPanel Orientation="Horizontal">
-                                <Label Content="Synhronization progress" Margin="0"/>
-                                <ProgressBar Height="10" Width="170" x:Name="progressSync" Margin="10" Value="{Binding progressBarSync}">
+                                <Label Content="Synhronization" Margin="0"/>
+                                <ProgressBar Height="10" Width="90" x:Name="progressSync" Margin="10" Value="{Binding progressBarSync}">
                                 </ProgressBar>
                             </StackPanel>
                         </Border>
-
+                        </Grid>
                     </StackPanel>
                 </Border>
             </StackPanel>

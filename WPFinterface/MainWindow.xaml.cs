@@ -341,7 +341,7 @@ namespace SimatekExCnahger
         }
 
 
-        private void LocalDBLoadAuto(string path)
+        private bool LocalDBLoadAuto(string path)
         {
             if (path != "")
             {
@@ -350,7 +350,13 @@ namespace SimatekExCnahger
                 dbManager.ReportMessage += DbManager_ReportMessage;
                 Model.isLocalDBConnected = true;
                 Model.localDbPath = path;
+
+                Model.addLogRecord(TAG, "LocalDB loaded in auto mode");
+                return true;
             }
+            Model.addLogRecord(TAG, "Fail to load LocalDB");
+            return false;
+
         }
 
 
@@ -358,7 +364,7 @@ namespace SimatekExCnahger
         {
             if ((dbManager != null) & (Model.opcMonitoredTags.Count > 0)) 
             {
-                dbManager.insert(Model.opcMonitoredTags, flag);
+                dbManager.insert(Model.opcMonitoredTags, flag, Model.specialFields.G_UCHASTOK, Model.specialFields.N_STAN);
             }
         }
 
@@ -577,8 +583,10 @@ namespace SimatekExCnahger
             {
                 Model.changeState(ModelState.opcConneted);
                 Model.selectedOPCserver = opcServer.selectedServer;
-                Subscribe();
+
                 LocalDBLoadAuto(Model.localDbPath);
+                Subscribe();
+                
             }
         }
 
@@ -832,6 +840,8 @@ namespace SimatekExCnahger
                 //        //oraEx.AddTestRecord();
                 //    }));
                 oraManualFields man = new oraManualFields();
+                man.G_UCHASTOK = "T";
+                man.N_STAN = 0;
                 oraEx.insert(Model.opcMonitoredTags.ToList(), man );
             }
 

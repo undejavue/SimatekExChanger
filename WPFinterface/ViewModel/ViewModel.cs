@@ -799,6 +799,8 @@ namespace SimatekExCnahger
                 configuredServer = new dbServerItem();
                 configuredServer = srv;
 
+                localDbPath = srv.dbConnString;
+
                 selectedOPCserver.Host = srv.opcHost;
                 selectedOPCserver.UrlString = srv.opcURL;
                 selectedOPCserver.isReconnect = srv.opcRecconect;
