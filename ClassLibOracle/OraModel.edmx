@@ -5,7 +5,7 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
     <Schema Namespace="Хранилище OraModel" Provider="Oracle.ManagedDataAccess.Client" ProviderManifestToken="11.2" Alias="Self" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
-        <Function Name="RUN_PROC_GUILD_OPC" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="SYSTEM">
+        <Function Name="PROC_GUILD_MILL_OPC" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="SYSTEM">
           <Parameter Name="INS_G_UCHASTOK" Type="char" Mode="In" />
           <Parameter Name="INS_N_STAN" Type="number" Mode="In" />
           <Parameter Name="INS_START_STOP" Type="number" Mode="In" />
@@ -22,7 +22,7 @@
     <edmx:ConceptualModels>
       <Schema Namespace="OraModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
         <EntityContainer Name="OraContext" annotation:LazyLoadingEnabled="true">
-          <FunctionImport Name="RUN_PROC_GUILD_OPC">
+          <FunctionImport Name="PROC_GUILD_MILL_OPC">
             <Parameter Name="INS_G_UCHASTOK" Mode="In" Type="String" />
             <Parameter Name="INS_N_STAN" Mode="In" Type="Decimal" />
             <Parameter Name="INS_START_STOP" Mode="In" Type="Decimal" />
@@ -40,7 +40,7 @@
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="Хранилище OraModelContainer" CdmEntityContainer="OraContext">
-          <FunctionImportMapping FunctionImportName="RUN_PROC_GUILD_OPC" FunctionName="Хранилище OraModel.RUN_PROC_GUILD_OPC" />
+          <FunctionImportMapping FunctionImportName="PROC_GUILD_MILL_OPC" FunctionName="Хранилище OraModel.PROC_GUILD_MILL_OPC" />
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

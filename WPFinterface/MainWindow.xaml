@@ -119,7 +119,7 @@
                         Click="btn_LoadConfig_Click"  IsEnabled="{Binding btn_LoadConfig_isEnable}" Style="{StaticResource btn_workBtn}"/>
                         <Button Content="Try connect" x:Name="btn_ConfigConnect" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" 
                         Click="btn_ConfigConnect_Click" IsEnabled="{Binding btn_TryConfig_isEnable}" Style="{StaticResource btn_workBtn}"  />
-                        <Button x:Name="btn_OraTableInit" Content=".NET?" Width="40" Margin="10,0" 
+                        <Button x:Name="btn_OraTableInit" Content=".NET" Width="40" Margin="10,0" 
                                 Click="btn_OraTableInit_Click" Style="{StaticResource btn_workBtn}" Background="#FFB7C0E6"/>
                     </StackPanel>
 
