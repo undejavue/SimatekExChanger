@@ -4,8 +4,8 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="Хранилище OraModel" Provider="Oracle.ManagedDataAccess.Client" ProviderManifestToken="11.2" Alias="Self" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
-        <Function Name="PROC_GUILD_MILL_OPC" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="SYSTEM">
+      <Schema Namespace="OraModel.Store" Provider="Oracle.ManagedDataAccess.Client" ProviderManifestToken="11.2" Alias="Self" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <Function Name="RUN_PROC_GUILD_OPC" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="OPC_SRV">
           <Parameter Name="INS_G_UCHASTOK" Type="char" Mode="In" />
           <Parameter Name="INS_N_STAN" Type="number" Mode="In" />
           <Parameter Name="INS_START_STOP" Type="number" Mode="In" />
@@ -16,13 +16,14 @@
           <Parameter Name="INS_INCOMIN_DATE" Type="date" Mode="In" />
           <Parameter Name="RET_OUT" Type="number" Mode="Out" />
         </Function>
-        <EntityContainer Name="Хранилище OraModelContainer" />
-      </Schema></edmx:StorageModels>
+        <EntityContainer Name="OraModelStoreContainer" />
+      </Schema>
+    </edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
-      <Schema Namespace="OraModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityContainer Name="OraContext" annotation:LazyLoadingEnabled="true">
-          <FunctionImport Name="PROC_GUILD_MILL_OPC">
+      <Schema Namespace="OraModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="Entities" annotation:LazyLoadingEnabled="true" >
+          <FunctionImport Name="RUN_PROC_GUILD_OPC">
             <Parameter Name="INS_G_UCHASTOK" Mode="In" Type="String" />
             <Parameter Name="INS_N_STAN" Mode="In" Type="Decimal" />
             <Parameter Name="INS_START_STOP" Mode="In" Type="Decimal" />
@@ -39,8 +40,8 @@
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="Хранилище OraModelContainer" CdmEntityContainer="OraContext">
-          <FunctionImportMapping FunctionImportName="PROC_GUILD_MILL_OPC" FunctionName="Хранилище OraModel.PROC_GUILD_MILL_OPC" />
+        <EntityContainerMapping StorageEntityContainer="OraModelStoreContainer" CdmEntityContainer="Entities" >
+          <FunctionImportMapping FunctionImportName="RUN_PROC_GUILD_OPC" FunctionName="OraModel.Store.RUN_PROC_GUILD_OPC" />
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
@@ -55,10 +56,10 @@
     <Options>
       <DesignerInfoPropertySet>
         <DesignerProperty Name="ValidateOnBuild" Value="true" />
-        <DesignerProperty Name="EnablePluralization" Value="False" />
-        <DesignerProperty Name="IncludeForeignKeysInModel" Value="false" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
         <DesignerProperty Name="UseLegacyProvider" Value="false" />
-        <DesignerProperty Name="CodeGenerationStrategy" Value="Нет" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
       </DesignerInfoPropertySet>
     </Options>
     <!-- Diagram content (shape and connector positions) -->

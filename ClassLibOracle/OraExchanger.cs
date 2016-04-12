@@ -96,9 +96,9 @@ namespace ClassLibOracle
             foreach (var prop in ent.GetType().GetProperties())
             {
                 oraManualFields gSpec = new oraManualFields();                          
-                if (prop.PropertyType != typeof(DateTime?)  & !prop.Name.Equals("id", StringComparison.OrdinalIgnoreCase) 
-                                                            & !prop.Name.Contains("N_STAN")
-                                                            & !prop.Name.Contains("G_UCHASTOK") )
+                if (prop.PropertyType != typeof(DateTime)  && !prop.Name.Equals("id", StringComparison.OrdinalIgnoreCase) 
+                                                            && !prop.Name.Contains("N_STAN")
+                                                            && !prop.Name.Contains("G_UCHASTOK") )
                 {                   
                     string s = prop.Name;
                     list.Add(s);   
@@ -217,16 +217,16 @@ namespace ClassLibOracle
         {
             bool result = false;
 
-            OnReportMessage("Remote DB, insert:");
-            OnReportMessage("COUNTER = " + e.COUNTER.ToString());
-            OnReportMessage("NSTAN  = " + e.N_STAN.ToString());
-            OnReportMessage("GUCHASTOK  = " + e.G_UCHASTOK.ToString());
-            OnReportMessage("bool fields  = " 
-                + e.BREAK.ToString() 
-                + " & " + e.ERASE.ToString() 
-                + " & " + e.REPLAC.ToString() 
-                + " & " + e.START_STOP.ToString() );
-            OnReportMessage("INC_DATE = " + e.INCOMIN_DATE.ToString());
+            //OnReportMessage("Remote DB, insert:");
+            //OnReportMessage("COUNTER = " + e.COUNTER.ToString());
+            //OnReportMessage("NSTAN  = " + e.N_STAN.ToString());
+            //OnReportMessage("GUCHASTOK  = " + e.G_UCHASTOK.ToString());
+            //OnReportMessage("bool fields  = " 
+            //    + e.BREAK.ToString() 
+            //    + " & " + e.ERASE.ToString() 
+            //    + " & " + e.REPLAC.ToString() 
+            //    + " & " + e.START_STOP.ToString() );
+            //OnReportMessage("INC_DATE = " + e.INCOMIN_DATE.ToString());
 
 
             try

@@ -101,7 +101,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <EntityDeploy Include="OraModel.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>OraModel.Designer.cs</LastGenOutput>
@@ -110,18 +112,6 @@
       <DependentUpon>OraModel.edmx</DependentUpon>
     </None>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="OraModel.Context.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>OraModel.edmx</DependentUpon>
-      <LastGenOutput>OraModel.Context.cs</LastGenOutput>
-    </Content>
-    <Content Include="OraModel.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <DependentUpon>OraModel.edmx</DependentUpon>
-      <LastGenOutput>OraModel.cs</LastGenOutput>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
@@ -135,6 +125,18 @@
       <Project>{ff2664cd-ab52-4dd9-b9e7-9de81eea383b}</Project>
       <Name>ClassLibGlobal</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="OraModel.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>OraModel.edmx</DependentUpon>
+      <LastGenOutput>OraModel.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="OraModel.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>OraModel.edmx</DependentUpon>
+      <LastGenOutput>OraModel.cs</LastGenOutput>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
