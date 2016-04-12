@@ -514,6 +514,16 @@ namespace SimatekExCnahger
         private void UnSubscribe()
         {
             opcServer.UnSubcribe();
+
+            Model.opcSubscribedTags.Clear();
+
+            foreach (mTag t in Model.opcMonitoredTags)
+            {
+                t.Value = "x";
+                t.Quality = "unsubsribed";
+                Model.opcSubscribedTags.Add(t);
+            }
+
             Model.changeState(ModelState.opcUnsubscribed);
 
             //foreach (mTag t in Model.opcSubscribedTags)
@@ -521,6 +531,8 @@ namespace SimatekExCnahger
             //    t.Value = "x";
             //    t.Quality = "unsubsribed";
             //}
+
+            
 
         }
 
@@ -594,7 +606,9 @@ namespace SimatekExCnahger
         {
             LoadConfiguration(SimatekExChanger.Properties.Settings.Default.configPath);
             ConnectFromConfig();
+            // DataInsertProcedure();
         }
+
 
         #endregion
 
@@ -840,8 +854,8 @@ namespace SimatekExCnahger
                 //        //oraEx.AddTestRecord();
                 //    }));
                 oraManualFields man = new oraManualFields();
-                man.G_UCHASTOK = "T";
-                man.N_STAN = 0;
+                man.G_UCHASTOK =  Model.specialFields.G_UCHASTOK.ToString().ToLower();
+                man.N_STAN = Model.specialFields.N_STAN;
                 oraEx.insert(Model.opcMonitoredTags.ToList(), man );
             }
 

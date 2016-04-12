@@ -418,7 +418,7 @@ namespace ClassLibOPC
                     tag.oValue = item.Value;
                     tag.Value = item.Value.ToString();
                     tag.Quality = item.Quality.ToString();
-                    isMarkedTagsChanged = tag.onChange;
+                    if (tag.onChange) isMarkedTagsChanged = true;
                 }
 
             }
