@@ -54,20 +54,17 @@
     <RegisterForComInterop>false</RegisterForComInterop>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="OpcNetApi, Version=2.0.2.0, Culture=neutral, PublicKeyToken=9a40e993cbface53, processorArchitecture=x86">
+    <Reference Include="OpcNetApi, Version=2.0.2.0, Culture=neutral, PublicKeyToken=9a40e993cbface53, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>opc_libraries\OpcNetApi.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
-    <Reference Include="OpcNetApi.Com, Version=2.0.1.0, Culture=neutral, PublicKeyToken=9a40e993cbface53, processorArchitecture=x86">
+    <Reference Include="OpcNetApi.Com, Version=2.0.1.0, Culture=neutral, PublicKeyToken=9a40e993cbface53, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>opc_libraries\OpcNetApi.Com.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
-    <Reference Include="OpcNetApi.Xml, Version=2.0.1.0, Culture=neutral, PublicKeyToken=9a40e993cbface53, processorArchitecture=x86">
+    <Reference Include="OpcNetApi.Xml, Version=2.0.1.0, Culture=neutral, PublicKeyToken=9a40e993cbface53, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>opc_libraries\OpcNetApi.Xml.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

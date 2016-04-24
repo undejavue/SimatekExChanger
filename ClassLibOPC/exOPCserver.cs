@@ -69,7 +69,7 @@ namespace ClassLibOPC
                 selectedServer.Host = hostname;
 
                 //Get all local OPC DA servers of version 3.0
-                Opc.Server[] localservers = discovery.GetAvailableServers(Opc.Specification.COM_DA_20, hostname, null);
+                Opc.Server[] localservers = discovery.GetAvailableServers(Opc.Specification.COM_DA_30, hostname, null);
 
                 listServers.Clear();
 
@@ -86,7 +86,7 @@ namespace ClassLibOPC
             }
             catch (Exception ex)
             {
-                OnReportMessage("Opc server enumerator failed");
+                OnReportMessage("Opc server enumerator failed for host '" + hostname + "'");
                 OnReportMessage(ex.Message);
             }
 

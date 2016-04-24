@@ -95,7 +95,7 @@ namespace SimatekExCnahger
 
             //configureOraTransmitRate();
 
-            SearchServers("localhost");
+            SearchServers(Model.selectedOPCserver.Host);
             bgwStarter.RunWorkerAsync();
 
             Model.isAutoRestart = SimatekExChanger.Properties.Settings.Default.isAutoRestart;
@@ -707,7 +707,7 @@ namespace SimatekExCnahger
         //--------- Buttons
         private void btn_GetServers_Click(object sender, RoutedEventArgs e)
         {          
-            SearchServers("LOCALHOST");
+            SearchServers(Model.selectedOPCserver.Host);
         }
 
 
