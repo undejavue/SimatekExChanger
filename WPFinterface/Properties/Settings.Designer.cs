@@ -70,5 +70,17 @@ namespace SimatekExChanger.Properties {
                 this["configPath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool isAutoSynhronisation {
+            get {
+                return ((bool)(this["isAutoSynhronisation"]));
+            }
+            set {
+                this["isAutoSynhronisation"] = value;
+            }
+        }
     }
 }

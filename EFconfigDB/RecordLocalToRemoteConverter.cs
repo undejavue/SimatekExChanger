@@ -7,17 +7,19 @@ using ClassLibOracle;
 
 namespace EFlocalDB
 {
-    public class RecordLocalToRemoteConverter
+    public class EntLocalToRemoteConverter
     {
-        private oraEntity oraEnt;
 
-        public RecordLocalToRemoteConverter()
+
+        public EntLocalToRemoteConverter()
         {
-            oraEnt = new oraEntity();
+
         }
 
         public oraEntity return_oraRecord(dbLocalRecord rec)
         {
+            oraEntity oraEnt = new oraEntity();
+
             oraEnt.BREAK = rec.BREAK;
             oraEnt.COUNTER = rec.COUNTER;
             oraEnt.ERASE = rec.ERASE;

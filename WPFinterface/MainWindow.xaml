@@ -373,21 +373,27 @@
                                 <ColumnDefinition Width="10*" />
                                 <ColumnDefinition Width="10*" />
                             </Grid.ColumnDefinitions>
-                            <Label Grid.Row="0" Grid.Column="0" Content="Status" />
+                            <Label Grid.Row="0" Grid.Column="0" Content="DB connection" />
                             <TextBlock Grid.Row="0" Grid.Column="1" Text=" DISCONNECTED " Background="DarkRed" Foreground="White" Width="100"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"  TextAlignment="Center" FontSize="12"  />
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="  CONNECTED  " Background="LightGreen" Foreground="Gray" Width="100"
                                        HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="12" 
                                    Visibility="{Binding isRemoteDBConnected, Converter={StaticResource BoolToVis}}" />
 
-                            <Label Grid.Row="1" Grid.Column="0" Content="Test connection" />
-                            <Button Grid.Row="1" Grid.Column="1" Content="Test Ora" x:Name="btn_oraTestConnection" Margin="2" 
+                            <Label Grid.Row="1" Grid.Column="0" Content="Insert result" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="  UNKNOWN  " Background="DarkRed" Foreground="White" Width="100"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"  TextAlignment="Center" FontSize="12"  />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text=" INSERT OK " Background="LightGreen" Foreground="Gray" Width="100"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="12" 
+                                   Visibility="{Binding isRemoteInsertOk, Converter={StaticResource BoolToVis}}" />
+
+                            <Label Grid.Row="2" Grid.Column="0" Content="Test connection" />
+                            <Button Grid.Row="2" Grid.Column="1" Content="Test Ora" x:Name="btn_oraTestConnection" Margin="2" 
                                 Click="btn_oraTestConnection_Click"  Style="{StaticResource btn_workBtn}" />
 
-                            <Button Grid.Row="2" Grid.Column="1" x:Name="btn_OraShowTable" Style="{StaticResource btn_workBtn}"
-                                    Content="View" Margin="2" Click="btn_OraShowTable_Click" IsEnabled="False"/>
+ 
 
-                            <Label Grid.Row="2" Grid.Column="0" Content="View remote Data" />
+
                             <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource st_border}" Background="#FF83D88F" Margin="0"
                                     Visibility="{Binding isRemoteDbLoading, Converter={StaticResource BoolToVis}}">
                                 <Label  Content="Loading..." HorizontalContentAlignment="Center" FontSize="13"  />
@@ -402,25 +408,33 @@
                             <Label Grid.Row="4" Grid.Column="0" Content="Init table" />
                             <Button Grid.Row="4" Grid.Column="1" x:Name="btn_RemoteInitFields" Style="{StaticResource btn_workBtn}"
                                     Content="Get Fields"  Margin="2" Click="btn_RemoteInitFields_Click"/>
-                        
+                            
+                            <!--<Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"  Name="panel_SyncPending" Background="#FFADB9AF" Margin="0" BorderBrush="Gray" BorderThickness="1"
+                                    Visibility="{Binding Path=isSyncPending,  Converter={StaticResource BoolToVis}}" >
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Label Content="Synhronization pending" Margin="0,0" />
+                                </StackPanel>
+                            </Border>-->
+                            
 
-                        <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"  Name="panel_SyncInProgress" Background="#FFB4F1BC" Margin="0" BorderBrush="Gray" BorderThickness="1"
+                            <Border Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"  Name="panel_SyncInProgress" Background="#FFB4F1BC" Margin="0" BorderBrush="Gray" BorderThickness="1"
                         Visibility="{Binding Path=isSyncInProgress,  Converter={StaticResource BoolToVis}}" >
                             <StackPanel Orientation="Horizontal">
-                                <Label Content="Synhronization" Margin="0"/>
-                                <ProgressBar Height="10" Width="90" x:Name="progressSync" Margin="10" Value="{Binding progressBarSync}">
+                                <Label Content="Synhronizing..." Margin="0" />
+                                <ProgressBar Height="10" Width="80" x:Name="progressSync" Margin="30,0,0,0" Value="{Binding progressBarSync}">
                                 </ProgressBar>
                             </StackPanel>
                         </Border>
+
+                            
                         </Grid>
                     </StackPanel>
                 </Border>
             </StackPanel>
             <StackPanel Name="panel_Monitor" Grid.Row="1" Grid.Column="1"   Orientation="Vertical" Height="Auto" VerticalAlignment="Stretch">
                 <DataGrid Name="dgrid_Subscribed"   ItemsSource="{Binding opcSubscribedTags}" IsEnabled="{Binding list_SubscribedTags_isEnable}"
-                      Height="Auto" Margin="4,10" Width="Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MouseDoubleClick="dgrid_Subscribed_MouseDoubleClick"
-                      Visibility="{Binding dgrid_Subscribed_isVisible, Converter={StaticResource BoolToVis} }" IsReadOnly="True" MaxHeight="200"
-                      AutoGenerateColumns="False">
+                       Margin="0,10,0,0" Width="Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" MouseDoubleClick="dgrid_Subscribed_MouseDoubleClick"
+                      Visibility="{Binding dgrid_Subscribed_isVisible, Converter={StaticResource BoolToVis} }" IsReadOnly="True" MaxHeight="148" Height="148"                      AutoGenerateColumns="False">
                     <DataGrid.Columns>
                         <DataGridCheckBoxColumn Header="Flag" Width="Auto" Binding="{Binding onChange}" />
                         <DataGridTextColumn Header="Field" Width="Auto" Binding="{Binding NameInDb}" FontSize="11" IsReadOnly="True" />
@@ -430,8 +444,8 @@
                 </DataGrid>
 
                 <DataGrid Name="dgrid_Monitored"   ItemsSource="{Binding opcMonitoredTags}" IsEnabled="{Binding list_SubscribedTags_isEnable}"
-                  Height="Auto" Margin="10" Width="Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                  Visibility="{Binding dgrid_Monitored_isVisible, Converter={StaticResource BoolToVis} }" IsReadOnly="True"
+                   Margin="0,10,0,0" Width="Auto" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                  Visibility="{Binding dgrid_Monitored_isVisible, Converter={StaticResource BoolToVis} }" IsReadOnly="True" MaxHeight="148" Height="148" 
                   AutoGenerateColumns="False">
                     <DataGrid.Columns>
                         <DataGridCheckBoxColumn Header="Flag" Width="Auto" Binding="{Binding onChange}" />
@@ -442,7 +456,36 @@
 
                     </DataGrid.Columns>
                 </DataGrid>
-                <Border Name="pnl_LoadingBrdr" BorderBrush="Gray" BorderThickness="1" Margin="50,10" Width="200"  
+
+                <Border Style="{StaticResource st_border}" Margin="0,4,0,0" BorderThickness="1" Height="28" >
+
+                        <Grid Width="auto" Height="Auto">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="20*" />
+                                <ColumnDefinition Width="14*" />
+                                <ColumnDefinition Width="20*" />
+                            </Grid.ColumnDefinitions>
+
+
+
+                            <CheckBox Grid.Column="0" Name="chb_AutoSync" IsChecked="{Binding isAutoSynhronisation}" Content="Auto synchronization" Margin="4,0,0,0" Height="Auto" 
+                                          VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="13" Width="Auto"/>
+                            <Button Grid.Column="1" Name="btn_Sync" Content="Sync now"  Margin="15,0" Style="{StaticResource btn_workBtn}" Click="btn_Sync_Click"/>
+
+                            <Border Grid.Column="2" Background="#FFB4F1BC" Width="Auto" BorderBrush="Gray" BorderThickness="1" Visibility="{Binding Path=isSyncPending,  Converter={StaticResource BoolToVis}}">
+                                <Label Content="Synchronisation pending" HorizontalAlignment="Center" Width="Auto" VerticalContentAlignment="Center" />
+                            </Border>
+
+                        </Grid>
+
+                </Border>
+
+
+
+                <Border Name="pnl_LoadingBrdr" BorderBrush="Gray" BorderThickness="1" Margin="0,-200,0,0" Width="200" Height="100" 
                         Visibility="{Binding Path=lbl_InitConnection_isVisible,  Converter={StaticResource BoolToVis}}" >
                     <StackPanel Name="pnl_Loading" Orientation="Vertical" >
                         <Label x:Name="lbl_PlsWait" Content="Waiting for Db connection..."  
@@ -471,7 +514,8 @@
 
         <StackPanel Name="log_panel" Grid.Row="4" Grid.Column="0" Orientation="Vertical"  Margin="5,0" >
             <Border Style="{StaticResource st_border}" Margin="4,0" BorderThickness="1,1,1,0"  >
-                <StackPanel Orientation="Horizontal" Height="24" Margin="5,0" >
+                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal" Height="24" Margin="5,0" Width="670">
                     <TextBlock Text="Filter log " FontSize="12" VerticalAlignment="Center" />
                     <Button Name="btn_LogFilterAll" Content="All" Height="20" Width="60" 
                         Tag="{Binding btn_LogFilterAll_Tag}" Background="{Binding btn_LogFilterAll_Brush}" Click="btn_LogFilter_Click" />
@@ -484,10 +528,14 @@
                     <Button Name="btn_LogFilterRemoteDb" Content="RemoteDb" Height="20" Width="60" 
                         Tag="{Binding btn_LogFilterRemoteDb_Tag}" Background="{Binding btn_LogFilterRemoteDb_Brush}" Click="btn_LogFilter_Click" />
                 </StackPanel>
+                <StackPanel >
+
+                </StackPanel>
+                </StackPanel>
             </Border>
 
             <ListBox    x:Name="list_Log"  HorizontalAlignment="Stretch" Margin="4,0" VerticalAlignment="Stretch" 
-                     MinWidth="700" Height="74" ItemsSource="{Binding messageLogFiltered, Mode=OneWay}" local:ListBoxExtenders.AutoScrollToEnd="True"  >
+                     MinWidth="700" Height="72" ItemsSource="{Binding messageLogFiltered, Mode=OneWay}" local:ListBoxExtenders.AutoScrollToEnd="True"  >
                 <ListBox.ItemTemplate >
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">

@@ -69,6 +69,7 @@ namespace SimatekExCnahger
             bgwStarter.DoWork += BgWorker_DoWork;
             bgwStarter.RunWorkerCompleted += BgWorker_RunWorkerCompleted;
             bgwStarter.ProgressChanged += BgWorker_ProgressChanged;
+            bgwStarter.WorkerReportsProgress = true;
             bgwStarter.WorkerSupportsCancellation = true;
 
             bgwOraTestConnection = new BackgroundWorker();
@@ -99,6 +100,7 @@ namespace SimatekExCnahger
             bgwStarter.RunWorkerAsync();
 
             Model.isAutoRestart = SimatekExChanger.Properties.Settings.Default.isAutoRestart;
+            Model.isAutoSynhronisation = SimatekExChanger.Properties.Settings.Default.isAutoSynhronisation;
 
             if (Model.isAutoRestart)
             {
@@ -204,25 +206,57 @@ namespace SimatekExCnahger
 
             if (e.Result != null)
             {
-                List<int> ids = (List<int>)e.Result; 
-                Model.addLogRecord(OraExchanger.TAG, ids.Count().ToString() + " local records pushed to remote db");
-
-                Dispatcher.BeginInvoke(new Action(() =>
+                List<int> ids = (List<int>)e.Result;
+                if (ids.Count > 0)
                 {
-                    dbManager.updateFlags(ids.ToList());
-                }));             
+                    Model.addLogRecord(OraExchanger.TAG, ids.Count().ToString() + " local records pushed to remote db");
+
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        dbManager.updateFlags(ids.ToList());
+                    }));
+                }
+                else
+                {
+                    Model.addLogRecord(TAG, "Nothing to sync");
+                    if (Model.cmdToSyncNow) MessageBox.Show("Nothing to syncronize", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                 
                 Model.isSyncInProgress = false;
+                Model.isSyncPending = false; // 
+                Model.cmdToSyncNow = false;
             }
+        }
+
+        private void SyncNow()
+        {
+            Model.cmdToSyncNow = true;
+            if ( (!bgwOraSync.IsBusy) )
+                bgwOraSync.RunWorkerAsync();
         }
 
         private void BgwOraSync_DoWork(object sender, DoWorkEventArgs e)
         {
-            
-            if ( (dbManager != null) & (oraEx != null) & (oraEx.isConnectionOK) )
+            Model.isSyncPending = true;
+
+            if ( (dbManager != null) && (!Model.isSyncDenied) && (oraEx != null) && (oraEx.isDbConnectionOK) && ((oraEx.isInsertOk) || (Model.cmdToSyncNow)) )
             {
-                Model.isSyncInProgress = true;
+
                 //Get local records
                 List<dbLocalRecord> records = dbManager.getNotSyncRecords();
+
+                if (records.Count > 0)
+                {
+                    Model.isSyncInProgress = true;
+                }
+                else
+                {
+                    Model.isSyncPending = false;
+                    Model.cmdToSyncNow = false;
+                    e.Result = new List<int>();
+                    return;
+                }
+
                 bgwOraSync.ReportProgress(30);
 
                 //Cancellation check
@@ -236,7 +270,7 @@ namespace SimatekExCnahger
                 float p = 40;
                 float max = records.Count();
                 float step = (70f - p) / max;
-                RecordLocalToRemoteConverter converter = new RecordLocalToRemoteConverter();  
+                EntLocalToRemoteConverter converter = new EntLocalToRemoteConverter();
                 foreach (dbLocalRecord r in records)
                 {
                     oraRecords.Add(converter.return_oraRecord(r));
@@ -247,12 +281,23 @@ namespace SimatekExCnahger
                 //Cancellation check
                 if (bgwStarter.CancellationPending) { e.Cancel = true; return; }
 
-                if (oraEx.insert(oraRecords))
+                if (oraRecords.Count > 0)
                 {
-                    bgwOraSync.ReportProgress(100);
-                    e.Result = ids;
+                    if (oraEx.insert(oraRecords))
+                    {
+                        bgwOraSync.ReportProgress(100);
+                        e.Result = ids;
+                    }
+                    else
+                    {
+                        Model.isSyncInProgress = false;
+                        Model.isSyncPending = false; // 
+                        Model.cmdToSyncNow = false;
+                    }
                 }
             }
+
+
         }
 
         private void BgwOraTestConnection_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -288,8 +333,10 @@ namespace SimatekExCnahger
             oraEx.ReportMessage += oraEx_ReportMessage;
             OraTableInit();
             Model.addLogRecord(OraExchanger.TAG, "Finish test oracle connection");
-            Model.isRemoteDBConnected = oraEx.isConnectionOK;
+            Model.isRemoteDBConnected = oraEx.isDbConnectionOK;
             Model.lbl_InitConnection_isVisible = false;
+
+            Model.isSyncPending = Model.isAutoSynhronisation;
         }
 
         private void BgWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -391,12 +438,14 @@ namespace SimatekExCnahger
         {
             bool flag = false;
 
+
             if (Model.isRemoteDBConnected)
             {
                 flag = OraInsert();
+                Model.isRemoteInsertOk = flag;
                 Model.isRemoteDBConnected = flag;
 
-                if ((Model.isSyncInProgress) & (!bgwOraSync.IsBusy))
+                if (flag && (Model.isSyncPending) && (!bgwOraSync.IsBusy))
                     bgwOraSync.RunWorkerAsync();
             }
             else
@@ -591,6 +640,7 @@ namespace SimatekExCnahger
 
         private void ConnectFromConfig()
         {
+            Model.isSyncDenied = true;
             if (opcServer.ConnectServer(Model.selectedOPCserver.UrlString))
             {
                 Model.changeState(ModelState.opcConneted);
@@ -600,6 +650,8 @@ namespace SimatekExCnahger
                 Subscribe();
                 
             }
+
+            Model.isSyncDenied = false;
         }
 
         private void AutoRestart()
@@ -690,7 +742,7 @@ namespace SimatekExCnahger
         private bool OraInsert()
         {
             if (oraEx != null)
-                if (oraEx.isConnectionOK)
+                if (oraEx.isDbConnectionOK)
                 {
                     return oraEx.insert(Model.opcMonitoredTags.ToList(),Model.specialFields);
                 }
@@ -978,6 +1030,11 @@ namespace SimatekExCnahger
 
             OraTableInit();
 
+        }
+
+        private void btn_Sync_Click(object sender, RoutedEventArgs e)
+        {
+            SyncNow();
         }
     }
 }

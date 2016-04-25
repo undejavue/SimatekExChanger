@@ -139,6 +139,7 @@ namespace EFlocalDB
 
         public List<dbLocalRecord> getNotSyncRecords()
         {
+            if (context != null)
             try {
                 List<dbLocalRecord> records =
                     new List<dbLocalRecord>(context.dbRecords.Where(r => r.flagIsSent == false).ToList());

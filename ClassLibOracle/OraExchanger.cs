@@ -20,7 +20,8 @@ namespace ClassLibOracle
     {
         public static string TAG = LogFilter.RemoteDB.ToString(); 
         private OraContext context;
-        public bool isConnectionOK;
+        public bool isDbConnectionOK;
+        public bool isInsertOk;
 
 
         /// <summary>
@@ -31,12 +32,12 @@ namespace ClassLibOracle
             try
             {
                 context = new OraContext();
-                isConnectionOK = context.Database.Exists();
+                isDbConnectionOK = context.Database.Exists();
                 OnReportMessage("Oracle Connection success");
             }
             catch (Exception ex)
             {
-                isConnectionOK = false;
+                isDbConnectionOK = false;
                 OnReportMessage("Oracle Connection fail");
                 OnReportMessage(ex.ToString());
             }           
@@ -52,16 +53,16 @@ namespace ClassLibOracle
             {
                 try
                 {
-                    isConnectionOK = context.Database.Exists();
+                    isDbConnectionOK = context.Database.Exists();
                 }
                 catch (Exception ex)
                 {
-                    isConnectionOK = false;
+                    isDbConnectionOK = false;
                     OnReportMessage("Oracle connection fail");
                     OnReportMessage(ex.ToString());
                 }
             }
-            return isConnectionOK;
+            return isDbConnectionOK;
         }
 
         /// <summary>
@@ -126,6 +127,7 @@ namespace ClassLibOracle
             DateTime insertTime = DateTime.Now;
             oraEntity ent = new oraEntity();
 
+            // TODO: use items instead of en.types, because its shorter
             foreach (var p in ent.GetType().GetProperties())
             {
                 if (items.Any(k => k.NameInDb == p.Name))
@@ -181,6 +183,8 @@ namespace ClassLibOracle
                             e.REPLAC, 
                             (int)e.COUNTER, 
                             e.INCOMIN_DATE);
+
+                        if ( retVal != 1 ) break;
                             
                     }
            
@@ -197,6 +201,8 @@ namespace ClassLibOracle
                         OnReportMessage("Synchronization fail, return_value = " + retVal.ToString());
                         result = false;
                     }
+
+                    
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -205,6 +211,8 @@ namespace ClassLibOracle
                     OnReportMessage(ex.Message);
                 }
             }
+
+            isInsertOk = result;
             return result;
         }
 
@@ -228,7 +236,6 @@ namespace ClassLibOracle
             //    + " & " + e.START_STOP.ToString() );
             //OnReportMessage("INC_DATE = " + e.INCOMIN_DATE.ToString());
 
-
             try
             {
                 int ret = 
@@ -241,7 +248,8 @@ namespace ClassLibOracle
                             e.INCOMIN_DATE);
 
                 context.SaveChanges();
-                isConnectionOK = true;
+                isDbConnectionOK = true;
+                
 
                 if (ret == 1)
                 {
@@ -259,14 +267,14 @@ namespace ClassLibOracle
                 OnReportMessage("Remote DB, insert fail with exception");
                 OnReportMessage(ex.Message.ToString());
 
-                isConnectionOK = false;
+                isDbConnectionOK = false;
 
                 if (ex.InnerException != null)
                     OnReportMessage(ex.InnerException.Message.ToString());
-
                 result = false;
             }
-        
+
+            isInsertOk = result;
             return result;
         }
 
@@ -294,7 +302,7 @@ namespace ClassLibOracle
                             e.INCOMIN_DATE);
 
                 context.SaveChanges();
-                isConnectionOK = true;
+                isDbConnectionOK = true;
 
                 if (ret == 1)
                 {
@@ -312,7 +320,7 @@ namespace ClassLibOracle
                 OnReportMessage("Insert fail for remote DB");
                 OnReportMessage(ex.Message.ToString());
 
-                isConnectionOK = false;
+                isDbConnectionOK = false;
 
                 if (ex.InnerException != null)
                     OnReportMessage(ex.InnerException.Message.ToString());

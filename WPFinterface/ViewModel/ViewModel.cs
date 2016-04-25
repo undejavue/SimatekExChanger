@@ -154,6 +154,20 @@ namespace SimatekExCnahger
             }
         }
 
+        private bool _isRemoteInsertOk;
+        public bool isRemoteInsertOk
+        {
+            get
+            {
+                return _isRemoteInsertOk;
+            }
+            set
+            {
+                _isRemoteInsertOk = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("isRemoteInsertOk"));
+            }
+        }
+
         private bool _isLocalDBConnected;
         public bool isLocalDBConnected
         {
@@ -210,6 +224,20 @@ namespace SimatekExCnahger
             }
         }
 
+        private bool _isSyncPending;
+        public bool isSyncPending
+        {
+            get
+            {
+                return _isSyncPending;
+            }
+            set
+            {
+                _isSyncPending = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("isSyncPending"));
+            }
+        }
+
         private bool _isSyncInProgress;
         public bool isSyncInProgress
         {
@@ -221,6 +249,34 @@ namespace SimatekExCnahger
             {
                 _isSyncInProgress = value;
                 OnPropertyChanged(new PropertyChangedEventArgs("isSyncInProgress"));
+            }
+        }
+
+        private bool _cmdToSyncNow;
+        public bool cmdToSyncNow
+        {
+            get
+            {
+                return _cmdToSyncNow;
+            }
+            set
+            {
+                _cmdToSyncNow = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("cmdToSyncNow"));
+            }
+        }
+
+        private bool _isSyncDenied;
+        public bool isSyncDenied
+        {
+            get
+            {
+                return _isSyncDenied;
+            }
+            set
+            {
+                _isSyncDenied = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("isSyncDenied"));
             }
         }
 
@@ -267,6 +323,22 @@ namespace SimatekExCnahger
                 SimatekExChanger.Properties.Settings.Default.isAutoRestart = value;
                 SimatekExChanger.Properties.Settings.Default.Save();
                 OnPropertyChanged(new PropertyChangedEventArgs("isAutoRestart"));
+            }
+        }
+
+        private bool _isAutoSynhronisation;
+        public bool isAutoSynhronisation
+        {
+            get
+            {
+                return _isAutoSynhronisation;
+            }
+            set
+            {
+                _isAutoSynhronisation = value;
+                SimatekExChanger.Properties.Settings.Default.isAutoSynhronisation = value;
+                SimatekExChanger.Properties.Settings.Default.Save();
+                OnPropertyChanged(new PropertyChangedEventArgs("isAutoSynhronisation"));
             }
         }
 
@@ -703,7 +775,7 @@ namespace SimatekExCnahger
 
                     list_Branches_isEnable = false;
                     list_Tags_isEnable = false;
-                    infoLineColor = new SolidColorBrush(Colors.DarkSlateBlue);
+                    infoLineColor = new SolidColorBrush(Colors.Gray);
 
                     break;
 
@@ -804,6 +876,8 @@ namespace SimatekExCnahger
                 selectedOPCserver.Host = srv.opcHost;
                 selectedOPCserver.UrlString = srv.opcURL;
                 selectedOPCserver.isReconnect = srv.opcRecconect;
+
+                opcSubscribedTags.Clear();
 
                 foreach (dbTagItem tag in srv.opcMonitoredTags)
                 {

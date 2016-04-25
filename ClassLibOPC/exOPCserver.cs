@@ -358,7 +358,7 @@ namespace ClassLibOPC
                         // Repeat this next part for all the items you need to subscribe
                         Opc.Da.Item item = new Opc.Da.Item();
                         item.ItemName = tag.Name;
-                        //item.ClientHandle = "handle"; // handle is up to you, but i use a logical name for it
+                        item.ClientHandle = "handle"; // handle is up to you, but i use a logical name for it
                         item.Active = true;
                         item.ActiveSpecified = true;
                         opcItems.Add(item);
@@ -377,7 +377,7 @@ namespace ClassLibOPC
                     subscriptionState.UpdateRate = 40;
                     subscriptionState.Deadband = 0;
 
-                    if (opcSubscription != null) { }
+                    //if (opcSubscription != null) { }
 
                     opcSubscription =  (Opc.Da.Subscription)this.server.CreateSubscription(subscriptionState);
 
