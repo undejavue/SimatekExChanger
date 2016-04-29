@@ -342,6 +342,34 @@ namespace SimatekExCnahger
             }
         }
 
+        private long _localDbNumberOfRecords;
+        public long localDbNumberOfRecords
+        {
+            get
+            {
+                return _localDbNumberOfRecords;
+            }
+            set
+            {
+                _localDbNumberOfRecords = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("localDbNumberOfRecords"));
+            }
+        }
+
+        private long _remoteDbNumberOfRecords;
+        public long remoteDbNumberOfRecords
+        {
+            get
+            {
+                return _remoteDbNumberOfRecords;
+            }
+            set
+            {
+                _remoteDbNumberOfRecords = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("remoteDbNumberOfRecords"));
+            }
+        }
+
 
         #endregion
 
@@ -831,6 +859,9 @@ namespace SimatekExCnahger
 
             FilterButtonsSetTags();
             SetLogFilter(LogFilter.All);
+
+            localDbNumberOfRecords = 0;
+            remoteDbNumberOfRecords = 0;
 
         }
 

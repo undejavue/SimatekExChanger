@@ -23,6 +23,8 @@ namespace ClassLibOracle
         public bool isDbConnectionOK;
         public bool isInsertOk;
 
+        private OraContext contextSync;
+
 
         /// <summary>
         /// Operation with remote Oracle database
@@ -169,40 +171,54 @@ namespace ClassLibOracle
             {
                 try
                 {
-                    foreach (oraEntity e in entities)
+                    using (contextSync = new OraContext())
                     {
 
-                        //e.G_UCHASTOK = spec.G_UCHASTOK;
-                        //e.N_STAN = spec.N_STAN;
-                        //e.INCOMIN_DATE = insertTime;
+                        //foreach (oraEntity e in entities)
+                        //{
+                        //    retVal = context.RUN_PROC_GUILD_OPC(e.G_UCHASTOK, 
+                        //        e.N_STAN, 
+                        //        e.START_STOP, 
+                        //        e.ERASE, e.BREAK, 
+                        //        e.REPLAC, 
+                        //        (int)e.COUNTER, 
+                        //        e.INCOMIN_DATE);
 
-                        retVal = context.RUN_PROC_GUILD_OPC(e.G_UCHASTOK, 
-                            e.N_STAN, 
-                            e.START_STOP, 
-                            e.ERASE, e.BREAK, 
-                            e.REPLAC, 
-                            (int)e.COUNTER, 
-                            e.INCOMIN_DATE);
+                        //    if ( retVal != 1 ) break;                            
+                        //}
 
-                        if ( retVal != 1 ) break;
-                            
+                        for (int i = 0; i < entities.Count; i++)
+                        {
+                            oraEntity e = new oraEntity();
+                            e = entities[i];
+                            retVal = contextSync.RUN_PROC_GUILD_OPC(e.G_UCHASTOK,
+                                e.N_STAN,
+                                e.START_STOP,
+                                e.ERASE, e.BREAK,
+                                e.REPLAC,
+                                (int)e.COUNTER,
+                                e.INCOMIN_DATE);
+
+                            if (retVal != 1) break;
+                        }
+
+                        contextSync.SaveChanges();
+
+                        //throw new InvalidOperationException("Storage procedure missing!");
+                        if (retVal == 1)
+                        {
+                            OnReportMessage("Synchronization success");
+                            result = true;
+                        }
+                        else
+                        {
+                            OnReportMessage("Synchronization fail, return_value = " + retVal.ToString());
+                            result = false;
+                        }
+
+
                     }
-           
-                    context.SaveChanges();
 
-                    //throw new InvalidOperationException("Storage procedure missing!");
-                    if (retVal == 1)
-                    {
-                        OnReportMessage("Synchronization success");
-                        result = true;
-                    }
-                    else
-                    {
-                        OnReportMessage("Synchronization fail, return_value = " + retVal.ToString());
-                        result = false;
-                    }
-
-                    
                 }
                 catch (InvalidOperationException ex)
                 {

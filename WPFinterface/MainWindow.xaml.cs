@@ -99,6 +99,8 @@ namespace SimatekExCnahger
             SearchServers(Model.selectedOPCserver.Host);
             bgwStarter.RunWorkerAsync();
 
+
+
             Model.isAutoRestart = SimatekExChanger.Properties.Settings.Default.isAutoRestart;
             Model.isAutoSynhronisation = SimatekExChanger.Properties.Settings.Default.isAutoSynhronisation;
 
@@ -287,6 +289,7 @@ namespace SimatekExCnahger
                     {
                         bgwOraSync.ReportProgress(100);
                         e.Result = ids;
+                        Model.remoteDbNumberOfRecords += oraRecords.Count;
                     }
                     else
                     {
@@ -411,7 +414,8 @@ namespace SimatekExCnahger
         {
             if ((dbManager != null) & (Model.opcMonitoredTags.Count > 0)) 
             {
-                dbManager.insert(Model.opcMonitoredTags, flag, Model.specialFields.G_UCHASTOK, Model.specialFields.N_STAN);
+                bool result = dbManager.insert(Model.opcMonitoredTags, flag, Model.specialFields.G_UCHASTOK, Model.specialFields.N_STAN);
+                if (result) Model.localDbNumberOfRecords++;
             }
         }
 
@@ -444,6 +448,8 @@ namespace SimatekExCnahger
                 flag = OraInsert();
                 Model.isRemoteInsertOk = flag;
                 Model.isRemoteDBConnected = flag;
+
+                if (flag) Model.remoteDbNumberOfRecords++;
 
                 if (flag && (Model.isSyncPending) && (!bgwOraSync.IsBusy))
                     bgwOraSync.RunWorkerAsync();
@@ -884,6 +890,7 @@ namespace SimatekExCnahger
         {
             Model.addLogRecord(dbLocalManager.TAG, "Local Db test record to insert...");
             LocalDBInsert(true);
+            
         }
 
         private void btn_LocalTableView_Click(object sender, RoutedEventArgs e)
@@ -908,7 +915,8 @@ namespace SimatekExCnahger
                 oraManualFields man = new oraManualFields();
                 man.G_UCHASTOK =  Model.specialFields.G_UCHASTOK.ToString().ToLower();
                 man.N_STAN = Model.specialFields.N_STAN;
-                oraEx.insert(Model.opcMonitoredTags.ToList(), man );
+                bool b = oraEx.insert(Model.opcMonitoredTags.ToList(), man );
+                if (b) Model.remoteDbNumberOfRecords++;
             }
 
         }

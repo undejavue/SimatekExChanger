@@ -15,7 +15,9 @@ namespace EFlocalDB
         public static string TAG = LogFilter.LocalDB.ToString();
 
         private dbLocalContext context;
+        private dbLocalContext contextSync;
         public ObservableCollection<gLogEntity> messageLog;
+        private string dbPath;
 
         public dbLocalManager(string filename, bool isNew)
         {
@@ -24,6 +26,7 @@ namespace EFlocalDB
             try {
                 context = new dbLocalContext(filename, isNew);
                 logMessage("Local database created, stored in " + filename);
+                dbPath = filename;
             }
             catch (Exception ex)
             {
@@ -34,7 +37,7 @@ namespace EFlocalDB
 
 
 
-        public void insert(ObservableCollection<mTag> tags, bool flag, string GUSHASTIC, int NSTAN)
+        public bool insert(ObservableCollection<mTag> tags, bool flag, string GUSHASTIC, int NSTAN)
         {
             dbLocalRecord record = new dbLocalRecord();
             record = TagsToRecordEntity(tags);
@@ -48,11 +51,13 @@ namespace EFlocalDB
                 context.SaveChanges();
 
                 logMessage("Local database record inserted");
+                return true;
             }
             catch (Exception ex)
             {
                 logMessage("Local database record insert error");
                 logMessage(ex.Message);
+                return false;
             }
 
         }
@@ -101,17 +106,22 @@ namespace EFlocalDB
         public bool updateFlags(List<int> ids)
         {
             bool result = false;
-            try {
-                foreach (int id in ids)
-                {
-                    context.dbRecords.Find(id).flagIsSent = true;
-                }
 
-                context.SaveChanges();
-                logMessage(ids.Count().ToString() + " records are successfully updated in local db");
-                result = true;
+            try
+            {
+                using (contextSync = new dbLocalContext(dbPath, false))
+                {
+                    foreach (int id in ids)
+                    {
+                        context.dbRecords.Find(id).flagIsSent = true;
+                    }
+
+                    context.SaveChanges();
+                    logMessage(ids.Count().ToString() + " records are successfully updated in local db");
+                    result = true;
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 result = false;
                 logMessage("Fail to update record flags in local db");
@@ -139,18 +149,23 @@ namespace EFlocalDB
 
         public List<dbLocalRecord> getNotSyncRecords()
         {
-            if (context != null)
-            try {
-                List<dbLocalRecord> records =
-                    new List<dbLocalRecord>(context.dbRecords.Where(r => r.flagIsSent == false).ToList());
 
-                return records;
+            try
+            {
+                using (contextSync = new dbLocalContext(this.dbPath, false))
+                {
+                    List<dbLocalRecord> records =
+                        new List<dbLocalRecord>(context.dbRecords.Where(r => r.flagIsSent == false).ToList());
+
+                    return records;
+                }
             }
             catch (Exception ex)
             {
                 logMessage("LocalDb getNotSyncREcords() failed");
                 logMessage(ex.Message);
             }
+
 
             return new List<dbLocalRecord>();
         }
